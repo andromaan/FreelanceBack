@@ -1,4 +1,5 @@
 using BLL.Common;
+using BLL.Common.Interfaces.Repositories;
 using DAL.Data;
 using DAL.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -34,5 +35,6 @@ public static class ConfigureDataAccess
     private static void AddRepositories(this IServiceCollection services)
     {
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     }
 }

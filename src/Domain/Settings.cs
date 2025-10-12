@@ -7,10 +7,14 @@ public static class Settings
         public const string AnyAuthenticated = "AnyAuthenticated";
         
         public const string AdminRole = "admin";
+        public const string ClientRole = "client";
+        public const string FreelancerRole = "freelancer";
     
         public static readonly List<string> ListOfRoles = new()
         {
             AdminRole,
+            ClientRole,
+            FreelancerRole
         };
     }
 }
