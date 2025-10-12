@@ -1,5 +1,6 @@
 using System.Text;
 using BLL.Services;
+using BLL.Services.PasswordHasher;
 using Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;

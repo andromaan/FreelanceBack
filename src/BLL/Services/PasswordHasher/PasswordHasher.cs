@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace BLL.Services;
+namespace BLL.Services.PasswordHasher;
 
 public class PasswordHasher : IPasswordHasher
 {

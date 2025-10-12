@@ -1,4 +1,4 @@
-namespace BLL.Services;
+namespace BLL.Services.PasswordHasher;
 
 public interface IPasswordHasher
 {

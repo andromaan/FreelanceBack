@@ -9,5 +9,5 @@ public class RefreshToken : Entity<string>
     public bool IsUsed { get; set; } = false;
     public DateTime CreateDate { get; set; }
     public DateTime ExpiredDate { get; set; }
-    public required string UserId { get; set; }
+    public Guid UserId { get; set; }
 }
