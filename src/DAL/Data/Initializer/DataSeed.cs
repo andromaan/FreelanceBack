@@ -22,7 +22,7 @@ public static partial class DataSeed
 
         foreach (var role in Settings.Roles.ListOfRoles)
         {
-            roles.Add(new Role { Name = role, Id = role });
+            roles.Add(new Role { Name = role, Id = role.ToLower() });
         }
 
         modelBuilder.Entity<Role>().HasData(roles);

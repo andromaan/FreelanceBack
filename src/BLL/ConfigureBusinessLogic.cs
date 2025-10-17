@@ -1,10 +1,14 @@
+using System.Reflection;
 using System.Text;
-using BLL.Services;
+using BLL.Common.Behaviours;
+using BLL.Services.ImageService;
+using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using Domain;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -15,6 +19,10 @@ public static class ConfigureBusinessLogic
 {
     public static void AddBusinessLogic(this IServiceCollection services, WebApplicationBuilder builder)
     {
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+        
         services.AddServices();
 
         services.AddJwtTokenAuth(builder);
@@ -30,6 +38,8 @@ public static class ConfigureBusinessLogic
     private static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IImageService, ImageService>();
     }
 
     private static void AddJwtTokenAuth(this IServiceCollection services, WebApplicationBuilder builder)

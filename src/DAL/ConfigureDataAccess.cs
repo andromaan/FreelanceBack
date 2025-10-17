@@ -36,5 +36,6 @@ public static class ConfigureDataAccess
     {
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
     }
 }

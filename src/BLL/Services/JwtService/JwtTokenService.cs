@@ -6,6 +6,7 @@ using BLL.Common.Interfaces.Repositories;
 using Domain.Models.Auth;
 using Domain.Models.Auth.Users;
 using Domain.ViewModels;
+using Domain.ViewModels.Auth;
 using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -103,7 +104,7 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
         return principals;
     }
 
-    public async Task<JwtModel> GenerateTokensAsync(User user, CancellationToken token)
+    public async Task<JwtVm> GenerateTokensAsync(User user, CancellationToken token)
     {
         var accessToken = GenerateAccessToken(user);
         var refreshToken = GenerateRefreshToken();
@@ -112,7 +113,7 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
 
         var saveResult = await SaveRefreshTokenAsync(user, refreshToken, accessToken.Id, token);
 
-        var tokens = new JwtModel
+        var tokens = new JwtVm
         {
             AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
             RefreshToken = refreshToken
@@ -121,7 +122,7 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
         return tokens;
     }
 
-    public async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(ExternalLoginModel model)
+    public async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(ExternalLoginVm vm)
     {
         string clientId = configuration["GoogleAuthSettings:ClientId"]!;
         var settings = new GoogleJsonWebSignature.ValidationSettings
@@ -129,33 +130,7 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
             Audience = new List<string> { clientId }
         };
 
-        var payload = await GoogleJsonWebSignature.ValidateAsync(model.Token, settings);
+        var payload = await GoogleJsonWebSignature.ValidateAsync(vm.Token, settings);
         return payload;
     }
-
-    public string GenerateEmailConfirmationToken(User user, int minutes = 30)
-    {
-        var issuer = configuration["AuthSettings:issuer"];
-        var audience = configuration["AuthSettings:audience"];
-        var keyString = configuration["AuthSettings:key"];
-        var symmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString!));
-
-        var claims = new List<Claim>
-    {
-            new("id", user.Id.ToString()),
-            new("email", user.Email),
-            new("type", "email-confirm")
-    };
-
-        var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(minutes),
-            signingCredentials: new SigningCredentials(symmetricKey, SecurityAlgorithms.HmacSha256)
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
 }
