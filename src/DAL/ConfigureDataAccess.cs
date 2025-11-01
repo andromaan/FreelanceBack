@@ -40,5 +40,10 @@ public static class ConfigureDataAccess
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddScoped<IProposalRepository, ProposalRepository>();
+        services.AddScoped<IContractRepository, ContractRepository>();
+        services.AddScoped<ICountryRepository, CountryRepository>();
+        services.AddScoped<ISkillRepository, SkillRepository>();
+        services.AddScoped<IUserSkillRepository, UserSkillRepository>();
+        services.AddScoped<ILanguageRepository, LanguageRepository>();
     }
 }
