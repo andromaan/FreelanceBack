@@ -16,7 +16,8 @@ public class SignUpCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     IJwtTokenService jwtTokenService,
-    IMapper mapper) : IRequestHandler<SignUpCommand, ServiceResponse>
+    IMapper mapper,
+    IUserProfileRepository userProfileRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
@@ -39,6 +40,17 @@ public class SignUpCommandHandler(
         try
         {
             await userRepository.CreateAsync(user, cancellationToken);
+
+            if (isDbHasUsers && vm.IsFreelancer)
+            {
+                var userProfile = new UserProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                };
+
+                await userProfileRepository.CreateAsync(userProfile, user.Id, cancellationToken);
+            }
         }
         catch (Exception e)
         {
