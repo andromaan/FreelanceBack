@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DAL.Repositories;
 
 public class Repository<TEntity, TKey>(AppDbContext appDbContext, IUserProvider userProvider)
-    : IRepository<TEntity, TKey>
+    : IRepository<TEntity, TKey>, IQueries<TEntity, TKey>
     where TEntity : Entity<TKey>
 {
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken token) =>

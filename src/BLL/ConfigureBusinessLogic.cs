@@ -1,10 +1,14 @@
 using System.Reflection;
 using System.Text;
+using BLL.Commands;
 using BLL.Common.Behaviours;
+using BLL.Services;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using Domain;
+using Domain.Models.Countries;
+using Domain.ViewModels.Country;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,9 +23,8 @@ public static class ConfigureBusinessLogic
 {
     public static void AddBusinessLogic(this IServiceCollection services, WebApplicationBuilder builder)
     {
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+        services.AddMediatrConfig();
+        services.AddRegistrations();
         
         services.AddServices();
 
@@ -33,6 +36,44 @@ public static class ConfigureBusinessLogic
             options.AddPolicy(Settings.Roles.AnyAuthenticated,
                 policy => policy.RequireRole(Settings.Roles.AdminRole));
         });
+    }
+    
+    private static void AddMediatrConfig(this IServiceCollection services)
+    {
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+        
+       
+    }
+    
+    private static void AddRegistrations(this IServiceCollection services)
+    {
+        // registrations for Country
+        services.AddTransient(
+            typeof(IRequestHandler<Create.Command<CreateCountryVM, Country, int>, ServiceResponse>),
+            typeof(Create.CommandHandler<CreateCountryVM, Country, int>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<GetAll.Query<Country, int, CountryVM>, ServiceResponse>),
+            typeof(GetAll.QueryHandler<Country, int, CountryVM>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<GetById.Query<Country, int, CountryVM>, ServiceResponse>),
+            typeof(GetById.QueryHandler<Country, int, CountryVM>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<Update.Command<UpdateCountryVM, Country, int>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateCountryVM, Country, int>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<Delete.Command<Country, int>, ServiceResponse>),
+            typeof(Delete.CommandHandler<Country, int>)
+        );
     }
 
     private static void AddServices(this IServiceCollection services)

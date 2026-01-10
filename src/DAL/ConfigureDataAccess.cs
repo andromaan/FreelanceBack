@@ -37,6 +37,7 @@ public static class ConfigureDataAccess
     private static void AddRepositories(this IServiceCollection services)
     {
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+        services.AddScoped(typeof(IQueries<,>), typeof(Repository<,>));
 
         services.AddScoped<JobRepository>();
         services.AddScoped<IJobRepository>(provider => provider.GetRequiredService<JobRepository>());
