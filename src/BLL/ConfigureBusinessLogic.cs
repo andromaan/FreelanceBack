@@ -8,7 +8,9 @@ using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using Domain;
 using Domain.Models.Countries;
+using Domain.Models.Languages;
 using Domain.ViewModels.Country;
+using Domain.ViewModels.Language;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -73,6 +75,32 @@ public static class ConfigureBusinessLogic
         services.AddTransient(
             typeof(IRequestHandler<Delete.Command<Country, int>, ServiceResponse>),
             typeof(Delete.CommandHandler<Country, int>)
+        );
+        
+        // registrations for Language
+        services.AddTransient(
+            typeof(IRequestHandler<Create.Command<CreateLanguageVM, Language, int>, ServiceResponse>),
+            typeof(Create.CommandHandler<CreateLanguageVM, Language, int>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<GetAll.Query<Language, int, LanguageVM>, ServiceResponse>),
+            typeof(GetAll.QueryHandler<Language, int, LanguageVM>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<GetById.Query<Language, int, LanguageVM>, ServiceResponse>),
+            typeof(GetById.QueryHandler<Language, int, LanguageVM>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<Update.Command<UpdateLanguageVM, Language, int>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateLanguageVM, Language, int>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<Delete.Command<Language, int>, ServiceResponse>),
+            typeof(Delete.CommandHandler<Language, int>)
         );
     }
 
