@@ -2,11 +2,11 @@ using Domain.Models.Languages;
 using Domain.ViewModels.Language;
 using FluentValidation;
 
-namespace BLL.Commands.Languages;
+namespace BLL.Commands.Languages.Validators;
 
-public class CreateLanguageCommandValidator : AbstractValidator<Create.Command<CreateLanguageVM, Language, int>>
+public class UpdateLanguageCommandValidator : AbstractValidator<Update.Command<CreateLanguageVM, Language, int>>
 {
-    public CreateLanguageCommandValidator()
+    public UpdateLanguageCommandValidator()
     {
         RuleFor(x => x.Model.Name)
             .NotEmpty().WithMessage("Name is required.");
@@ -14,4 +14,3 @@ public class CreateLanguageCommandValidator : AbstractValidator<Create.Command<C
             .NotEmpty().WithMessage("Code is required.");
     }
 }
-

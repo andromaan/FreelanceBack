@@ -1,4 +1,5 @@
 using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
@@ -19,6 +20,7 @@ public record GoogleExternalLoginCommand : IRequest<ServiceResponse>
 
 public class GoogleExternalLoginCommandHandler(
     IUserRepository userRepository,
+    IUserQueries userQueries,
     IJwtTokenService jwtTokenService,
     IPasswordHasher hashPasswordService)
     : IRequestHandler<GoogleExternalLoginCommand, ServiceResponse>
@@ -37,7 +39,7 @@ public class GoogleExternalLoginCommandHandler(
 
             var info = new UserLoginInfo(request.Model.Provider, payload.Subject, request.Model.Provider);
 
-            var isUsersNullOrEmpty = (await userRepository.GetAllAsync(cancellationToken)).Any();
+            var isUsersNullOrEmpty = (await userQueries.GetAllAsync(cancellationToken)).Any();
 
             var user = await FindOrCreateUserAsync(payload, info, isUsersNullOrEmpty, cancellationToken);
 
@@ -56,11 +58,11 @@ public class GoogleExternalLoginCommandHandler(
     private async Task<User?> FindOrCreateUserAsync(GoogleJsonWebSignature.Payload payload,
         UserLoginInfo info, bool isUsersNullOrEmpty, CancellationToken cancellationToken)
     {
-        var user = await userRepository.FindByLoginAsync(info.LoginProvider, info.ProviderKey, cancellationToken);
+        var user = await userQueries.FindByLoginAsync(info.LoginProvider, info.ProviderKey, cancellationToken);
         if (user != null)
             return user;
 
-        user = await userRepository.GetByEmailAsync(payload.Email, cancellationToken);
+        user = await userQueries.GetByEmailAsync(payload.Email, cancellationToken);
         if (user == null)
         {
             user = await CreateUserAsync(payload, isUsersNullOrEmpty, cancellationToken);

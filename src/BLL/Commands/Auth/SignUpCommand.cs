@@ -1,5 +1,7 @@
 using AutoMapper;
 using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces.Repositories.UserProfiles;
+using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
@@ -16,18 +18,19 @@ public class SignUpCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     IJwtTokenService jwtTokenService,
+    IUserQueries userQueries,
     IMapper mapper,
     IUserProfileRepository userProfileRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
         var vm = request.Vm;
-        if (!await userRepository.IsUniqueEmailAsync(vm.Email, cancellationToken))
+        if (!await userQueries.IsUniqueEmailAsync(vm.Email, cancellationToken))
         {
             return ServiceResponse.BadRequestResponse($"{vm.Email} вже використовується");
         }
 
-        var isDbHasUsers = (await userRepository.GetAllAsync(cancellationToken)).Count()! != 0;
+        var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count()! != 0;
 
         var user = mapper.Map<User>(vm);
         user.Id = Guid.NewGuid();

@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces.Repositories.Users;
 using DAL.Data;
 using Domain.Common.Interfaces;
 using Domain.Models.Auth.Users;
@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DAL.Repositories;
 
 public class UserRepository(AppDbContext appDbContext, IUserProvider userProvider)
-    : Repository<User, Guid>(appDbContext, userProvider), IUserRepository
+    : Repository<User, Guid>(appDbContext, userProvider), IUserRepository, IUserQueries
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
