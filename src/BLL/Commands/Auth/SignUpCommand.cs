@@ -1,12 +1,12 @@
 using AutoMapper;
-using BLL.Common.Interfaces.Repositories;
-using BLL.Common.Interfaces.Repositories.UserProfiles;
+using BLL.Common.Interfaces.Repositories.FreelancersInfo;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using Domain;
 using Domain.Models.Auth.Users;
+using Domain.Models.Freelance;
 using Domain.ViewModels.Auth;
 using MediatR;
 
@@ -20,7 +20,7 @@ public class SignUpCommandHandler(
     IJwtTokenService jwtTokenService,
     IUserQueries userQueries,
     IMapper mapper,
-    IUserProfileRepository userProfileRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
+    IFreelancerInfoRepository freelancerInfoRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
@@ -46,13 +46,13 @@ public class SignUpCommandHandler(
 
             if (isDbHasUsers && vm.IsFreelancer)
             {
-                var userProfile = new UserProfile
+                var freelancerInfo = new FreelancerInfo
                 {
-                    Id = Guid.NewGuid(),
+                    Id = user.Id,
                     UserId = user.Id,
                 };
 
-                await userProfileRepository.CreateAsync(userProfile, user.Id, cancellationToken);
+                await freelancerInfoRepository.CreateAsync(freelancerInfo, user.Id, cancellationToken);
             }
         }
         catch (Exception e)

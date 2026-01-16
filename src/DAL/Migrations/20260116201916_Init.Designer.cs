@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251012190405_Initial")]
-    partial class Initial
+    [Migration("20260116201916_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -184,80 +184,6 @@ namespace DAL.Migrations
                         .HasDatabaseName("ix_users_role_id");
 
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Models.Auth.Users.UserProfile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("AvatarLogo")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("avatar_logo");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("bio");
-
-                    b.Property<int?>("CountryId")
-                        .HasColumnType("integer")
-                        .HasColumnName("country_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("timezone('utc', now())");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by");
-
-                    b.Property<decimal?>("HourlyRate")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("hourly_rate");
-
-                    b.Property<string>("Location")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("location");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("modified_at")
-                        .HasDefaultValueSql("timezone('utc', now())");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("modified_by");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_user_profile");
-
-                    b.HasIndex("CountryId")
-                        .HasDatabaseName("ix_user_profile_country_id");
-
-                    b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_user_profile_created_by");
-
-                    b.HasIndex("ModifiedBy")
-                        .HasDatabaseName("ix_user_profile_modified_by");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_profile_user_id");
-
-                    b.ToTable("user_profile", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Countries.Country", b =>
@@ -2110,6 +2036,80 @@ namespace DAL.Migrations
                     b.ToTable("contract", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Freelance.FreelancerInfo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AvatarLogo")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("avatar_logo");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("bio");
+
+                    b.Property<int?>("CountryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("country_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal?>("HourlyRate")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("hourly_rate");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("location");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("modified_by");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_freelancers_info");
+
+                    b.HasIndex("CountryId")
+                        .HasDatabaseName("ix_freelancers_info_country_id");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("ix_freelancers_info_created_by");
+
+                    b.HasIndex("ModifiedBy")
+                        .HasDatabaseName("ix_freelancers_info_modified_by");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_freelancers_info_user_id");
+
+                    b.ToTable("freelancers_info", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Freelance.Job", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2219,6 +2219,10 @@ namespace DAL.Migrations
                         .HasColumnType("character varying(512)")
                         .HasColumnName("file_url");
 
+                    b.Property<Guid>("FreelancerInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("freelancer_info_id");
+
                     b.Property<DateTime>("ModifiedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -2235,21 +2239,17 @@ namespace DAL.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("title");
 
-                    b.Property<Guid>("UserProfileId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_profile_id");
-
                     b.HasKey("Id")
                         .HasName("pk_portfolio_item");
 
                     b.HasIndex("CreatedBy")
                         .HasDatabaseName("ix_portfolio_item_created_by");
 
+                    b.HasIndex("FreelancerInfoId")
+                        .HasDatabaseName("ix_portfolio_item_freelancer_info_id");
+
                     b.HasIndex("ModifiedBy")
                         .HasDatabaseName("ix_portfolio_item_modified_by");
-
-                    b.HasIndex("UserProfileId")
-                        .HasDatabaseName("ix_portfolio_item_user_profile_id");
 
                     b.ToTable("portfolio_item", (string)null);
                 });
@@ -2350,22 +2350,22 @@ namespace DAL.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid>("FreelancerInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("freelancer_info_id");
+
                     b.Property<int>("SkillId")
                         .HasColumnType("integer")
                         .HasColumnName("skill_id");
 
-                    b.Property<Guid>("UserProfileId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_profile_id");
-
                     b.HasKey("Id")
                         .HasName("pk_user_skill");
 
+                    b.HasIndex("FreelancerInfoId")
+                        .HasDatabaseName("ix_user_skill_freelancer_info_id");
+
                     b.HasIndex("SkillId")
                         .HasDatabaseName("ix_user_skill_skill_id");
-
-                    b.HasIndex("UserProfileId")
-                        .HasDatabaseName("ix_user_skill_user_profile_id");
 
                     b.ToTable("user_skill", (string)null);
                 });
@@ -3616,23 +3616,23 @@ namespace DAL.Migrations
                     b.ToTable("payment", (string)null);
                 });
 
-            modelBuilder.Entity("LanguageUserProfile", b =>
+            modelBuilder.Entity("FreelancerInfoLanguage", b =>
                 {
+                    b.Property<Guid>("FreelancerInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("freelancer_info_id");
+
                     b.Property<int>("LanguagesId")
                         .HasColumnType("integer")
                         .HasColumnName("languages_id");
 
-                    b.Property<Guid>("UserProfileId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_profile_id");
+                    b.HasKey("FreelancerInfoId", "LanguagesId")
+                        .HasName("pk_freelancer_info_language");
 
-                    b.HasKey("LanguagesId", "UserProfileId")
-                        .HasName("pk_language_user_profile");
+                    b.HasIndex("LanguagesId")
+                        .HasDatabaseName("ix_freelancer_info_language_languages_id");
 
-                    b.HasIndex("UserProfileId")
-                        .HasDatabaseName("ix_language_user_profile_user_profile_id");
-
-                    b.ToTable("language_user_profile", (string)null);
+                    b.ToTable("freelancer_info_language", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Auth.RefreshToken", b =>
@@ -3669,40 +3669,6 @@ namespace DAL.Migrations
                         .HasConstraintName("fk_users_roles_role_id");
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("Domain.Models.Auth.Users.UserProfile", b =>
-                {
-                    b.HasOne("Domain.Models.Countries.Country", "Country")
-                        .WithMany()
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_user_profile_country_country_id");
-
-                    b.HasOne("Domain.Models.Auth.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_profile_users_created_by");
-
-                    b.HasOne("Domain.Models.Auth.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("ModifiedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_profile_users_modified_by");
-
-                    b.HasOne("Domain.Models.Auth.Users.User", "User")
-                        .WithOne()
-                        .HasForeignKey("Domain.Models.Auth.Users.UserProfile", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_profile_users_user_id");
-
-                    b.Navigation("Country");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Models.Freelance.Contract", b =>
@@ -3749,6 +3715,40 @@ namespace DAL.Migrations
                     b.Navigation("Job");
                 });
 
+            modelBuilder.Entity("Domain.Models.Freelance.FreelancerInfo", b =>
+                {
+                    b.HasOne("Domain.Models.Countries.Country", "Country")
+                        .WithMany()
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_freelancers_info_country_country_id");
+
+                    b.HasOne("Domain.Models.Auth.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_freelancers_info_users_created_by");
+
+                    b.HasOne("Domain.Models.Auth.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("ModifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_freelancers_info_users_modified_by");
+
+                    b.HasOne("Domain.Models.Auth.Users.User", "User")
+                        .WithOne()
+                        .HasForeignKey("Domain.Models.Freelance.FreelancerInfo", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_freelancers_info_users_user_id");
+
+                    b.Navigation("Country");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Models.Freelance.Job", b =>
                 {
                     b.HasOne("Domain.Models.Auth.Users.User", "Client")
@@ -3784,6 +3784,13 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_portfolio_item_users_created_by");
 
+                    b.HasOne("Domain.Models.Freelance.FreelancerInfo", "FreelancerInfo")
+                        .WithMany("Portfolio")
+                        .HasForeignKey("FreelancerInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_portfolio_item_freelancers_info_freelancer_info_id");
+
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("ModifiedBy")
@@ -3791,14 +3798,7 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_portfolio_item_users_modified_by");
 
-                    b.HasOne("Domain.Models.Auth.Users.UserProfile", "UserProfile")
-                        .WithMany("Portfolio")
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_portfolio_item_user_profile_user_profile_id");
-
-                    b.Navigation("UserProfile");
+                    b.Navigation("FreelancerInfo");
                 });
 
             modelBuilder.Entity("Domain.Models.Freelance.Proposal", b =>
@@ -3838,6 +3838,13 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Domain.Models.Freelance.UserSkill", b =>
                 {
+                    b.HasOne("Domain.Models.Freelance.FreelancerInfo", "FreelancerInfo")
+                        .WithMany("Skills")
+                        .HasForeignKey("FreelancerInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_skill_freelancers_info_freelancer_info_id");
+
                     b.HasOne("Domain.Models.Freelance.Skill", "Skill")
                         .WithMany()
                         .HasForeignKey("SkillId")
@@ -3845,16 +3852,9 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_user_skill_skill_skill_id");
 
-                    b.HasOne("Domain.Models.Auth.Users.UserProfile", "UserProfile")
-                        .WithMany("Skills")
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_skill_user_profile_user_profile_id");
+                    b.Navigation("FreelancerInfo");
 
                     b.Navigation("Skill");
-
-                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("Domain.Models.Messaging.Message", b =>
@@ -3918,24 +3918,24 @@ namespace DAL.Migrations
                     b.Navigation("Contract");
                 });
 
-            modelBuilder.Entity("LanguageUserProfile", b =>
+            modelBuilder.Entity("FreelancerInfoLanguage", b =>
                 {
+                    b.HasOne("Domain.Models.Freelance.FreelancerInfo", null)
+                        .WithMany()
+                        .HasForeignKey("FreelancerInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_freelancer_info_language_freelancers_info_freelancer_info_id");
+
                     b.HasOne("Domain.Models.Languages.Language", null)
                         .WithMany()
                         .HasForeignKey("LanguagesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_language_user_profile_language_languages_id");
-
-                    b.HasOne("Domain.Models.Auth.Users.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_language_user_profile_user_profile_user_profile_id");
+                        .HasConstraintName("fk_freelancer_info_language_language_languages_id");
                 });
 
-            modelBuilder.Entity("Domain.Models.Auth.Users.UserProfile", b =>
+            modelBuilder.Entity("Domain.Models.Freelance.FreelancerInfo", b =>
                 {
                     b.Navigation("Portfolio");
 

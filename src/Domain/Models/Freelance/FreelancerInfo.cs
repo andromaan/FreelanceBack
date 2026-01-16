@@ -1,11 +1,11 @@
 using Domain.Common.Abstractions;
+using Domain.Models.Auth.Users;
 using Domain.Models.Countries;
-using Domain.Models.Freelance;
 using Domain.Models.Languages;
 
-namespace Domain.Models.Auth.Users;
+namespace Domain.Models.Freelance;
 
-public class UserProfile : AuditableEntity<Guid>
+public class FreelancerInfo : AuditableEntity<Guid>
 {
     public required Guid UserId { get; set; }
     public User? User { get; set; }

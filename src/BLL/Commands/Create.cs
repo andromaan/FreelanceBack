@@ -8,20 +8,20 @@ namespace BLL.Commands;
 
 public partial class Create
 {
-    public record Command<TViewModel, TEntity, TKey> : IRequest<ServiceResponse>
+    public record Command<TCreateViewModel, TEntity, TKey> : IRequest<ServiceResponse>
         where TEntity : Entity<TKey>
-        where TViewModel : class
+        where TCreateViewModel : class
     {
-        public required TViewModel Model { get; init; }
+        public required TCreateViewModel Model { get; init; }
     }
 
     public class
-        CommandHandler<TViewModel, TEntity, TKey>(IRepository<TEntity, TKey> repository, IMapper mapper)
-        : IRequestHandler<Command<TViewModel, TEntity, TKey>, ServiceResponse>
+        CommandHandler<TCreateViewModel, TEntity, TKey>(IRepository<TEntity, TKey> repository, IMapper mapper)
+        : IRequestHandler<Command<TCreateViewModel, TEntity, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
-        where TViewModel : class
+        where TCreateViewModel : class
     {
-        public async Task<ServiceResponse> Handle(Command<TViewModel, TEntity, TKey> request,
+        public async Task<ServiceResponse> Handle(Command<TCreateViewModel, TEntity, TKey> request,
             CancellationToken cancellationToken)
         {
             try

@@ -2,11 +2,11 @@ using BLL.Common;
 using BLL.Common.Interfaces.Repositories;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
+using BLL.Common.Interfaces.Repositories.FreelancersInfo;
 using BLL.Common.Interfaces.Repositories.Jobs;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Proposals;
 using BLL.Common.Interfaces.Repositories.Skills;
-using BLL.Common.Interfaces.Repositories.UserProfiles;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserSkills;
 using DAL.Data;
@@ -58,9 +58,9 @@ public static class ConfigureDataAccess
         services.AddScoped<IUserRepository>(provider => provider.GetRequiredService<UserRepository>());
         services.AddScoped<IUserQueries>(provider => provider.GetRequiredService<UserRepository>());
 
-        services.AddScoped<UserProfileRepository>();
-        services.AddScoped<IUserProfileRepository>(provider => provider.GetRequiredService<UserProfileRepository>());
-        services.AddScoped<IUserProfileQueries>(provider => provider.GetRequiredService<UserProfileRepository>());
+        services.AddScoped<FreelancerInfoRepository>();
+        services.AddScoped<IFreelancerInfoRepository>(provider => provider.GetRequiredService<FreelancerInfoRepository>());
+        services.AddScoped<IFreelancerInfoQueries>(provider => provider.GetRequiredService<FreelancerInfoRepository>());
 
         services.AddScoped<ProposalRepository>();
         services.AddScoped<IProposalRepository>(provider => provider.GetRequiredService<ProposalRepository>());

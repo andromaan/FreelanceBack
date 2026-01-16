@@ -5,8 +5,8 @@ namespace Domain.Models.Freelance;
 
 public class PortfolioItem : AuditableEntity<Guid>
 {
-    public required Guid UserProfileId { get; set; }
-    public UserProfile? UserProfile { get; set; }
+    public required Guid FreelancerInfoId { get; set; }
+    public FreelancerInfo? FreelancerInfo { get; set; }
 
     public required string Title { get; set; }
     public string? Description { get; set; }

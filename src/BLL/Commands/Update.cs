@@ -8,23 +8,23 @@ namespace BLL.Commands;
 
 public partial class Update
 {
-    public record Command<TViewModel, TEntity, TKey> : IRequest<ServiceResponse>
+    public record Command<TUpdateViewModel, TEntity, TKey> : IRequest<ServiceResponse>
         where TEntity : Entity<TKey>
-        where TViewModel : class
+        where TUpdateViewModel : class
     {
         public required TKey Id { get; init; }
-        public required TViewModel Model { get; init; }
+        public required TUpdateViewModel Model { get; init; }
     }
 
-    public class CommandHandler<TViewModel, TEntity, TKey>(
+    public class CommandHandler<TUpdateViewModel, TEntity, TKey>(
         IRepository<TEntity, TKey> repository,
         IQueries<TEntity, TKey> queries,
         IMapper mapper)
-        : IRequestHandler<Command<TViewModel, TEntity, TKey>, ServiceResponse>
+        : IRequestHandler<Command<TUpdateViewModel, TEntity, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
-        where TViewModel : class
+        where TUpdateViewModel : class
     {
-        public async Task<ServiceResponse> Handle(Command<TViewModel, TEntity, TKey> request,
+        public async Task<ServiceResponse> Handle(Command<TUpdateViewModel, TEntity, TKey> request,
             CancellationToken cancellationToken)
         {
             var existingEntity = await queries.GetByIdAsync(request.Id,

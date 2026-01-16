@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -109,6 +109,51 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "freelancers_info",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    bio = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    hourly_rate = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    location = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    avatar_logo = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    country_id = table.Column<int>(type: "integer", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_freelancers_info", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_freelancers_info_country_country_id",
+                        column: x => x.country_id,
+                        principalTable: "country",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "fk_freelancers_info_users_created_by",
+                        column: x => x.created_by,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_freelancers_info_users_modified_by",
+                        column: x => x.modified_by,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_freelancers_info_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "job",
                 columns: table => new
                 {
@@ -173,16 +218,38 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "user_profile",
+                name: "freelancer_info_language",
+                columns: table => new
+                {
+                    freelancer_info_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    languages_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_freelancer_info_language", x => new { x.freelancer_info_id, x.languages_id });
+                    table.ForeignKey(
+                        name: "fk_freelancer_info_language_freelancers_info_freelancer_info_id",
+                        column: x => x.freelancer_info_id,
+                        principalTable: "freelancers_info",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_freelancer_info_language_language_languages_id",
+                        column: x => x.languages_id,
+                        principalTable: "language",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "portfolio_item",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    bio = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    hourly_rate = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    location = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    avatar_logo = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    country_id = table.Column<int>(type: "integer", nullable: true),
+                    freelancer_info_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    file_url = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
                     created_by = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
                     modified_by = table.Column<Guid>(type: "uuid", nullable: false),
@@ -190,29 +257,48 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_user_profile", x => x.id);
+                    table.PrimaryKey("pk_portfolio_item", x => x.id);
                     table.ForeignKey(
-                        name: "fk_user_profile_country_country_id",
-                        column: x => x.country_id,
-                        principalTable: "country",
+                        name: "fk_portfolio_item_freelancers_info_freelancer_info_id",
+                        column: x => x.freelancer_info_id,
+                        principalTable: "freelancers_info",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_user_profile_users_created_by",
+                        name: "fk_portfolio_item_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_user_profile_users_modified_by",
+                        name: "fk_portfolio_item_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user_skill",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    freelancer_info_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    skill_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_user_skill", x => x.id);
                     table.ForeignKey(
-                        name: "fk_user_profile_users_user_id",
-                        column: x => x.user_id,
-                        principalTable: "users",
+                        name: "fk_user_skill_freelancers_info_freelancer_info_id",
+                        column: x => x.freelancer_info_id,
+                        principalTable: "freelancers_info",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_user_skill_skill_skill_id",
+                        column: x => x.skill_id,
+                        principalTable: "skill",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -309,92 +395,6 @@ namespace DAL.Migrations
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "language_user_profile",
-                columns: table => new
-                {
-                    languages_id = table.Column<int>(type: "integer", nullable: false),
-                    user_profile_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_language_user_profile", x => new { x.languages_id, x.user_profile_id });
-                    table.ForeignKey(
-                        name: "fk_language_user_profile_language_languages_id",
-                        column: x => x.languages_id,
-                        principalTable: "language",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_language_user_profile_user_profile_user_profile_id",
-                        column: x => x.user_profile_id,
-                        principalTable: "user_profile",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "portfolio_item",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    user_profile_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    file_url = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
-                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_portfolio_item", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_portfolio_item_user_profile_user_profile_id",
-                        column: x => x.user_profile_id,
-                        principalTable: "user_profile",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_portfolio_item_users_created_by",
-                        column: x => x.created_by,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_portfolio_item_users_modified_by",
-                        column: x => x.modified_by,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "user_skill",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    user_profile_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    skill_id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_user_skill", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_user_skill_skill_skill_id",
-                        column: x => x.skill_id,
-                        principalTable: "skill",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_user_skill_user_profile_user_profile_id",
-                        column: x => x.user_profile_id,
-                        principalTable: "user_profile",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -958,6 +958,32 @@ namespace DAL.Migrations
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
+                name: "ix_freelancer_info_language_languages_id",
+                table: "freelancer_info_language",
+                column: "languages_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_freelancers_info_country_id",
+                table: "freelancers_info",
+                column: "country_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_freelancers_info_created_by",
+                table: "freelancers_info",
+                column: "created_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_freelancers_info_modified_by",
+                table: "freelancers_info",
+                column: "modified_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_freelancers_info_user_id",
+                table: "freelancers_info",
+                column: "user_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "ix_job_client_id",
                 table: "job",
                 column: "client_id");
@@ -971,11 +997,6 @@ namespace DAL.Migrations
                 name: "ix_job_modified_by",
                 table: "job",
                 column: "modified_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_language_user_profile_user_profile_id",
-                table: "language_user_profile",
-                column: "user_profile_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_message_contract_id",
@@ -1018,14 +1039,14 @@ namespace DAL.Migrations
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
+                name: "ix_portfolio_item_freelancer_info_id",
+                table: "portfolio_item",
+                column: "freelancer_info_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_portfolio_item_modified_by",
                 table: "portfolio_item",
                 column: "modified_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_portfolio_item_user_profile_id",
-                table: "portfolio_item",
-                column: "user_profile_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_proposal_created_by",
@@ -1053,35 +1074,14 @@ namespace DAL.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_profile_country_id",
-                table: "user_profile",
-                column: "country_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_user_profile_created_by",
-                table: "user_profile",
-                column: "created_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_user_profile_modified_by",
-                table: "user_profile",
-                column: "modified_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_user_profile_user_id",
-                table: "user_profile",
-                column: "user_id",
-                unique: true);
+                name: "ix_user_skill_freelancer_info_id",
+                table: "user_skill",
+                column: "freelancer_info_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_skill_skill_id",
                 table: "user_skill",
                 column: "skill_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_user_skill_user_profile_id",
-                table: "user_skill",
-                column: "user_profile_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_users_created_by",
@@ -1109,7 +1109,7 @@ namespace DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "language_user_profile");
+                name: "freelancer_info_language");
 
             migrationBuilder.DropTable(
                 name: "message");
@@ -1136,10 +1136,10 @@ namespace DAL.Migrations
                 name: "contract");
 
             migrationBuilder.DropTable(
-                name: "skill");
+                name: "freelancers_info");
 
             migrationBuilder.DropTable(
-                name: "user_profile");
+                name: "skill");
 
             migrationBuilder.DropTable(
                 name: "job");
