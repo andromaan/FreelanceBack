@@ -8,6 +8,8 @@ public class UserSkillConfiguration : IEntityTypeConfiguration<UserSkill>
 {
     public void Configure(EntityTypeBuilder<UserSkill> builder)
     {
+        builder.ToTable("user_skills");
+        
         builder.HasKey(p => p.Id);
 
         builder.HasOne(p => p.FreelancerInfo)

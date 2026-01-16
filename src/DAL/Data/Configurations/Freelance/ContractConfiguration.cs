@@ -9,6 +9,8 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
 {
     public void Configure(EntityTypeBuilder<Contract> builder)
     {
+        builder.ToTable("contracts");
+        
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Amount).IsRequired();

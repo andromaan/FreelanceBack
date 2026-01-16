@@ -9,6 +9,8 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
 {
     public void Configure(EntityTypeBuilder<Message> builder)
     {
+        builder.ToTable("messages");
+        
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Content).IsRequired().HasMaxLength(2000);

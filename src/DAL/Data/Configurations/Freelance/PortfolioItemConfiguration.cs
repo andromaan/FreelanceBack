@@ -9,6 +9,8 @@ public class PortfolioItemConfiguration : IEntityTypeConfiguration<PortfolioItem
 {
     public void Configure(EntityTypeBuilder<PortfolioItem> builder)
     {
+        builder.ToTable("portfolio_items");
+        
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Title).IsRequired().HasMaxLength(200);

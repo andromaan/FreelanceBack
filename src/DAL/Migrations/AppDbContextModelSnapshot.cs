@@ -213,9 +213,9 @@ namespace DAL.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("pk_country");
+                        .HasName("pk_countries");
 
-                    b.ToTable("country", (string)null);
+                    b.ToTable("countries", (string)null);
 
                     b.HasData(
                         new
@@ -1963,6 +1963,35 @@ namespace DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Models.Employers.Employer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("company_name");
+
+                    b.Property<string>("CompanyWebsite")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("company_website");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_employers");
+
+                    b.ToTable("employers", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Freelance.Contract", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2013,24 +2042,24 @@ namespace DAL.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("Id")
-                        .HasName("pk_contract");
+                        .HasName("pk_contracts");
 
                     b.HasIndex("ClientId")
-                        .HasDatabaseName("ix_contract_client_id");
+                        .HasDatabaseName("ix_contracts_client_id");
 
                     b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_contract_created_by");
+                        .HasDatabaseName("ix_contracts_created_by");
 
                     b.HasIndex("FreelancerId")
-                        .HasDatabaseName("ix_contract_freelancer_id");
+                        .HasDatabaseName("ix_contracts_freelancer_id");
 
                     b.HasIndex("JobId")
-                        .HasDatabaseName("ix_contract_job_id");
+                        .HasDatabaseName("ix_contracts_job_id");
 
                     b.HasIndex("ModifiedBy")
-                        .HasDatabaseName("ix_contract_modified_by");
+                        .HasDatabaseName("ix_contracts_modified_by");
 
-                    b.ToTable("contract", (string)null);
+                    b.ToTable("contracts", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Freelance.FreelancerInfo", b =>
@@ -2175,18 +2204,18 @@ namespace DAL.Migrations
                         .HasColumnName("title");
 
                     b.HasKey("Id")
-                        .HasName("pk_job");
+                        .HasName("pk_jobs");
 
                     b.HasIndex("ClientId")
-                        .HasDatabaseName("ix_job_client_id");
+                        .HasDatabaseName("ix_jobs_client_id");
 
                     b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_job_created_by");
+                        .HasDatabaseName("ix_jobs_created_by");
 
                     b.HasIndex("ModifiedBy")
-                        .HasDatabaseName("ix_job_modified_by");
+                        .HasDatabaseName("ix_jobs_modified_by");
 
-                    b.ToTable("job", (string)null);
+                    b.ToTable("jobs", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Freelance.PortfolioItem", b =>
@@ -2237,18 +2266,18 @@ namespace DAL.Migrations
                         .HasColumnName("title");
 
                     b.HasKey("Id")
-                        .HasName("pk_portfolio_item");
+                        .HasName("pk_portfolio_items");
 
                     b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_portfolio_item_created_by");
+                        .HasDatabaseName("ix_portfolio_items_created_by");
 
                     b.HasIndex("FreelancerInfoId")
-                        .HasDatabaseName("ix_portfolio_item_freelancer_info_id");
+                        .HasDatabaseName("ix_portfolio_items_freelancer_info_id");
 
                     b.HasIndex("ModifiedBy")
-                        .HasDatabaseName("ix_portfolio_item_modified_by");
+                        .HasDatabaseName("ix_portfolio_items_modified_by");
 
-                    b.ToTable("portfolio_item", (string)null);
+                    b.ToTable("portfolio_items", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Freelance.Proposal", b =>
@@ -2302,21 +2331,21 @@ namespace DAL.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("Id")
-                        .HasName("pk_proposal");
+                        .HasName("pk_proposals");
 
                     b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_proposal_created_by");
+                        .HasDatabaseName("ix_proposals_created_by");
 
                     b.HasIndex("FreelancerId")
-                        .HasDatabaseName("ix_proposal_freelancer_id");
+                        .HasDatabaseName("ix_proposals_freelancer_id");
 
                     b.HasIndex("JobId")
-                        .HasDatabaseName("ix_proposal_job_id");
+                        .HasDatabaseName("ix_proposals_job_id");
 
                     b.HasIndex("ModifiedBy")
-                        .HasDatabaseName("ix_proposal_modified_by");
+                        .HasDatabaseName("ix_proposals_modified_by");
 
-                    b.ToTable("proposal", (string)null);
+                    b.ToTable("proposals", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Freelance.Skill", b =>
@@ -2335,9 +2364,9 @@ namespace DAL.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("pk_skill");
+                        .HasName("pk_skills");
 
-                    b.ToTable("skill", (string)null);
+                    b.ToTable("skills", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Freelance.UserSkill", b =>
@@ -2356,15 +2385,15 @@ namespace DAL.Migrations
                         .HasColumnName("skill_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_user_skill");
+                        .HasName("pk_user_skills");
 
                     b.HasIndex("FreelancerInfoId")
-                        .HasDatabaseName("ix_user_skill_freelancer_info_id");
+                        .HasDatabaseName("ix_user_skills_freelancer_info_id");
 
                     b.HasIndex("SkillId")
-                        .HasDatabaseName("ix_user_skill_skill_id");
+                        .HasDatabaseName("ix_user_skills_skill_id");
 
-                    b.ToTable("user_skill", (string)null);
+                    b.ToTable("user_skills", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Languages.Language", b =>
@@ -2390,9 +2419,9 @@ namespace DAL.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("pk_language");
+                        .HasName("pk_languages");
 
-                    b.ToTable("language", (string)null);
+                    b.ToTable("languages", (string)null);
 
                     b.HasData(
                         new
@@ -3535,21 +3564,21 @@ namespace DAL.Migrations
                         .HasColumnName("sent_at");
 
                     b.HasKey("Id")
-                        .HasName("pk_message");
+                        .HasName("pk_messages");
 
                     b.HasIndex("ContractId")
-                        .HasDatabaseName("ix_message_contract_id");
+                        .HasDatabaseName("ix_messages_contract_id");
 
                     b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_message_created_by");
+                        .HasDatabaseName("ix_messages_created_by");
 
                     b.HasIndex("ModifiedBy")
-                        .HasDatabaseName("ix_message_modified_by");
+                        .HasDatabaseName("ix_messages_modified_by");
 
                     b.HasIndex("SenderId")
-                        .HasDatabaseName("ix_message_sender_id");
+                        .HasDatabaseName("ix_messages_sender_id");
 
-                    b.ToTable("message", (string)null);
+                    b.ToTable("messages", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Payments.Payment", b =>
@@ -3599,18 +3628,18 @@ namespace DAL.Migrations
                         .HasColumnName("stripe_payment_intent_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_payment");
+                        .HasName("pk_payments");
 
                     b.HasIndex("ContractId")
-                        .HasDatabaseName("ix_payment_contract_id");
+                        .HasDatabaseName("ix_payments_contract_id");
 
                     b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_payment_created_by");
+                        .HasDatabaseName("ix_payments_created_by");
 
                     b.HasIndex("ModifiedBy")
-                        .HasDatabaseName("ix_payment_modified_by");
+                        .HasDatabaseName("ix_payments_modified_by");
 
-                    b.ToTable("payment", (string)null);
+                    b.ToTable("payments", (string)null);
                 });
 
             modelBuilder.Entity("FreelancerInfoLanguage", b =>
@@ -3675,35 +3704,35 @@ namespace DAL.Migrations
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_contract_users_client_id");
+                        .HasConstraintName("fk_contracts_users_client_id");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_contract_users_created_by");
+                        .HasConstraintName("fk_contracts_users_created_by");
 
                     b.HasOne("Domain.Models.Auth.Users.User", "Freelancer")
                         .WithMany()
                         .HasForeignKey("FreelancerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_contract_users_freelancer_id");
+                        .HasConstraintName("fk_contracts_users_freelancer_id");
 
                     b.HasOne("Domain.Models.Freelance.Job", "Job")
                         .WithMany("Contracts")
                         .HasForeignKey("JobId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_contract_job_job_id");
+                        .HasConstraintName("fk_contracts_job_job_id");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("ModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_contract_users_modified_by");
+                        .HasConstraintName("fk_contracts_users_modified_by");
 
                     b.Navigation("Client");
 
@@ -3753,21 +3782,21 @@ namespace DAL.Migrations
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_job_users_client_id");
+                        .HasConstraintName("fk_jobs_users_client_id");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_job_users_created_by");
+                        .HasConstraintName("fk_jobs_users_created_by");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("ModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_job_users_modified_by");
+                        .HasConstraintName("fk_jobs_users_modified_by");
 
                     b.Navigation("Client");
                 });
@@ -3779,21 +3808,21 @@ namespace DAL.Migrations
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_portfolio_item_users_created_by");
+                        .HasConstraintName("fk_portfolio_items_users_created_by");
 
                     b.HasOne("Domain.Models.Freelance.FreelancerInfo", "FreelancerInfo")
                         .WithMany("Portfolio")
                         .HasForeignKey("FreelancerInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_portfolio_item_freelancers_info_freelancer_info_id");
+                        .HasConstraintName("fk_portfolio_items_freelancers_info_freelancer_info_id");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("ModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_portfolio_item_users_modified_by");
+                        .HasConstraintName("fk_portfolio_items_users_modified_by");
 
                     b.Navigation("FreelancerInfo");
                 });
@@ -3805,28 +3834,28 @@ namespace DAL.Migrations
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_proposal_users_created_by");
+                        .HasConstraintName("fk_proposals_users_created_by");
 
                     b.HasOne("Domain.Models.Auth.Users.User", "Freelancer")
                         .WithMany()
                         .HasForeignKey("FreelancerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_proposal_users_freelancer_id");
+                        .HasConstraintName("fk_proposals_users_freelancer_id");
 
                     b.HasOne("Domain.Models.Freelance.Job", "Job")
                         .WithMany("Proposals")
                         .HasForeignKey("JobId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_proposal_job_job_id");
+                        .HasConstraintName("fk_proposals_jobs_job_id");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("ModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_proposal_users_modified_by");
+                        .HasConstraintName("fk_proposals_users_modified_by");
 
                     b.Navigation("Freelancer");
 
@@ -3840,14 +3869,14 @@ namespace DAL.Migrations
                         .HasForeignKey("FreelancerInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_user_skill_freelancers_info_freelancer_info_id");
+                        .HasConstraintName("fk_user_skills_freelancers_info_freelancer_info_id");
 
                     b.HasOne("Domain.Models.Freelance.Skill", "Skill")
                         .WithMany()
                         .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_user_skill_skill_skill_id");
+                        .HasConstraintName("fk_user_skills_skills_skill_id");
 
                     b.Navigation("FreelancerInfo");
 
@@ -3861,28 +3890,28 @@ namespace DAL.Migrations
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_message_contract_contract_id");
+                        .HasConstraintName("fk_messages_contracts_contract_id");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_message_users_created_by");
+                        .HasConstraintName("fk_messages_users_created_by");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("ModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_message_users_modified_by");
+                        .HasConstraintName("fk_messages_users_modified_by");
 
                     b.HasOne("Domain.Models.Auth.Users.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_message_users_sender_id");
+                        .HasConstraintName("fk_messages_users_sender_id");
 
                     b.Navigation("Contract");
 
@@ -3896,21 +3925,21 @@ namespace DAL.Migrations
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_payment_contract_contract_id");
+                        .HasConstraintName("fk_payments_contracts_contract_id");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_payment_users_created_by");
+                        .HasConstraintName("fk_payments_users_created_by");
 
                     b.HasOne("Domain.Models.Auth.Users.User", null)
                         .WithMany()
                         .HasForeignKey("ModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_payment_users_modified_by");
+                        .HasConstraintName("fk_payments_users_modified_by");
 
                     b.Navigation("Contract");
                 });

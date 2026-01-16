@@ -9,6 +9,8 @@ public class ProposalConfiguration : IEntityTypeConfiguration<Proposal>
 {
     public void Configure(EntityTypeBuilder<Proposal> builder)
     {
+        builder.ToTable("proposals");
+        
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Price).IsRequired();

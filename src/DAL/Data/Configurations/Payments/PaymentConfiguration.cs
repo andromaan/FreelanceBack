@@ -9,6 +9,8 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
 {
     public void Configure(EntityTypeBuilder<Payment> builder)
     {
+        builder.ToTable("payments");
+        
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.StripePaymentIntentId).HasMaxLength(128);

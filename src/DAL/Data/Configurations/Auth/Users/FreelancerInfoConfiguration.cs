@@ -10,6 +10,8 @@ public class FreelancerInfoConfiguration : IEntityTypeConfiguration<FreelancerIn
 {
     public void Configure(EntityTypeBuilder<FreelancerInfo> builder)
     {
+        builder.ToTable("freelancers_info");
+        
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Bio).HasMaxLength(2000);

@@ -9,13 +9,13 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "country",
+                name: "countries",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -26,11 +26,25 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_country", x => x.id);
+                    table.PrimaryKey("pk_countries", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "language",
+                name: "employers",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    company_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    company_website = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_employers", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "languages",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -40,7 +54,7 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_language", x => x.id);
+                    table.PrimaryKey("pk_languages", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,7 +70,7 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "skill",
+                name: "skills",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -65,7 +79,7 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_skill", x => x.id);
+                    table.PrimaryKey("pk_skills", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -130,7 +144,7 @@ namespace DAL.Migrations
                     table.ForeignKey(
                         name: "fk_freelancers_info_country_country_id",
                         column: x => x.country_id,
-                        principalTable: "country",
+                        principalTable: "countries",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
@@ -154,7 +168,7 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "job",
+                name: "jobs",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -173,21 +187,21 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_job", x => x.id);
+                    table.PrimaryKey("pk_jobs", x => x.id);
                     table.ForeignKey(
-                        name: "fk_job_users_client_id",
+                        name: "fk_jobs_users_client_id",
                         column: x => x.client_id,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_job_users_created_by",
+                        name: "fk_jobs_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_job_users_modified_by",
+                        name: "fk_jobs_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
@@ -236,13 +250,13 @@ namespace DAL.Migrations
                     table.ForeignKey(
                         name: "fk_freelancer_info_language_language_languages_id",
                         column: x => x.languages_id,
-                        principalTable: "language",
+                        principalTable: "languages",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "portfolio_item",
+                name: "portfolio_items",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -257,21 +271,21 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_portfolio_item", x => x.id);
+                    table.PrimaryKey("pk_portfolio_items", x => x.id);
                     table.ForeignKey(
-                        name: "fk_portfolio_item_freelancers_info_freelancer_info_id",
+                        name: "fk_portfolio_items_freelancers_info_freelancer_info_id",
                         column: x => x.freelancer_info_id,
                         principalTable: "freelancers_info",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_portfolio_item_users_created_by",
+                        name: "fk_portfolio_items_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_portfolio_item_users_modified_by",
+                        name: "fk_portfolio_items_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
@@ -279,7 +293,7 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "user_skill",
+                name: "user_skills",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -288,23 +302,23 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_user_skill", x => x.id);
+                    table.PrimaryKey("pk_user_skills", x => x.id);
                     table.ForeignKey(
-                        name: "fk_user_skill_freelancers_info_freelancer_info_id",
+                        name: "fk_user_skills_freelancers_info_freelancer_info_id",
                         column: x => x.freelancer_info_id,
                         principalTable: "freelancers_info",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_user_skill_skill_skill_id",
+                        name: "fk_user_skills_skills_skill_id",
                         column: x => x.skill_id,
-                        principalTable: "skill",
+                        principalTable: "skills",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "contract",
+                name: "contracts",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -320,33 +334,33 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_contract", x => x.id);
+                    table.PrimaryKey("pk_contracts", x => x.id);
                     table.ForeignKey(
-                        name: "fk_contract_job_job_id",
+                        name: "fk_contracts_job_job_id",
                         column: x => x.job_id,
-                        principalTable: "job",
+                        principalTable: "jobs",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_contract_users_client_id",
+                        name: "fk_contracts_users_client_id",
                         column: x => x.client_id,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_contract_users_created_by",
+                        name: "fk_contracts_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_contract_users_freelancer_id",
+                        name: "fk_contracts_users_freelancer_id",
                         column: x => x.freelancer_id,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_contract_users_modified_by",
+                        name: "fk_contracts_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
@@ -354,7 +368,7 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "proposal",
+                name: "proposals",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -370,27 +384,27 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_proposal", x => x.id);
+                    table.PrimaryKey("pk_proposals", x => x.id);
                     table.ForeignKey(
-                        name: "fk_proposal_job_job_id",
+                        name: "fk_proposals_jobs_job_id",
                         column: x => x.job_id,
-                        principalTable: "job",
+                        principalTable: "jobs",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_proposal_users_created_by",
+                        name: "fk_proposals_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_proposal_users_freelancer_id",
+                        name: "fk_proposals_users_freelancer_id",
                         column: x => x.freelancer_id,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_proposal_users_modified_by",
+                        name: "fk_proposals_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
@@ -398,7 +412,7 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "message",
+                name: "messages",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -413,27 +427,27 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_message", x => x.id);
+                    table.PrimaryKey("pk_messages", x => x.id);
                     table.ForeignKey(
-                        name: "fk_message_contract_contract_id",
+                        name: "fk_messages_contracts_contract_id",
                         column: x => x.contract_id,
-                        principalTable: "contract",
+                        principalTable: "contracts",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_message_users_created_by",
+                        name: "fk_messages_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_message_users_modified_by",
+                        name: "fk_messages_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_message_users_sender_id",
+                        name: "fk_messages_users_sender_id",
                         column: x => x.sender_id,
                         principalTable: "users",
                         principalColumn: "id",
@@ -441,7 +455,7 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "payment",
+                name: "payments",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -456,21 +470,21 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_payment", x => x.id);
+                    table.PrimaryKey("pk_payments", x => x.id);
                     table.ForeignKey(
-                        name: "fk_payment_contract_contract_id",
+                        name: "fk_payments_contracts_contract_id",
                         column: x => x.contract_id,
-                        principalTable: "contract",
+                        principalTable: "contracts",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_payment_users_created_by",
+                        name: "fk_payments_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_payment_users_modified_by",
+                        name: "fk_payments_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
@@ -478,7 +492,7 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "country",
+                table: "countries",
                 columns: new[] { "id", "alpha2code", "alpha3code", "name" },
                 values: new object[,]
                 {
@@ -734,7 +748,7 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "language",
+                table: "languages",
                 columns: new[] { "id", "code", "name" },
                 values: new object[,]
                 {
@@ -933,28 +947,28 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_contract_client_id",
-                table: "contract",
+                name: "ix_contracts_client_id",
+                table: "contracts",
                 column: "client_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_contract_created_by",
-                table: "contract",
+                name: "ix_contracts_created_by",
+                table: "contracts",
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_contract_freelancer_id",
-                table: "contract",
+                name: "ix_contracts_freelancer_id",
+                table: "contracts",
                 column: "freelancer_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_contract_job_id",
-                table: "contract",
+                name: "ix_contracts_job_id",
+                table: "contracts",
                 column: "job_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_contract_modified_by",
-                table: "contract",
+                name: "ix_contracts_modified_by",
+                table: "contracts",
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
@@ -984,88 +998,88 @@ namespace DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_job_client_id",
-                table: "job",
+                name: "ix_jobs_client_id",
+                table: "jobs",
                 column: "client_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_job_created_by",
-                table: "job",
+                name: "ix_jobs_created_by",
+                table: "jobs",
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_job_modified_by",
-                table: "job",
+                name: "ix_jobs_modified_by",
+                table: "jobs",
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_message_contract_id",
-                table: "message",
+                name: "ix_messages_contract_id",
+                table: "messages",
                 column: "contract_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_message_created_by",
-                table: "message",
+                name: "ix_messages_created_by",
+                table: "messages",
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_message_modified_by",
-                table: "message",
+                name: "ix_messages_modified_by",
+                table: "messages",
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_message_sender_id",
-                table: "message",
+                name: "ix_messages_sender_id",
+                table: "messages",
                 column: "sender_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payment_contract_id",
-                table: "payment",
+                name: "ix_payments_contract_id",
+                table: "payments",
                 column: "contract_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payment_created_by",
-                table: "payment",
+                name: "ix_payments_created_by",
+                table: "payments",
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payment_modified_by",
-                table: "payment",
+                name: "ix_payments_modified_by",
+                table: "payments",
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_portfolio_item_created_by",
-                table: "portfolio_item",
+                name: "ix_portfolio_items_created_by",
+                table: "portfolio_items",
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_portfolio_item_freelancer_info_id",
-                table: "portfolio_item",
+                name: "ix_portfolio_items_freelancer_info_id",
+                table: "portfolio_items",
                 column: "freelancer_info_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_portfolio_item_modified_by",
-                table: "portfolio_item",
+                name: "ix_portfolio_items_modified_by",
+                table: "portfolio_items",
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_proposal_created_by",
-                table: "proposal",
+                name: "ix_proposals_created_by",
+                table: "proposals",
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_proposal_freelancer_id",
-                table: "proposal",
+                name: "ix_proposals_freelancer_id",
+                table: "proposals",
                 column: "freelancer_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_proposal_job_id",
-                table: "proposal",
+                name: "ix_proposals_job_id",
+                table: "proposals",
                 column: "job_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_proposal_modified_by",
-                table: "proposal",
+                name: "ix_proposals_modified_by",
+                table: "proposals",
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
@@ -1074,13 +1088,13 @@ namespace DAL.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_skill_freelancer_info_id",
-                table: "user_skill",
+                name: "ix_user_skills_freelancer_info_id",
+                table: "user_skills",
                 column: "freelancer_info_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_skill_skill_id",
-                table: "user_skill",
+                name: "ix_user_skills_skill_id",
+                table: "user_skills",
                 column: "skill_id");
 
             migrationBuilder.CreateIndex(
@@ -1109,43 +1123,46 @@ namespace DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "employers");
+
+            migrationBuilder.DropTable(
                 name: "freelancer_info_language");
 
             migrationBuilder.DropTable(
-                name: "message");
+                name: "messages");
 
             migrationBuilder.DropTable(
-                name: "payment");
+                name: "payments");
 
             migrationBuilder.DropTable(
-                name: "portfolio_item");
+                name: "portfolio_items");
 
             migrationBuilder.DropTable(
-                name: "proposal");
+                name: "proposals");
 
             migrationBuilder.DropTable(
                 name: "refresh_tokens");
 
             migrationBuilder.DropTable(
-                name: "user_skill");
+                name: "user_skills");
 
             migrationBuilder.DropTable(
-                name: "language");
+                name: "languages");
 
             migrationBuilder.DropTable(
-                name: "contract");
+                name: "contracts");
 
             migrationBuilder.DropTable(
                 name: "freelancers_info");
 
             migrationBuilder.DropTable(
-                name: "skill");
+                name: "skills");
 
             migrationBuilder.DropTable(
-                name: "job");
+                name: "jobs");
 
             migrationBuilder.DropTable(
-                name: "country");
+                name: "countries");
 
             migrationBuilder.DropTable(
                 name: "users");
