@@ -1,6 +1,6 @@
 using Domain.Common.Abstractions;
 
-namespace Domain.Models.Freelance;
+namespace Domain.Models.Projects;
 
 public class Skill : Entity<int>
 {

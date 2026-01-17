@@ -9,6 +9,8 @@ using BLL.Services.PasswordHasher;
 using Domain;
 using Domain.Models.Countries;
 using Domain.Models.Languages;
+using Domain.Models.Projects;
+using Domain.ViewModels.Category;
 using Domain.ViewModels.Country;
 using Domain.ViewModels.Language;
 using FluentValidation;
@@ -101,6 +103,32 @@ public static class ConfigureBusinessLogic
         services.AddTransient(
             typeof(IRequestHandler<Delete.Command<Language, int>, ServiceResponse>),
             typeof(Delete.CommandHandler<Language, int>)
+        );
+        
+        // registrations for Category
+        services.AddTransient(
+            typeof(IRequestHandler<Create.Command<CreateCategoryVM, Category, Guid>, ServiceResponse>),
+            typeof(Create.CommandHandler<CreateCategoryVM, Category, Guid>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<GetAll.Query<Category, Guid, CategoryVM>, ServiceResponse>),
+            typeof(GetAll.QueryHandler<Category, Guid, CategoryVM>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<GetById.Query<Category, Guid, CategoryVM>, ServiceResponse>),
+            typeof(GetById.QueryHandler<Category, Guid, CategoryVM>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<Update.Command<UpdateCategoryVM, Category, Guid>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateCategoryVM, Category, Guid>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<Delete.Command<Category, Guid>, ServiceResponse>),
+            typeof(Delete.CommandHandler<Category, Guid>)
         );
     }
 

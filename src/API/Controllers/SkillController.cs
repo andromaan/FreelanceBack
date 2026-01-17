@@ -3,6 +3,7 @@ using AutoMapper;
 using BLL.Commands;
 using BLL.Services;
 using Domain.Models.Freelance;
+using Domain.Models.Projects;
 using Domain.ViewModels.Skill;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

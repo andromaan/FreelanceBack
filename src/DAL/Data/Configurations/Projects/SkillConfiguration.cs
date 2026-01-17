@@ -1,8 +1,8 @@
-using Domain.Models.Freelance;
+using Domain.Models.Projects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DAL.Data.Configurations.Freelance;
+namespace DAL.Data.Configurations.Projects;
 
 public class SkillConfiguration : IEntityTypeConfiguration<Skill>
 {

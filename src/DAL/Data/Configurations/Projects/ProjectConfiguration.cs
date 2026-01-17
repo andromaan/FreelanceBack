@@ -1,15 +1,15 @@
 using DAL.Extensions;
-using Domain.Models.Freelance;
+using Domain.Models.Projects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DAL.Data.Configurations.Freelance;
+namespace DAL.Data.Configurations.Projects;
 
-public class JobConfiguration : IEntityTypeConfiguration<Job>
+public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 {
-    public void Configure(EntityTypeBuilder<Job> builder)
+    public void Configure(EntityTypeBuilder<Project> builder)
     {
-        builder.ToTable("jobs");
+        builder.ToTable("projects");
         
         builder.HasKey(p => p.Id);
 
@@ -21,7 +21,7 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
         builder.Property(p => p.IsHourly).IsRequired();
         builder.Property(p => p.Status).HasMaxLength(32).IsRequired();
 
-        builder.HasOne(p => p.Client)
+        builder.HasOne(p => p.Employer)
             .WithMany()
             .HasForeignKey(p => p.EmployerId)
             .OnDelete(DeleteBehavior.Restrict);

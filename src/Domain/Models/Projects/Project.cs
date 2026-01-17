@@ -1,13 +1,13 @@
 using Domain.Common.Abstractions;
-using Domain.Models.Auth.Users;
 using Domain.Models.Employers;
+using Domain.Models.Freelance;
 
-namespace Domain.Models.Freelance;
+namespace Domain.Models.Projects;
 
-public class Job : AuditableEntity<Guid>
+public class Project : AuditableEntity<Guid>
 {
     public required Guid EmployerId { get; set; }
-    public Employer? Client { get; set; }
+    public Employer? Employer { get; set; }
 
     public required string Title { get; set; }
     public string? Description { get; set; }
@@ -15,13 +15,13 @@ public class Job : AuditableEntity<Guid>
     public decimal? BudgetMin { get; set; }
     public decimal? BudgetMax { get; set; }
     public bool IsHourly { get; set; }
-    public string Status { get; set; } = nameof(JobStatus.Open);
+    public string Status { get; set; } = nameof(ProjectStatus.Open);
 
     public ICollection<Proposal> Proposals { get; set; } = new List<Proposal>();
     public ICollection<Contract> Contracts { get; set; } = new List<Contract>();
 }
 
-public enum JobStatus
+public enum ProjectStatus
 {
     Open,
     InProgress,

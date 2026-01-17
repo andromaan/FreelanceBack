@@ -1,5 +1,6 @@
 using Domain.Common.Abstractions;
 using Domain.Models.Auth.Users;
+using Domain.Models.Projects;
 
 namespace Domain.Models.Freelance;
 

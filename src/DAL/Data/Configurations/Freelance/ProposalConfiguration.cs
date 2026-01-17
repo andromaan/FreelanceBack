@@ -17,9 +17,9 @@ public class ProposalConfiguration : IEntityTypeConfiguration<Proposal>
         builder.Property(p => p.CoverLetter).HasMaxLength(2000);
         builder.Property(p => p.Status).HasMaxLength(32).IsRequired();
 
-        builder.HasOne(p => p.Job)
+        builder.HasOne(p => p.Project)
             .WithMany(j => j.Proposals)
-            .HasForeignKey(p => p.JobId)
+            .HasForeignKey(p => p.ProjectId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(p => p.Freelancer)

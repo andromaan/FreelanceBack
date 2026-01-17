@@ -3,6 +3,7 @@ using System;
 using DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260117140925_RenamedJobToProject")]
+    partial class RenamedJobToProject
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,13 +189,13 @@ namespace DAL.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 1, 17, 20, 22, 25, 518, DateTimeKind.Utc).AddTicks(9454),
+                            CreatedAt = new DateTime(2026, 1, 17, 14, 9, 24, 705, DateTimeKind.Utc).AddTicks(8541),
                             CreatedBy = new Guid("11111111-1111-1111-1111-111111111111"),
                             DisplayName = "Admin",
                             Email = "admin@mail.com",
-                            ModifiedAt = new DateTime(2026, 1, 17, 20, 22, 25, 518, DateTimeKind.Utc).AddTicks(9460),
+                            ModifiedAt = new DateTime(2026, 1, 17, 14, 9, 24, 705, DateTimeKind.Utc).AddTicks(8547),
                             ModifiedBy = new Guid("11111111-1111-1111-1111-111111111111"),
-                            PasswordHash = "400AB221E8AD5A194A468573B67978775AD35374E0285F77CE0BBEAE54C9F55A-9E24EB3E5079D40B8276D27D524F0107",
+                            PasswordHash = "B6E6E8E1BC9FBC582541C9D4FFCA70B6A0C45CE649D657EF1B50BC945413E6AE-6F94EBF0475433A1D3DE2E373C24A60E",
                             RoleId = "admin"
                         });
                 });
@@ -2228,6 +2231,88 @@ namespace DAL.Migrations
                     b.ToTable("portfolio_items", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Freelance.Project", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("BudgetMax")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("budget_max");
+
+                    b.Property<decimal?>("BudgetMin")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("budget_min");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("EmployerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("employer_id");
+
+                    b.Property<bool>("IsHourly")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_hourly");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id")
+                        .HasName("pk_projects");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("ix_projects_created_by");
+
+                    b.HasIndex("EmployerId")
+                        .HasDatabaseName("ix_projects_employer_id");
+
+                    b.HasIndex("ModifiedBy")
+                        .HasDatabaseName("ix_projects_modified_by");
+
+                    b.ToTable("projects", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Freelance.Proposal", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2294,6 +2379,27 @@ namespace DAL.Migrations
                         .HasDatabaseName("ix_proposals_project_id");
 
                     b.ToTable("proposals", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Freelance.Skill", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_skills");
+
+                    b.ToTable("skills", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Freelance.UserSkill", b =>
@@ -3569,144 +3675,6 @@ namespace DAL.Migrations
                     b.ToTable("payments", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Models.Projects.Category", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("modified_at");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("modified_by");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id")
-                        .HasName("pk_categories");
-
-                    b.ToTable("categories", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Models.Projects.Project", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<decimal?>("BudgetMax")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("budget_max");
-
-                    b.Property<decimal?>("BudgetMin")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("budget_min");
-
-                    b.Property<string>("Category")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("category");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("timezone('utc', now())");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("description");
-
-                    b.Property<Guid>("EmployerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("employer_id");
-
-                    b.Property<bool>("IsHourly")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_hourly");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("modified_at")
-                        .HasDefaultValueSql("timezone('utc', now())");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("modified_by");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("status");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("title");
-
-                    b.HasKey("Id")
-                        .HasName("pk_projects");
-
-                    b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_projects_created_by");
-
-                    b.HasIndex("EmployerId")
-                        .HasDatabaseName("ix_projects_employer_id");
-
-                    b.HasIndex("ModifiedBy")
-                        .HasDatabaseName("ix_projects_modified_by");
-
-                    b.ToTable("projects", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Models.Projects.Skill", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id")
-                        .HasName("pk_skills");
-
-                    b.ToTable("skills", (string)null);
-                });
-
             modelBuilder.Entity("FreelancerLanguage", b =>
                 {
                     b.Property<Guid>("FreelancerId")
@@ -3792,7 +3760,7 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_contracts_users_modified_by");
 
-                    b.HasOne("Domain.Models.Projects.Project", "Project")
+                    b.HasOne("Domain.Models.Freelance.Project", "Project")
                         .WithMany("Contracts")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -3866,6 +3834,32 @@ namespace DAL.Migrations
                     b.Navigation("Freelancer");
                 });
 
+            modelBuilder.Entity("Domain.Models.Freelance.Project", b =>
+                {
+                    b.HasOne("Domain.Models.Auth.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_projects_users_created_by");
+
+                    b.HasOne("Domain.Models.Employers.Employer", "Employer")
+                        .WithMany()
+                        .HasForeignKey("EmployerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_projects_employers_employer_id");
+
+                    b.HasOne("Domain.Models.Auth.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("ModifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_projects_users_modified_by");
+
+                    b.Navigation("Employer");
+                });
+
             modelBuilder.Entity("Domain.Models.Freelance.Proposal", b =>
                 {
                     b.HasOne("Domain.Models.Auth.Users.User", null)
@@ -3889,12 +3883,12 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_proposals_users_modified_by");
 
-                    b.HasOne("Domain.Models.Projects.Project", "Project")
+                    b.HasOne("Domain.Models.Freelance.Project", "Project")
                         .WithMany("Proposals")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_proposals_project_project_id");
+                        .HasConstraintName("fk_proposals_projects_project_id");
 
                     b.Navigation("Freelancer");
 
@@ -3910,12 +3904,12 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_user_skills_freelancers_info_freelancer_id");
 
-                    b.HasOne("Domain.Models.Projects.Skill", "Skill")
+                    b.HasOne("Domain.Models.Freelance.Skill", "Skill")
                         .WithMany()
                         .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_user_skills_skill_skill_id");
+                        .HasConstraintName("fk_user_skills_skills_skill_id");
 
                     b.Navigation("Freelancer");
 
@@ -3983,32 +3977,6 @@ namespace DAL.Migrations
                     b.Navigation("Contract");
                 });
 
-            modelBuilder.Entity("Domain.Models.Projects.Project", b =>
-                {
-                    b.HasOne("Domain.Models.Auth.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_projects_users_created_by");
-
-                    b.HasOne("Domain.Models.Employers.Employer", "Employer")
-                        .WithMany()
-                        .HasForeignKey("EmployerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_projects_employers_employer_id");
-
-                    b.HasOne("Domain.Models.Auth.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("ModifiedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_projects_users_modified_by");
-
-                    b.Navigation("Employer");
-                });
-
             modelBuilder.Entity("FreelancerLanguage", b =>
                 {
                     b.HasOne("Domain.Models.Freelance.Freelancer", null)
@@ -4033,7 +4001,7 @@ namespace DAL.Migrations
                     b.Navigation("Skills");
                 });
 
-            modelBuilder.Entity("Domain.Models.Projects.Project", b =>
+            modelBuilder.Entity("Domain.Models.Freelance.Project", b =>
                 {
                     b.Navigation("Contracts");
 

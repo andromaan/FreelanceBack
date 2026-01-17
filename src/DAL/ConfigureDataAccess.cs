@@ -1,11 +1,12 @@
 using BLL.Common;
 using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
-using BLL.Common.Interfaces.Repositories.Jobs;
 using BLL.Common.Interfaces.Repositories.Languages;
+using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Proposals;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Interfaces.Repositories.Users;
@@ -44,12 +45,14 @@ public static class ConfigureDataAccess
 
     private static void AddRepositories(this IServiceCollection services)
     {
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped(typeof(IQueries<,>), typeof(Repository<,>));
 
-        services.AddScoped<JobRepository>();
-        services.AddScoped<IJobRepository>(provider => provider.GetRequiredService<JobRepository>());
-        services.AddScoped<IJobQueries>(provider => provider.GetRequiredService<JobRepository>());
+        services.AddScoped<ProjectRepository>();
+        services.AddScoped<IProjectRepository>(provider => provider.GetRequiredService<ProjectRepository>());
+        services.AddScoped<IProjectQueries>(provider => provider.GetRequiredService<ProjectRepository>());
 
         services.AddScoped<CountryRepository>();
         services.AddScoped<ICountryRepository>(provider => provider.GetRequiredService<CountryRepository>());
@@ -87,6 +90,12 @@ public static class ConfigureDataAccess
         services.AddScoped<IEmployerRepository>(provider => provider.GetRequiredService<EmployerRepository>());
         services.AddScoped<IEmployerQueries>(provider => provider.GetRequiredService<EmployerRepository>());
         
-        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<EmployerRepository>();
+        services.AddScoped<IEmployerRepository>(provider => provider.GetRequiredService<EmployerRepository>());
+        services.AddScoped<IEmployerQueries>(provider => provider.GetRequiredService<EmployerRepository>());
+        
+        services.AddScoped<CategoryRepository>();
+        services.AddScoped<ICategoryRepository>(provider => provider.GetRequiredService<CategoryRepository>());
+        services.AddScoped<ICategoryQueries>(provider => provider.GetRequiredService<CategoryRepository>());
     }
 }
