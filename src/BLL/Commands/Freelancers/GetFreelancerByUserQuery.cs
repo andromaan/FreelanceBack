@@ -26,10 +26,10 @@ public class QueryHandler(
             var freelancer = await queriesFreelancer.GetByUserId(userId, cancellationToken, includes: true);
             if (freelancer == null)
             {
-                return ServiceResponse.NotFoundResponse("Freelancer info not found");
+                return ServiceResponse.NotFoundResponse("Freelancer not found");
             }
 
-            return ServiceResponse.OkResponse("Freelancer info retrieved",
+            return ServiceResponse.OkResponse("Freelancer retrieved",
                 mapper.Map<FreelancerVM>(freelancer));
         }
         catch (Exception exception)

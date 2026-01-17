@@ -22,7 +22,7 @@ public class SignUpCommandHandler(
     IJwtTokenService jwtTokenService,
     IUserQueries userQueries,
     IMapper mapper,
-    IFreelancerRepository FreelancerRepository,
+    IFreelancerRepository freelancerRepository,
     IEmployerRepository employerRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -51,18 +51,18 @@ public class SignUpCommandHandler(
             {
                 var freelancer = new Freelancer
                 {
-                    Id = user.Id,
+                    Id = Guid.NewGuid(),
                     UserId = user.Id,
                 };
 
-                await FreelancerRepository.CreateAsync(freelancer, user.Id, cancellationToken);
+                await freelancerRepository.CreateAsync(freelancer, user.Id, cancellationToken);
             }
 
             if (user.RoleId == Settings.Roles.EmployerRole)
             {
                 var employer = new Employer
                 {
-                    Id = user.Id,
+                    Id = Guid.NewGuid(),
                     UserId = user.Id,
                 };
 

@@ -1,6 +1,8 @@
 using System.Text.Json;
+using BLL.Services.PasswordHasher;
 using Domain;
 using Domain.Models.Auth;
+using Domain.Models.Auth.Users;
 using Domain.Models.Countries;
 using Domain.Models.Languages;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +16,31 @@ public static partial class DataSeed
         SeedRoles(modelBuilder);
         SeedLanguages(modelBuilder);
         SeedCountries(modelBuilder);
+        SeedUsers(modelBuilder);
     }
-    
+
+    private static void SeedUsers(ModelBuilder modelBuilder)
+    {
+        var passwordHasher = new PasswordHasher();
+        
+        var adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        
+        var adminUser = new User
+        {
+            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            DisplayName = "Admin",
+            PasswordHash = passwordHasher.HashPassword("admin"),
+            Email = "admin@mail.com",
+            RoleId = Settings.Roles.AdminRole,
+            CreatedBy = adminId,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = adminId,
+            ModifiedAt = DateTime.UtcNow
+        };
+        
+        modelBuilder.Entity<User>().HasData(adminUser);
+    }
+
     private static void SeedRoles(ModelBuilder modelBuilder)
     {
         var roles = new List<Role>();

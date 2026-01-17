@@ -36,7 +36,7 @@ public class UpdateFreelancerCommandHandler(
         var existingFreelancer = await freelancerQueries.GetByUserId(userId, cancellationToken);
         if (existingFreelancer == null)
         {
-            return ServiceResponse.NotFoundResponse($"User with id {userId} does not have a profile");
+            return ServiceResponse.NotFoundResponse($"User with id {userId} is not a freelancer");
         }
 
         if (await countryQueries.GetByIdAsync(vm.CountryId, cancellationToken) == null)

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.Common;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public abstract class CrudControllerBase<TKey, TCreateVm, TUpdateVm>(
     ISender sender,
     IMapper mapper) : BaseController
