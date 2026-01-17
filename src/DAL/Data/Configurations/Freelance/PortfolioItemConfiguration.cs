@@ -17,9 +17,9 @@ public class PortfolioItemConfiguration : IEntityTypeConfiguration<PortfolioItem
         builder.Property(p => p.Description).HasMaxLength(2000);
         builder.Property(p => p.FileUrl).HasMaxLength(512);
 
-        builder.HasOne(p => p.FreelancerInfo)
+        builder.HasOne(p => p.Freelancer)
             .WithMany(u => u.Portfolio)
-            .HasForeignKey(p => p.FreelancerInfoId)
+            .HasForeignKey(p => p.FreelancerId)
             .OnDelete(DeleteBehavior.Cascade);
         
         builder.ConfigureAudit();

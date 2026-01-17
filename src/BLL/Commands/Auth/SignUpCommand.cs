@@ -1,11 +1,13 @@
 using AutoMapper;
-using BLL.Common.Interfaces.Repositories.FreelancersInfo;
+using BLL.Common.Interfaces.Repositories.Employers;
+using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using Domain;
 using Domain.Models.Auth.Users;
+using Domain.Models.Employers;
 using Domain.Models.Freelance;
 using Domain.ViewModels.Auth;
 using MediatR;
@@ -20,7 +22,8 @@ public class SignUpCommandHandler(
     IJwtTokenService jwtTokenService,
     IUserQueries userQueries,
     IMapper mapper,
-    IFreelancerInfoRepository freelancerInfoRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
+    IFreelancerRepository FreelancerRepository,
+    IEmployerRepository employerRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
@@ -37,22 +40,33 @@ public class SignUpCommandHandler(
         user.PasswordHash = passwordHasher.HashPassword(vm.Password);
         user.CreatedBy = user.Id;
         user.RoleId = isDbHasUsers
-            ? (vm.IsFreelancer ? Settings.Roles.FreelancerRole : Settings.Roles.ClientRole)
+            ? (vm.IsFreelancer ? Settings.Roles.FreelancerRole : Settings.Roles.EmployerRole)
             : Settings.Roles.AdminRole;
 
         try
         {
             await userRepository.CreateAsync(user, cancellationToken);
 
-            if (isDbHasUsers && vm.IsFreelancer)
+            if (user.RoleId == Settings.Roles.FreelancerRole)
             {
-                var freelancerInfo = new FreelancerInfo
+                var freelancer = new Freelancer
                 {
                     Id = user.Id,
                     UserId = user.Id,
                 };
 
-                await freelancerInfoRepository.CreateAsync(freelancerInfo, user.Id, cancellationToken);
+                await FreelancerRepository.CreateAsync(freelancer, user.Id, cancellationToken);
+            }
+
+            if (user.RoleId == Settings.Roles.EmployerRole)
+            {
+                var employer = new Employer
+                {
+                    Id = user.Id,
+                    UserId = user.Id,
+                };
+
+                await employerRepository.CreateAsync(employer, user.Id, cancellationToken);
             }
         }
         catch (Exception e)

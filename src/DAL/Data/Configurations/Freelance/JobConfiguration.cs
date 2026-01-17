@@ -23,7 +23,7 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
 
         builder.HasOne(p => p.Client)
             .WithMany()
-            .HasForeignKey(p => p.ClientId)
+            .HasForeignKey(p => p.EmployerId)
             .OnDelete(DeleteBehavior.Restrict);
         
         builder.ConfigureAudit();

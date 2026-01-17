@@ -1,4 +1,4 @@
-using BLL.Common.Interfaces.Repositories.FreelancersInfo;
+using BLL.Common.Interfaces.Repositories.Freelancers;
 using DAL.Data;
 using DAL.Extensions;
 using Domain.Common.Interfaces;
@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
 
-public class FreelancerInfoRepository(AppDbContext appDbContext, IUserProvider userProvider)
-    : Repository<FreelancerInfo, Guid>(appDbContext, userProvider), IFreelancerInfoRepository, IFreelancerInfoQueries
+public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userProvider)
+    : Repository<Freelancer, Guid>(appDbContext, userProvider), IFreelancerRepository, IFreelancerQueries
 {
     private readonly AppDbContext _appDbContext = appDbContext;
     
-    public async Task<FreelancerInfo?> CreateAsync(FreelancerInfo entity, Guid createdBy, CancellationToken token)
+    public async Task<Freelancer?> CreateAsync(Freelancer entity, Guid createdBy, CancellationToken token)
     {
         entity.CreatedBy = createdBy;
         await _appDbContext.AddAuditableAsync(entity, token);
@@ -20,9 +20,9 @@ public class FreelancerInfoRepository(AppDbContext appDbContext, IUserProvider u
         return entity;
     }
 
-    public async Task<FreelancerInfo?> GetByUserId(Guid userId, CancellationToken token, bool includes = false)
+    public async Task<Freelancer?> GetByUserId(Guid userId, CancellationToken token, bool includes = false)
     {
-        var query = _appDbContext.FreelancersInfo.AsQueryable();
+        var query = _appDbContext.Freelancers.AsQueryable();
 
         if (includes)
         {

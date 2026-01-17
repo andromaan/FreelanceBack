@@ -21,9 +21,9 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
             .HasForeignKey(p => p.JobId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(p => p.Client)
+        builder.HasOne(p => p.Employer)
             .WithMany()
-            .HasForeignKey(p => p.ClientId)
+            .HasForeignKey(p => p.EmployerId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(p => p.Freelancer)

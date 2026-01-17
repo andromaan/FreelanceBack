@@ -1,13 +1,13 @@
 using AutoMapper;
-using BLL.Common.Interfaces.Repositories.FreelancersInfo;
+using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using Domain.Common.Interfaces;
-using Domain.ViewModels.FreelancerInfo;
+using Domain.ViewModels.Freelancer;
 using MediatR;
 
-namespace BLL.Commands.FreelancersInfo;
+namespace BLL.Commands.Freelancers;
 
 public record UpdateFrInfoLangCommand(UpdateFrInfoLangVM Vm) : IRequest<ServiceResponse>
 {
@@ -17,8 +17,8 @@ public class UpdateFrInfoLangCommandHandler(
     IUserProvider userProvider,
     IMapper mapper,
     IUserQueries userQueries,
-    IFreelancerInfoQueries freelancerInfoQueries,
-    IFreelancerInfoRepository freelancerInfoRepository,
+    IFreelancerQueries freelancerQueries,
+    IFreelancerRepository freelancerRepository,
     ILanguageQueries languageQueries
     ) : IRequestHandler<UpdateFrInfoLangCommand, ServiceResponse>
 {
@@ -32,8 +32,8 @@ public class UpdateFrInfoLangCommandHandler(
             return ServiceResponse.NotFoundResponse($"User with id {userId} not found");
         }
         
-        var existingFreelancerInfo = await freelancerInfoQueries.GetByUserId(userId, cancellationToken, true);
-        if (existingFreelancerInfo == null)
+        var existingFreelancer = await freelancerQueries.GetByUserId(userId, cancellationToken, true);
+        if (existingFreelancer == null)
         {
             return ServiceResponse.NotFoundResponse($"User with id {userId} does not have a profile");
         }
@@ -46,13 +46,13 @@ public class UpdateFrInfoLangCommandHandler(
                 return ServiceResponse.NotFoundResponse($"Language with id {langId} not found");
             }
             
-            existingFreelancerInfo.Languages.Add(existingLanguage);
+            existingFreelancer.Languages.Add(existingLanguage);
         }
         
         try
         {
-            await freelancerInfoRepository.UpdateAsync(existingFreelancerInfo, cancellationToken);
-            return ServiceResponse.OkResponse("User profile languages updated successfully", existingFreelancerInfo);
+            await freelancerRepository.UpdateAsync(existingFreelancer, cancellationToken);
+            return ServiceResponse.OkResponse("User profile languages updated successfully", existingFreelancer);
         }
         catch (Exception exception)
         {

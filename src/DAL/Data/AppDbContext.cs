@@ -2,6 +2,7 @@ using System.Reflection;
 using DAL.Data.Initializer;
 using Domain.Models.Auth;
 using Domain.Models.Auth.Users;
+using Domain.Models.Employers;
 using Domain.Models.Freelance;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
-    public DbSet<FreelancerInfo> FreelancersInfo { get; set; }
+    public DbSet<Freelancer> Freelancers { get; set; }
+    public DbSet<Employer> Employers { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)

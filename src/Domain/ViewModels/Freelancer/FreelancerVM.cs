@@ -1,9 +1,9 @@
 using Domain.ViewModels.Country;
 using Domain.ViewModels.Language;
 
-namespace Domain.ViewModels.FreelancerInfo;
+namespace Domain.ViewModels.Freelancer;
 
-public class FreelancerInfoVM
+public class FreelancerVM
 {
     public string? Bio { get; set; }
     public decimal? HourlyRate { get; set; }

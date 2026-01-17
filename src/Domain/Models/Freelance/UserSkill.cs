@@ -5,8 +5,8 @@ namespace Domain.Models.Freelance;
 
 public class UserSkill : Entity<Guid>
 {
-    public required Guid FreelancerInfoId { get; set; }
-    public FreelancerInfo? FreelancerInfo { get; set; }
+    public required Guid FreelancerId { get; set; }
+    public Freelancer? Freelancer { get; set; }
 
     public required int SkillId { get; set; }
     public Skill? Skill { get; set; }

@@ -1,28 +1,28 @@
 using AutoMapper;
 using BLL.Common.Interfaces.Repositories.Countries;
-using BLL.Common.Interfaces.Repositories.FreelancersInfo;
+using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using Domain.Common.Interfaces;
-using Domain.ViewModels.FreelancerInfo;
+using Domain.ViewModels.Freelancer;
 using MediatR;
 
-namespace BLL.Commands.FreelancersInfo;
+namespace BLL.Commands.Freelancers;
 
-public record UpdateFreelancerInfoCommand(UpdateFreelancerInfoVM Vm) : IRequest<ServiceResponse>
+public record UpdateFreelancerCommand(UpdateFreelancerVM Vm) : IRequest<ServiceResponse>
 {
 }
 
-public class UpdateFreelancerInfoCommandHandler(
+public class UpdateFreelancerCommandHandler(
     IUserQueries userQueries,
-    IFreelancerInfoRepository freelancerInfoRepository,
-    IFreelancerInfoQueries freelancerInfoQueries,
+    IFreelancerRepository freelancerRepository,
+    IFreelancerQueries freelancerQueries,
     ICountryQueries countryQueries,
     IMapper mapper,
     IUserProvider userProvider)
-    : IRequestHandler<UpdateFreelancerInfoCommand, ServiceResponse>
+    : IRequestHandler<UpdateFreelancerCommand, ServiceResponse>
 {
-    public async Task<ServiceResponse> Handle(UpdateFreelancerInfoCommand request, CancellationToken cancellationToken)
+    public async Task<ServiceResponse> Handle(UpdateFreelancerCommand request, CancellationToken cancellationToken)
     {
         var userId = await userProvider.GetUserId();
         var vm = request.Vm;
@@ -33,8 +33,8 @@ public class UpdateFreelancerInfoCommandHandler(
             return ServiceResponse.NotFoundResponse($"User with id {userId} not found");
         }
         
-        var existingFreelancerInfo = await freelancerInfoQueries.GetByUserId(userId, cancellationToken);
-        if (existingFreelancerInfo == null)
+        var existingFreelancer = await freelancerQueries.GetByUserId(userId, cancellationToken);
+        if (existingFreelancer == null)
         {
             return ServiceResponse.NotFoundResponse($"User with id {userId} does not have a profile");
         }
@@ -44,11 +44,11 @@ public class UpdateFreelancerInfoCommandHandler(
             return ServiceResponse.NotFoundResponse($"Country with id {vm.CountryId} not found");
         }
         
-        var updatedProfile = mapper.Map(vm, existingFreelancerInfo);
+        var updatedProfile = mapper.Map(vm, existingFreelancer);
         
         try
         {
-            await freelancerInfoRepository.UpdateAsync(updatedProfile, cancellationToken);
+            await freelancerRepository.UpdateAsync(updatedProfile, cancellationToken);
             return ServiceResponse.OkResponse("User profile updated successfully", updatedProfile);
         }
         catch (Exception exception)

@@ -1,14 +1,13 @@
 using DAL.Extensions;
-using Domain.Models.Auth.Users;
 using Domain.Models.Freelance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DAL.Data.Configurations.Auth.Users;
 
-public class FreelancerInfoConfiguration : IEntityTypeConfiguration<FreelancerInfo>
+public class FreelancerConfiguration : IEntityTypeConfiguration<Freelancer>
 {
-    public void Configure(EntityTypeBuilder<FreelancerInfo> builder)
+    public void Configure(EntityTypeBuilder<Freelancer> builder)
     {
         builder.ToTable("freelancers_info");
         
@@ -21,7 +20,7 @@ public class FreelancerInfoConfiguration : IEntityTypeConfiguration<FreelancerIn
 
         builder.HasOne(p => p.User)
             .WithOne()
-            .HasForeignKey<FreelancerInfo>(p => p.UserId)
+            .HasForeignKey<Freelancer>(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(p => p.CountryId).IsRequired(false);
@@ -34,8 +33,8 @@ public class FreelancerInfoConfiguration : IEntityTypeConfiguration<FreelancerIn
             .WithMany();
         
         builder.HasMany(p => p.Skills)
-            .WithOne(s => s.FreelancerInfo!)
-            .HasForeignKey(s => s.FreelancerInfoId)
+            .WithOne(s => s.Freelancer!)
+            .HasForeignKey(s => s.FreelancerId)
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.ConfigureAudit();

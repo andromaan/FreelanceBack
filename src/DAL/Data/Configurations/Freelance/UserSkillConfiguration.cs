@@ -12,9 +12,9 @@ public class UserSkillConfiguration : IEntityTypeConfiguration<UserSkill>
         
         builder.HasKey(p => p.Id);
 
-        builder.HasOne(p => p.FreelancerInfo)
+        builder.HasOne(p => p.Freelancer)
             .WithMany(u => u.Skills)
-            .HasForeignKey(p => p.FreelancerInfoId)
+            .HasForeignKey(p => p.FreelancerId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(p => p.Skill)

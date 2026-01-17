@@ -5,7 +5,7 @@ using Domain.Models.Languages;
 
 namespace Domain.Models.Freelance;
 
-public class FreelancerInfo : AuditableEntity<Guid>
+public class Freelancer : AuditableEntity<Guid>
 {
     public required Guid UserId { get; set; }
     public User? User { get; set; }

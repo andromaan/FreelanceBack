@@ -1,6 +1,6 @@
-namespace Domain.ViewModels.FreelancerInfo;
+namespace Domain.ViewModels.Freelancer;
 
-public class UpdateFreelancerInfoVM
+public class UpdateFreelancerVM
 {
     public string Bio { get; set; }
     public decimal HourlyRate { get; set; }

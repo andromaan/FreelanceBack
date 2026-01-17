@@ -1,12 +1,13 @@
 using Domain.Common.Abstractions;
 using Domain.Models.Auth.Users;
+using Domain.Models.Employers;
 
 namespace Domain.Models.Freelance;
 
 public class Job : AuditableEntity<Guid>
 {
-    public required Guid ClientId { get; set; }
-    public User? Client { get; set; }
+    public required Guid EmployerId { get; set; }
+    public Employer? Client { get; set; }
 
     public required string Title { get; set; }
     public string? Description { get; set; }

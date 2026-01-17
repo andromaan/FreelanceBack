@@ -1,4 +1,4 @@
-namespace Domain.ViewModels.FreelancerInfo;
+namespace Domain.ViewModels.Freelancer;
 
 public class UpdateFrInfoLangVM
 {
