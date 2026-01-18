@@ -2,6 +2,10 @@ using System.Reflection;
 using System.Text;
 using BLL.Commands;
 using BLL.Common.Behaviours;
+using BLL.Common.Interfaces.Repositories.Categories;
+using BLL.Common.Interfaces.Repositories.Countries;
+using BLL.Common.Interfaces.Repositories.Languages;
+using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Services;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
@@ -57,7 +61,7 @@ public static class ConfigureBusinessLogic
         // registrations for Country
         services.AddTransient(
             typeof(IRequestHandler<Create.Command<CreateCountryVM>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateCountryVM, CountryVM, Country, int>)
+            typeof(Create.CommandHandlerUniqueCheck<CreateCountryVM, CountryVM, Country, int, ICountryQueries>)
         );
 
         services.AddTransient(
@@ -72,7 +76,7 @@ public static class ConfigureBusinessLogic
 
         services.AddTransient(
             typeof(IRequestHandler<Update.Command<UpdateCountryVM, int>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateCountryVM, CountryVM, Country, int>)
+            typeof(Update.CommandHandlerUniqueCheck<UpdateCountryVM, CountryVM, Country, int, ICountryQueries>)
         );
 
         services.AddTransient(
@@ -83,7 +87,7 @@ public static class ConfigureBusinessLogic
         // registrations for Language
         services.AddTransient(
             typeof(IRequestHandler<Create.Command<CreateLanguageVM>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateLanguageVM, Language, Language, int>)
+            typeof(Create.CommandHandlerUniqueCheck<CreateLanguageVM, Language, Language, int, ILanguageQueries>)
         );
 
         services.AddTransient(
@@ -98,7 +102,7 @@ public static class ConfigureBusinessLogic
 
         services.AddTransient(
             typeof(IRequestHandler<Update.Command<UpdateLanguageVM, int>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateLanguageVM, LanguageVM, Language, int>)
+            typeof(Update.CommandHandlerUniqueCheck<UpdateLanguageVM, LanguageVM, Language, int, ILanguageQueries>)
         );
 
         services.AddTransient(
@@ -109,7 +113,7 @@ public static class ConfigureBusinessLogic
         // registrations for Category
         services.AddTransient(
             typeof(IRequestHandler<Create.Command<CreateCategoryVM>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateCategoryVM, CategoryVM, Category, Guid>)
+            typeof(Create.CommandHandlerUniqueCheck<CreateCategoryVM, CategoryVM, Category, Guid, ICategoryQueries>)
         );
 
         services.AddTransient(
@@ -124,7 +128,7 @@ public static class ConfigureBusinessLogic
 
         services.AddTransient(
             typeof(IRequestHandler<Update.Command<UpdateCategoryVM, Guid>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateCategoryVM, CategoryVM, Category, Guid>)
+            typeof(Update.CommandHandlerUniqueCheck<UpdateCategoryVM, CategoryVM, Category, Guid, ICategoryQueries>)
         );
 
         services.AddTransient(
@@ -135,7 +139,7 @@ public static class ConfigureBusinessLogic
         // registrations for Skill
         services.AddTransient(
             typeof(IRequestHandler<Create.Command<CreateSkillVM>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateSkillVM, SkillVM, Skill, int>)
+            typeof(Create.CommandHandlerUniqueCheck<CreateSkillVM, SkillVM, Skill, int, ISkillQueries>)
         );
 
         services.AddTransient(
@@ -150,7 +154,7 @@ public static class ConfigureBusinessLogic
 
         services.AddTransient(
             typeof(IRequestHandler<Update.Command<UpdateSkillVM, int>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateSkillVM, SkillVM, Skill, int>)
+            typeof(Update.CommandHandlerUniqueCheck<UpdateSkillVM, SkillVM, Skill, int, ISkillQueries>)
         );
 
         services.AddTransient(

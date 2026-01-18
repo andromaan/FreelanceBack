@@ -31,18 +31,18 @@ public class UpdateFreelancerCommandHandler(
         var existingUser = await userQueries.GetByIdAsync(userId, cancellationToken);
         if (existingUser == null)
         {
-            return ServiceResponse.NotFoundResponse($"User with id {userId} not found");
+            return ServiceResponse.NotFound($"User with id {userId} not found");
         }
         
         var existingFreelancer = await freelancerQueries.GetByUserId(userId, cancellationToken);
         if (existingFreelancer == null)
         {
-            return ServiceResponse.NotFoundResponse($"User with id {userId} is not a freelancer");
+            return ServiceResponse.NotFound($"User with id {userId} is not a freelancer");
         }
 
         if (await countryQueries.GetByIdAsync(vm.CountryId, cancellationToken) == null)
         {
-            return ServiceResponse.NotFoundResponse($"Country with id {vm.CountryId} not found");
+            return ServiceResponse.NotFound($"Country with id {vm.CountryId} not found");
         }
         
         var updatedProfile = mapper.Map(vm, existingFreelancer);
@@ -50,11 +50,11 @@ public class UpdateFreelancerCommandHandler(
         try
         {
             await freelancerRepository.UpdateAsync(updatedProfile, cancellationToken);
-            return ServiceResponse.OkResponse("User profile updated successfully", updatedProfile);
+            return ServiceResponse.Ok("User profile updated successfully", updatedProfile);
         }
         catch (Exception exception)
         {
-            return ServiceResponse.InternalServerErrorResponse(exception.Message);
+            return ServiceResponse.InternalError(exception.Message);
         }
     }
 }

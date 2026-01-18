@@ -27,15 +27,15 @@ public class QueryHandler(
             var employer = await queriesEmployer.GetByUserId(userId, cancellationToken, includes: true);
             if (employer == null)
             {
-                return ServiceResponse.NotFoundResponse("Employer not found");
+                return ServiceResponse.NotFound("Employer not found");
             }
 
-            return ServiceResponse.OkResponse("Employer retrieved",
+            return ServiceResponse.Ok("Employer retrieved",
                 mapper.Map<EmployerVM>(employer));
         }
         catch (Exception exception)
         {
-            return ServiceResponse.InternalServerErrorResponse(exception.Message);
+            return ServiceResponse.InternalError(exception.Message);
         }
     }
 }

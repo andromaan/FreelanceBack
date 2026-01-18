@@ -31,13 +31,13 @@ public class UpdateEmployerCommandHandler(
         var existingUser = await userQueries.GetByIdAsync(userId, cancellationToken);
         if (existingUser == null)
         {
-            return ServiceResponse.NotFoundResponse($"User with id {userId} not found");
+            return ServiceResponse.NotFound($"User with id {userId} not found");
         }
         
         var existingEmployer = await employerQueries.GetByUserId(userId, cancellationToken);
         if (existingEmployer == null)
         {
-            return ServiceResponse.NotFoundResponse($"User with id {userId} is not an employer");
+            return ServiceResponse.NotFound($"User with id {userId} is not an employer");
         }
         
         var updatedProfile = mapper.Map(vm, existingEmployer);
@@ -45,11 +45,11 @@ public class UpdateEmployerCommandHandler(
         try
         {
             await employerRepository.UpdateAsync(updatedProfile, cancellationToken);
-            return ServiceResponse.OkResponse("User profile updated successfully", updatedProfile);
+            return ServiceResponse.Ok("User profile updated successfully", updatedProfile);
         }
         catch (Exception exception)
         {
-            return ServiceResponse.InternalServerErrorResponse(exception.Message);
+            return ServiceResponse.InternalError(exception.Message);
         }
     }
 }

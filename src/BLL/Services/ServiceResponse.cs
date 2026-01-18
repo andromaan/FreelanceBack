@@ -20,27 +20,27 @@ public class ServiceResponse
         };
     }
 
-    public static ServiceResponse OkResponse(string message, object? payload = null)
+    public static ServiceResponse Ok(string message, object? payload = null)
     {
         return GetResponse(message, true, payload, HttpStatusCode.OK);
     }
 
-    public static ServiceResponse BadRequestResponse(string message, object? payload = null)
+    public static ServiceResponse BadRequest(string message, object? payload = null)
     {
         return GetResponse(message, false, payload, HttpStatusCode.BadRequest);
     }
 
-    public static ServiceResponse InternalServerErrorResponse(string message, object? payload = null)
+    public static ServiceResponse InternalError(string message, object? payload = null)
     {
         return GetResponse(message, false, payload, HttpStatusCode.InternalServerError);
     }
         
-    public static ServiceResponse NotFoundResponse(string message, object? payload = null)
+    public static ServiceResponse NotFound(string message, object? payload = null)
     {
         return GetResponse(message, false, payload, HttpStatusCode.NotFound);
     }
 
-    public static ServiceResponse ForbiddenResponse(string message, object? payload = null)
+    public static ServiceResponse Forbidden(string message, object? payload = null)
     {
         return GetResponse(message, false, payload, HttpStatusCode.Forbidden);
     }

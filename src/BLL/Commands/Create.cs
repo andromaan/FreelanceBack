@@ -14,10 +14,13 @@ public partial class Create
     }
 
     public class
-        CommandHandler<TCreateViewModel, TViewModel, TEntity, TKey>(IRepository<TEntity, TKey> repository, IMapper mapper)
+        CommandHandler<TCreateViewModel, TViewModel, TEntity, TKey>(
+            IRepository<TEntity, TKey> repository,
+            IMapper mapper)
         : IRequestHandler<Command<TCreateViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TCreateViewModel : class
+        where TViewModel : class
     {
         public async Task<ServiceResponse> Handle(Command<TCreateViewModel> request,
             CancellationToken cancellationToken)
@@ -26,12 +29,46 @@ public partial class Create
             {
                 var entity = mapper.Map<TEntity>(request.Model);
                 var createdEntity = await repository.CreateAsync(entity, cancellationToken);
-                return ServiceResponse.OkResponse($"{typeof(TEntity).Name} created",
+                return ServiceResponse.Ok($"{typeof(TEntity).Name} created",
                     mapper.Map<TViewModel>(createdEntity));
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalServerErrorResponse(exception.Message);
+                return ServiceResponse.InternalError(exception.Message);
+            }
+        }
+    }
+
+    public class
+        CommandHandlerUniqueCheck<TCreateViewModel, TViewModel, TEntity, TKey, TQueries>(
+            IRepository<TEntity, TKey> repository,
+            IMapper mapper,
+            TQueries query)
+        : IRequestHandler<Command<TCreateViewModel>, ServiceResponse>
+        where TEntity : Entity<TKey>
+        where TCreateViewModel : class
+        where TViewModel : class
+        where TQueries : IUniqueQuery<TEntity, TKey>, IQueries<TEntity, TKey>
+    {
+        public async Task<ServiceResponse> Handle(Command<TCreateViewModel> request,
+            CancellationToken cancellationToken)
+        {
+            var entity = mapper.Map<TEntity>(request.Model);
+
+            if (!await query.IsUniqueAsync(entity, cancellationToken))
+            {
+                return ServiceResponse.BadRequest($"{typeof(TEntity).Name} with the same unique fields already exists");
+            }
+
+            try
+            {
+                var createdEntity = await repository.CreateAsync(entity, cancellationToken);
+                return ServiceResponse.Ok($"{typeof(TEntity).Name} created",
+                    mapper.Map<TViewModel>(createdEntity));
+            }
+            catch (Exception exception)
+            {
+                return ServiceResponse.InternalError(exception.Message);
             }
         }
     }

@@ -24,18 +24,18 @@ public class SignInCommandHandler(
 
         if (user == null)
         {
-            return ServiceResponse.BadRequestResponse($"Користувача з поштою {vm.Email} не знайдено");
+            return ServiceResponse.BadRequest($"Користувача з поштою {vm.Email} не знайдено");
         }
 
         var result = passwordHasher.Verify(vm.Password, user.PasswordHash);
 
         if (!result)
         {
-            return ServiceResponse.BadRequestResponse($"Пароль вказано невірно");
+            return ServiceResponse.BadRequest($"Пароль вказано невірно");
         }
 
         var tokens = await jwtService.GenerateTokensAsync(user, cancellationToken);
 
-        return ServiceResponse.OkResponse("Успішний вхід", tokens);
+        return ServiceResponse.Ok("Успішний вхід", tokens);
     }
 }

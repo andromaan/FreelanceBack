@@ -30,13 +30,13 @@ public class UpdateFrInfoLangCommandHandler(
         
         if (await userQueries.GetByIdAsync(userId, cancellationToken) == null)
         {
-            return ServiceResponse.NotFoundResponse($"User with id {userId} not found");
+            return ServiceResponse.NotFound($"User with id {userId} not found");
         }
         
         var existingFreelancer = await freelancerQueries.GetByUserId(userId, cancellationToken, true);
         if (existingFreelancer == null)
         {
-            return ServiceResponse.NotFoundResponse($"User with id {userId} does not have a profile");
+            return ServiceResponse.NotFound($"User with id {userId} does not have a profile");
         }
 
         foreach (var langId in vm.LanguageIds)
@@ -44,7 +44,7 @@ public class UpdateFrInfoLangCommandHandler(
             var existingLanguage = await languageQueries.GetByIdAsync(langId, cancellationToken);  
             if (existingLanguage == null)
             {
-                return ServiceResponse.NotFoundResponse($"Language with id {langId} not found");
+                return ServiceResponse.NotFound($"Language with id {langId} not found");
             }
             
             existingFreelancer.Languages.Add(existingLanguage);
@@ -53,11 +53,11 @@ public class UpdateFrInfoLangCommandHandler(
         try
         {
             await freelancerRepository.UpdateAsync(existingFreelancer, cancellationToken);
-            return ServiceResponse.OkResponse("User profile languages updated successfully", existingFreelancer);
+            return ServiceResponse.Ok("User profile languages updated successfully", existingFreelancer);
         }
         catch (Exception exception)
         {
-            return ServiceResponse.InternalServerErrorResponse(exception.Message);
+            return ServiceResponse.InternalError(exception.Message);
         }
     }
 }

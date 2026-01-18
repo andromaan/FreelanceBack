@@ -21,17 +21,17 @@ public partial class Delete
         {
             if (await queries.GetByIdAsync(request.Id, cancellationToken, true) is null)
             {
-                return ServiceResponse.NotFoundResponse($"{typeof(TEntity).Name} with ID {request.Id} not found");
+                return ServiceResponse.NotFound($"{typeof(TEntity).Name} with ID {request.Id} not found");
             }
 
             try
             {
                 await repository.DeleteAsync(request.Id, cancellationToken);
-                return ServiceResponse.OkResponse($"{typeof(TEntity).Name} deleted");
+                return ServiceResponse.Ok($"{typeof(TEntity).Name} deleted");
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalServerErrorResponse(exception.Message);
+                return ServiceResponse.InternalError(exception.Message);
             }
         }
     }

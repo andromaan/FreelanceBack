@@ -21,11 +21,11 @@ public partial class GetAll
             {
                 var entities = await queries.GetAllAsync(cancellationToken);
                 var viewModels = mapper.Map<List<TViewModel>>(entities);
-                return ServiceResponse.OkResponse($"{typeof(TEntity).Name}s retrieved", viewModels);
+                return ServiceResponse.Ok($"{typeof(TEntity).Name}s retrieved", viewModels);
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalServerErrorResponse(exception.Message);
+                return ServiceResponse.InternalError(exception.Message);
             }
         }
     }

@@ -25,14 +25,14 @@ public partial class GetById
                 var entity = await queries.GetByIdAsync(request.Id, cancellationToken);
                 if (entity == null)
                 {
-                    return ServiceResponse.NotFoundResponse($"{typeof(TEntity).Name} not found");
+                    return ServiceResponse.NotFound($"{typeof(TEntity).Name} not found");
                 }
                 var viewModel = mapper.Map<TViewModel>(entity);
-                return ServiceResponse.OkResponse($"{typeof(TEntity).Name} retrieved", viewModel);
+                return ServiceResponse.Ok($"{typeof(TEntity).Name} retrieved", viewModel);
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalServerErrorResponse(exception.Message);
+                return ServiceResponse.InternalError(exception.Message);
             }
         }
     }

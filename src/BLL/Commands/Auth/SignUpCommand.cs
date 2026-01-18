@@ -30,7 +30,7 @@ public class SignUpCommandHandler(
         var vm = request.Vm;
         if (!await userQueries.IsUniqueEmailAsync(vm.Email, cancellationToken))
         {
-            return ServiceResponse.BadRequestResponse($"{vm.Email} вже використовується");
+            return ServiceResponse.BadRequest($"{vm.Email} вже використовується");
         }
 
         var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count()! != 0;
@@ -71,11 +71,11 @@ public class SignUpCommandHandler(
         }
         catch (Exception e)
         {
-            return ServiceResponse.InternalServerErrorResponse(e.Message, e.InnerException?.Message);
+            return ServiceResponse.InternalError(e.Message, e.InnerException?.Message);
         }
 
         var tokens = await jwtTokenService.GenerateTokensAsync(user, cancellationToken);
 
-        return ServiceResponse.OkResponse($"Користувач {vm.Email} успішно зареєстрований", tokens);
+        return ServiceResponse.Ok($"Користувач {vm.Email} успішно зареєстрований", tokens);
     }
 }

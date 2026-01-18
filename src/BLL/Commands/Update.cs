@@ -21,6 +21,7 @@ public partial class Update
         : IRequestHandler<Command<TUpdateViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TUpdateViewModel : class
+        where TViewModel : class
     {
         public async Task<ServiceResponse> Handle(Command<TUpdateViewModel, TKey> request,
             CancellationToken cancellationToken)
@@ -30,18 +31,58 @@ public partial class Update
 
             if (existingEntity == null)
             {
-                return ServiceResponse.NotFoundResponse($"{typeof(TEntity).Name} with ID {request.Id} not found");
+                return ServiceResponse.NotFound($"{typeof(TEntity).Name} with ID {request.Id} not found");
             }
 
             try
             {
                 var entity = mapper.Map(request.Model, existingEntity);
                 await repository.UpdateAsync(entity, cancellationToken);
-                return ServiceResponse.OkResponse($"{typeof(TEntity).Name} updated", mapper.Map<TViewModel>(entity));
+                return ServiceResponse.Ok($"{typeof(TEntity).Name} updated", mapper.Map<TViewModel>(entity));
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalServerErrorResponse(exception.Message);
+                return ServiceResponse.InternalError(exception.Message);
+            }
+        }
+    }
+
+    public class CommandHandlerUniqueCheck<TUpdateViewModel, TViewModel, TEntity, TKey, TQueries>(
+        IRepository<TEntity, TKey> repository,
+        TQueries queries,
+        IMapper mapper)
+        : IRequestHandler<Command<TUpdateViewModel, TKey>, ServiceResponse>
+        where TEntity : Entity<TKey>
+        where TUpdateViewModel : class
+        where TViewModel : class
+        where TQueries : IQueries<TEntity, TKey>, IUniqueQuery<TEntity, TKey>
+    {
+        public async Task<ServiceResponse> Handle(Command<TUpdateViewModel, TKey> request,
+            CancellationToken cancellationToken)
+        {
+            var existingEntity = await queries.GetByIdAsync(request.Id,
+                cancellationToken);
+
+            if (existingEntity == null)
+            {
+                return ServiceResponse.NotFound($"{typeof(TEntity).Name} with ID {request.Id} not found");
+            }
+
+            var entity = mapper.Map(request.Model, existingEntity);
+
+            if (!await queries.IsUniqueAsync(entity, cancellationToken))
+            {
+                return ServiceResponse.BadRequest($"{typeof(TEntity).Name} with the same unique fields already exists");
+            }
+
+            try
+            {
+                await repository.UpdateAsync(entity, cancellationToken);
+                return ServiceResponse.Ok($"{typeof(TEntity).Name} updated", mapper.Map<TViewModel>(entity));
+            }
+            catch (Exception exception)
+            {
+                return ServiceResponse.InternalError(exception.Message);
             }
         }
     }

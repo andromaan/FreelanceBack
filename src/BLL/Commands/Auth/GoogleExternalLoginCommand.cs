@@ -29,12 +29,12 @@ public class GoogleExternalLoginCommandHandler(
         try
         {
             if (request.Model == null || string.IsNullOrEmpty(request.Model.Token))
-                return ServiceResponse.BadRequestResponse("Google token not sent");
+                return ServiceResponse.BadRequest("Google token not sent");
 
             var payload = await jwtTokenService.VerifyGoogleToken(request.Model);
 
             if (payload is null)
-                return ServiceResponse.BadRequestResponse("Invalid Google token");
+                return ServiceResponse.BadRequest("Invalid Google token");
 
             var info = new UserLoginInfo(request.Model.Provider, payload.Subject, request.Model.Provider);
 
@@ -43,14 +43,14 @@ public class GoogleExternalLoginCommandHandler(
             var user = await FindOrCreateUserAsync(payload, info, isUsersNullOrEmpty, cancellationToken);
 
             if (user is null)
-                return ServiceResponse.BadRequestResponse("Failed to add Google login");
+                return ServiceResponse.BadRequest("Failed to add Google login");
 
             var tokens = await jwtTokenService.GenerateTokensAsync(user, cancellationToken);
-            return ServiceResponse.OkResponse("Users tokens", tokens);
+            return ServiceResponse.Ok("Users tokens", tokens);
         }
         catch (Exception ex)
         {
-            return ServiceResponse.InternalServerErrorResponse(ex.Message);
+            return ServiceResponse.InternalError(ex.Message);
         }
     }
 

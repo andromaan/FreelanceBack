@@ -27,15 +27,15 @@ public class QueryHandler(
             var freelancer = await queriesFreelancer.GetByUserId(userId, cancellationToken, includes: true);
             if (freelancer == null)
             {
-                return ServiceResponse.NotFoundResponse("Freelancer not found");
+                return ServiceResponse.NotFound("Freelancer not found");
             }
 
-            return ServiceResponse.OkResponse("Freelancer retrieved",
+            return ServiceResponse.Ok("Freelancer retrieved",
                 mapper.Map<FreelancerVM>(freelancer));
         }
         catch (Exception exception)
         {
-            return ServiceResponse.InternalServerErrorResponse(exception.Message);
+            return ServiceResponse.InternalError(exception.Message);
         }
     }
 }
