@@ -12,11 +12,12 @@ public partial class Delete
         public required TKey Id { get; init; }
     }
 
-    public class CommandHandler<TEntity, TKey>(IRepository<TEntity, TKey> repository, IQueries<TEntity, TKey> queries)
-        : IRequestHandler<Command<TEntity, TKey>, ServiceResponse>
+    public class CommandHandler<TViewModel, TEntity, TKey>(IRepository<TEntity, TKey> repository, IQueries<TEntity, TKey> queries)
+        : IRequestHandler<Command<TViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
+        where TViewModel : class
     {
-        public async Task<ServiceResponse> Handle(Command<TEntity, TKey> request, CancellationToken cancellationToken)
+        public async Task<ServiceResponse> Handle(Command<TViewModel, TKey> request, CancellationToken cancellationToken)
         {
             if (await queries.GetByIdAsync(request.Id, cancellationToken, true) is null)
             {

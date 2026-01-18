@@ -77,7 +77,7 @@ public static class ConfigureBusinessLogic
 
         services.AddTransient(
             typeof(IRequestHandler<Delete.Command<CountryVM, int>, ServiceResponse>),
-            typeof(Delete.CommandHandler<Country, int>)
+            typeof(Delete.CommandHandler<CountryVM, Country, int>)
         );
         
         // registrations for Language
@@ -103,7 +103,7 @@ public static class ConfigureBusinessLogic
 
         services.AddTransient(
             typeof(IRequestHandler<Delete.Command<LanguageVM, int>, ServiceResponse>),
-            typeof(Delete.CommandHandler<Language, int>)
+            typeof(Delete.CommandHandler<LanguageVM, Language, int>)
         );
         
         // registrations for Category
@@ -129,7 +129,7 @@ public static class ConfigureBusinessLogic
 
         services.AddTransient(
             typeof(IRequestHandler<Delete.Command<CategoryVM, Guid>, ServiceResponse>),
-            typeof(Delete.CommandHandler<Category, Guid>)
+            typeof(Delete.CommandHandler<CategoryVM, Category, Guid>)
         );
         
         // registrations for Skill
@@ -155,7 +155,7 @@ public static class ConfigureBusinessLogic
 
         services.AddTransient(
             typeof(IRequestHandler<Delete.Command<SkillVM, int>, ServiceResponse>),
-            typeof(Delete.CommandHandler<Skill, int>)
+            typeof(Delete.CommandHandler<SkillVM, Skill, int>)
         );
     }
 
