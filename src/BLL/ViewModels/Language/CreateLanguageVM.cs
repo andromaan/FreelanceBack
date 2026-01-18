@@ -1,4 +1,4 @@
-namespace Domain.ViewModels.Language;
+namespace BLL.ViewModels.Language;
 
 public class CreateLanguageVM
 {

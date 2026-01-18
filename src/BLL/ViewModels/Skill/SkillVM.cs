@@ -1,4 +1,4 @@
-namespace Domain.ViewModels.Skill;
+namespace BLL.ViewModels.Skill;
 
 public class SkillVM
 {

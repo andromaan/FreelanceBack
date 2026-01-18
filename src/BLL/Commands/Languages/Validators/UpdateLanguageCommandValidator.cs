@@ -1,10 +1,9 @@
-using Domain.Models.Languages;
-using Domain.ViewModels.Language;
+using BLL.ViewModels.Language;
 using FluentValidation;
 
 namespace BLL.Commands.Languages.Validators;
 
-public class UpdateLanguageCommandValidator : AbstractValidator<Update.Command<CreateLanguageVM, Language, int>>
+public class UpdateLanguageCommandValidator : AbstractValidator<Update.Command<CreateLanguageVM, int>>
 {
     public UpdateLanguageCommandValidator()
     {

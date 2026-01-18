@@ -1,4 +1,4 @@
-namespace Domain.ViewModels.Country;
+namespace BLL.ViewModels.Country;
 
 public class CountryVM : CreateCountryVM
 {

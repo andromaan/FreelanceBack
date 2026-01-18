@@ -1,6 +1,6 @@
 using AutoMapper;
+using BLL.ViewModels.Category;
 using Domain.Models.Projects;
-using Domain.ViewModels.Category;
 
 namespace BLL.MappingProfiles;
 

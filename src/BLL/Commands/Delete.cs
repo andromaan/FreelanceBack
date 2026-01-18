@@ -7,7 +7,7 @@ namespace BLL.Commands;
 
 public partial class Delete
 {
-    public record Command<TEntity, TKey> : IRequest<ServiceResponse> where TEntity : Entity<TKey>
+    public record Command<TViewModel, TKey> : IRequest<ServiceResponse> where TViewModel : class
     {
         public required TKey Id { get; init; }
     }

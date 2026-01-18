@@ -1,6 +1,6 @@
 using AutoMapper;
+using BLL.ViewModels.Auth;
 using Domain.Models.Auth.Users;
-using Domain.ViewModels.Auth;
 
 namespace BLL.MappingProfiles;
 

@@ -1,6 +1,7 @@
 using API.Modules;
 using API.Services.UserProvider;
 using BLL;
+using BLL.Common.Interfaces;
 using BLL.Middlewares;
 using DAL;
 using Domain.Common.Interfaces;

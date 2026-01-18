@@ -1,7 +1,7 @@
 using API.Controllers.Common;
 using BLL.Commands.Employers;
+using BLL.ViewModels.Employer;
 using Domain;
-using Domain.ViewModels.Employer;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

@@ -1,4 +1,4 @@
-namespace Domain.ViewModels.Employer;
+namespace BLL.ViewModels.Employer;
 
 public class UpdateEmployerVM
 {

@@ -1,10 +1,9 @@
-using Domain.Models.Countries;
-using Domain.ViewModels.Country;
+using BLL.ViewModels.Country;
 using FluentValidation;
 
 namespace BLL.Commands.Countries.Validators;
 
-public class CreateCountryCommandValidator : AbstractValidator<Create.Command<CreateCountryVM, Country, int>>
+public class CreateCountryCommandValidator : AbstractValidator<Create.Command<CreateCountryVM>>
 {
     public CreateCountryCommandValidator()
     {

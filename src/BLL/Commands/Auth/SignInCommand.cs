@@ -3,7 +3,7 @@ using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
-using Domain.ViewModels.Auth;
+using BLL.ViewModels.Auth;
 using MediatR;
 
 namespace BLL.Commands.Auth;

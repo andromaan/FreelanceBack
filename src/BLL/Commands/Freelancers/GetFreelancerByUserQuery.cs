@@ -1,8 +1,9 @@
 using AutoMapper;
+using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Services;
+using BLL.ViewModels.Freelancer;
 using Domain.Common.Interfaces;
-using Domain.ViewModels.Freelancer;
 using MediatR;
 
 namespace BLL.Commands.Freelancers;

@@ -8,27 +8,26 @@ namespace BLL.Commands;
 
 public partial class Create
 {
-    public record Command<TCreateViewModel, TEntity, TKey> : IRequest<ServiceResponse>
-        where TEntity : Entity<TKey>
-        where TCreateViewModel : class
+    public record Command<TCreateViewModel> : IRequest<ServiceResponse> where TCreateViewModel : class
     {
         public required TCreateViewModel Model { get; init; }
     }
 
     public class
-        CommandHandler<TCreateViewModel, TEntity, TKey>(IRepository<TEntity, TKey> repository, IMapper mapper)
-        : IRequestHandler<Command<TCreateViewModel, TEntity, TKey>, ServiceResponse>
+        CommandHandler<TCreateViewModel, TViewModel, TEntity, TKey>(IRepository<TEntity, TKey> repository, IMapper mapper)
+        : IRequestHandler<Command<TCreateViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TCreateViewModel : class
     {
-        public async Task<ServiceResponse> Handle(Command<TCreateViewModel, TEntity, TKey> request,
+        public async Task<ServiceResponse> Handle(Command<TCreateViewModel> request,
             CancellationToken cancellationToken)
         {
             try
             {
                 var entity = mapper.Map<TEntity>(request.Model);
                 var createdEntity = await repository.CreateAsync(entity, cancellationToken);
-                return ServiceResponse.OkResponse($"{typeof(TEntity).Name} created", createdEntity);
+                return ServiceResponse.OkResponse($"{typeof(TEntity).Name} created",
+                    mapper.Map<TViewModel>(createdEntity));
             }
             catch (Exception exception)
             {

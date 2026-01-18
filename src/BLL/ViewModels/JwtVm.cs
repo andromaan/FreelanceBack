@@ -1,4 +1,4 @@
-namespace Domain.ViewModels;
+namespace BLL.ViewModels;
 
 public class JwtVm
 {

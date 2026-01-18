@@ -1,6 +1,6 @@
 using AutoMapper;
+using BLL.ViewModels.Employer;
 using Domain.Models.Employers;
-using Domain.ViewModels.Employer;
 
 namespace BLL.MappingProfiles;
 

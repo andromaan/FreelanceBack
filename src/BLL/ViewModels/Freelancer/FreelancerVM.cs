@@ -1,7 +1,7 @@
-using Domain.ViewModels.Country;
-using Domain.ViewModels.Language;
+using BLL.ViewModels.Country;
+using BLL.ViewModels.Language;
 
-namespace Domain.ViewModels.Freelancer;
+namespace BLL.ViewModels.Freelancer;
 
 public class FreelancerVM
 {

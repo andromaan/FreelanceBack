@@ -1,6 +1,6 @@
 using API.Controllers.Common;
 using BLL.Commands.Auth;
-using Domain.ViewModels.Auth;
+using BLL.ViewModels.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

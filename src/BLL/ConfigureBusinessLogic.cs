@@ -6,13 +6,14 @@ using BLL.Services;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
+using BLL.ViewModels.Category;
+using BLL.ViewModels.Country;
+using BLL.ViewModels.Language;
+using BLL.ViewModels.Skill;
 using Domain;
 using Domain.Models.Countries;
 using Domain.Models.Languages;
 using Domain.Models.Projects;
-using Domain.ViewModels.Category;
-using Domain.ViewModels.Country;
-using Domain.ViewModels.Language;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -55,80 +56,106 @@ public static class ConfigureBusinessLogic
     {
         // registrations for Country
         services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateCountryVM, Country, int>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateCountryVM, Country, int>)
+            typeof(IRequestHandler<Create.Command<CreateCountryVM>, ServiceResponse>),
+            typeof(Create.CommandHandler<CreateCountryVM, CountryVM, Country, int>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<Country, int, CountryVM>, ServiceResponse>),
+            typeof(IRequestHandler<GetAll.Query<CountryVM>, ServiceResponse>),
             typeof(GetAll.QueryHandler<Country, int, CountryVM>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<Country, int, CountryVM>, ServiceResponse>),
+            typeof(IRequestHandler<GetById.Query<int, CountryVM>, ServiceResponse>),
             typeof(GetById.QueryHandler<Country, int, CountryVM>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateCountryVM, Country, int>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateCountryVM, Country, int>)
+            typeof(IRequestHandler<Update.Command<UpdateCountryVM, int>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateCountryVM, CountryVM, Country, int>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<Country, int>, ServiceResponse>),
+            typeof(IRequestHandler<Delete.Command<CountryVM, int>, ServiceResponse>),
             typeof(Delete.CommandHandler<Country, int>)
         );
         
         // registrations for Language
         services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateLanguageVM, Language, int>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateLanguageVM, Language, int>)
+            typeof(IRequestHandler<Create.Command<CreateLanguageVM>, ServiceResponse>),
+            typeof(Create.CommandHandler<CreateLanguageVM, Language, Language, int>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<Language, int, LanguageVM>, ServiceResponse>),
+            typeof(IRequestHandler<GetAll.Query<LanguageVM>, ServiceResponse>),
             typeof(GetAll.QueryHandler<Language, int, LanguageVM>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<Language, int, LanguageVM>, ServiceResponse>),
+            typeof(IRequestHandler<GetById.Query<int, LanguageVM>, ServiceResponse>),
             typeof(GetById.QueryHandler<Language, int, LanguageVM>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateLanguageVM, Language, int>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateLanguageVM, Language, int>)
+            typeof(IRequestHandler<Update.Command<UpdateLanguageVM, int>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateLanguageVM, LanguageVM, Language, int>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<Language, int>, ServiceResponse>),
+            typeof(IRequestHandler<Delete.Command<LanguageVM, int>, ServiceResponse>),
             typeof(Delete.CommandHandler<Language, int>)
         );
         
         // registrations for Category
         services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateCategoryVM, Category, Guid>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateCategoryVM, Category, Guid>)
+            typeof(IRequestHandler<Create.Command<CreateCategoryVM>, ServiceResponse>),
+            typeof(Create.CommandHandler<CreateCategoryVM, CategoryVM, Category, Guid>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<Category, Guid, CategoryVM>, ServiceResponse>),
+            typeof(IRequestHandler<GetAll.Query<CategoryVM>, ServiceResponse>),
             typeof(GetAll.QueryHandler<Category, Guid, CategoryVM>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<Category, Guid, CategoryVM>, ServiceResponse>),
+            typeof(IRequestHandler<GetById.Query<Guid, CategoryVM>, ServiceResponse>),
             typeof(GetById.QueryHandler<Category, Guid, CategoryVM>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateCategoryVM, Category, Guid>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateCategoryVM, Category, Guid>)
+            typeof(IRequestHandler<Update.Command<UpdateCategoryVM, Guid>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateCategoryVM, CategoryVM, Category, Guid>)
         );
 
         services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<Category, Guid>, ServiceResponse>),
+            typeof(IRequestHandler<Delete.Command<CategoryVM, Guid>, ServiceResponse>),
             typeof(Delete.CommandHandler<Category, Guid>)
+        );
+        
+        // registrations for Skill
+        services.AddTransient(
+            typeof(IRequestHandler<Create.Command<CreateSkillVM>, ServiceResponse>),
+            typeof(Create.CommandHandler<CreateSkillVM, SkillVM, Skill, int>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<GetAll.Query<SkillVM>, ServiceResponse>),
+            typeof(GetAll.QueryHandler<Skill, int, SkillVM>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<GetById.Query<int, SkillVM>, ServiceResponse>),
+            typeof(GetById.QueryHandler<Skill, int, SkillVM>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<Update.Command<UpdateSkillVM, int>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateSkillVM, SkillVM, Skill, int>)
+        );
+
+        services.AddTransient(
+            typeof(IRequestHandler<Delete.Command<SkillVM, int>, ServiceResponse>),
+            typeof(Delete.CommandHandler<Skill, int>)
         );
     }
 

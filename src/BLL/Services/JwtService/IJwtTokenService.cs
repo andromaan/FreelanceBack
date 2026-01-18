@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
+using BLL.ViewModels;
+using BLL.ViewModels.Auth;
 using Domain.Models.Auth.Users;
-using Domain.ViewModels;
-using Domain.ViewModels.Auth;
 using Google.Apis.Auth;
 
 namespace BLL.Services.JwtService;

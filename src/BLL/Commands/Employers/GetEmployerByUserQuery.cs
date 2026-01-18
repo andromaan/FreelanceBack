@@ -1,8 +1,9 @@
 using AutoMapper;
+using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Services;
+using BLL.ViewModels.Employer;
 using Domain.Common.Interfaces;
-using Domain.ViewModels.Employer;
 using MediatR;
 
 namespace BLL.Commands.Employers;

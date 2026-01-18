@@ -1,5 +1,5 @@
+using BLL.Common.Interfaces;
 using DAL.Data;
-using Domain.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Services.UserProvider;

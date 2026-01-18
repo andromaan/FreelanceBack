@@ -1,4 +1,4 @@
-namespace Domain.Common.Interfaces;
+namespace BLL.Common.Interfaces;
 
 public interface IUserProvider
 {

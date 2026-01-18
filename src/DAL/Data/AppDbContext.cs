@@ -4,6 +4,7 @@ using Domain.Models.Auth;
 using Domain.Models.Auth.Users;
 using Domain.Models.Employers;
 using Domain.Models.Freelance;
+using Domain.Models.Projects;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Data;
@@ -15,6 +16,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Freelancer> Freelancers { get; set; }
     public DbSet<Employer> Employers { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    
+    public DbSet<Category> Categories { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

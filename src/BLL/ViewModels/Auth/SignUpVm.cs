@@ -1,4 +1,4 @@
-namespace Domain.ViewModels.Auth;
+namespace BLL.ViewModels.Auth;
 
 public class SignUpVm
 {
