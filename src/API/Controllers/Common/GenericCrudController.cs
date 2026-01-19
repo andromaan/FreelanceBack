@@ -1,0 +1,56 @@
+using AutoMapper;
+using BLL.Commands;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace API.Controllers.Common;
+
+public abstract class GenericCrudController<TKey, TViewModel, TCreateViewModel, TUpdateViewModel>(
+    ISender sender)
+    : BaseController
+    where TViewModel : class
+    where TCreateViewModel : class
+    where TUpdateViewModel : class
+{
+    protected readonly ISender Sender = sender;
+
+    [HttpGet]
+    public virtual async Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        var query = new GetAll.Query<TViewModel>();
+        var result = await Sender.Send(query, ct);
+        return GetResult(result);
+    }
+
+    [HttpGet("{id}")]
+    public virtual async Task<IActionResult> GetById(TKey id, CancellationToken ct)
+    {
+        var query = new GetById.Query<TKey, TViewModel> { Id = id };
+        var result = await Sender.Send(query, ct);
+        return GetResult(result);
+    }
+
+    [HttpPost]
+    public virtual async Task<IActionResult> Create([FromBody] TCreateViewModel vm, CancellationToken ct)
+    {
+        var command = new Create.Command<TCreateViewModel> { Model = vm };
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+
+    [HttpPut("{id}")]
+    public virtual async Task<IActionResult> Update(TKey id, [FromBody] TUpdateViewModel vm, CancellationToken ct)
+    {
+        var command = new Update.Command<TUpdateViewModel, TKey> { Id = id, Model = vm };
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+
+    [HttpDelete("{id}")]
+    public virtual async Task<IActionResult> Delete(TKey id, CancellationToken ct)
+    {
+        var command = new Delete.Command<TViewModel, TKey> { Id = id };
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+}
