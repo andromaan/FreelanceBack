@@ -1,5 +1,7 @@
 using BLL.Common;
+using BLL.Common.Interfaces;
 using BLL.Services;
+using Domain;
 using Domain.Common.Abstractions;
 using MediatR;
 
@@ -12,16 +14,33 @@ public partial class Delete
         public required TKey Id { get; init; }
     }
 
-    public class CommandHandler<TViewModel, TEntity, TKey>(IRepository<TEntity, TKey> repository, IQueries<TEntity, TKey> queries)
+    public class CommandHandler<TViewModel, TEntity, TKey>(
+        IRepository<TEntity, TKey> repository,
+        IQueries<TEntity, TKey> queries,
+        IUserProvider userProvider)
         : IRequestHandler<Command<TViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TViewModel : class
     {
-        public async Task<ServiceResponse> Handle(Command<TViewModel, TKey> request, CancellationToken cancellationToken)
+        public async Task<ServiceResponse> Handle(Command<TViewModel, TKey> request,
+            CancellationToken cancellationToken)
         {
-            if (await queries.GetByIdAsync(request.Id, cancellationToken, true) is null)
+            var existingEntity = await queries.GetByIdAsync(request.Id, cancellationToken);
+            
+            if (existingEntity is null)
             {
                 return ServiceResponse.NotFound($"{typeof(TEntity).Name} with ID {request.Id} not found");
+            }
+
+            if (existingEntity is AuditableEntity<TKey> auditable)
+            {
+                var userId = await userProvider.GetUserId();
+                var userRole = userProvider.GetUserRole();
+
+                if (auditable.CreatedBy != userId && userRole != Settings.Roles.AdminRole)
+                {
+                    return ServiceResponse.Forbidden("You do not have permission to delete this entity");
+                }
             }
 
             try

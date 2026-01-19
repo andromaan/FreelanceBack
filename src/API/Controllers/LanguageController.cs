@@ -3,6 +3,7 @@ using AutoMapper;
 using BLL.Commands;
 using BLL.Services;
 using BLL.ViewModels.Language;
+using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("[controller]")]
 // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+// [Authorize(Roles = Settings.Roles.AdminRole)]
 public class LanguageController(ISender sender)
     : GenericCrudController<int, LanguageVM, CreateLanguageVM, UpdateLanguageVM>(sender)
 {

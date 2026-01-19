@@ -59,46 +59,38 @@ public static class ConfigureBusinessLogic
     {
         // registrations for Country
         services.RegisterCrudHandlers(
-            new CrudRegistration<Country, int>
+            new CrudRegistration<Country, int, ICountryQueries>
             {
                 ViewModelType = typeof(CountryVM),
                 CreateViewModelType = typeof(CreateCountryVM),
-                UpdateViewModelType = typeof(UpdateCountryVM),
-                HasUniqueCheck = true,
-                QueriesInterfaceType = typeof(ICountryQueries)
+                UpdateViewModelType = typeof(UpdateCountryVM)
             });
 
         // registrations for Language
         services.RegisterCrudHandlers(
-            new CrudRegistration<Language, int>
+            new CrudRegistration<Language, int, ILanguageQueries>
             {
                 ViewModelType = typeof(LanguageVM),
                 CreateViewModelType = typeof(CreateLanguageVM),
-                UpdateViewModelType = typeof(UpdateLanguageVM),
-                HasUniqueCheck = true,
-                QueriesInterfaceType = typeof(ILanguageQueries)
+                UpdateViewModelType = typeof(UpdateLanguageVM)
             });
 
         // registrations for Category
         services.RegisterCrudHandlers(
-            new CrudRegistration<Category, Guid>
+            new CrudRegistration<Category, Guid, ICategoryQueries>
             {
                 ViewModelType = typeof(CategoryVM),
                 CreateViewModelType = typeof(CreateCategoryVM),
-                UpdateViewModelType = typeof(UpdateCategoryVM),
-                HasUniqueCheck = true,
-                QueriesInterfaceType = typeof(ICategoryQueries)
+                UpdateViewModelType = typeof(UpdateCategoryVM)
             });
 
         // registrations for Skill
         services.RegisterCrudHandlers(
-            new CrudRegistration<Skill, int>
+            new CrudRegistration<Skill, int, ISkillQueries>
             {
                 ViewModelType = typeof(SkillVM),
                 CreateViewModelType = typeof(CreateSkillVM),
-                UpdateViewModelType = typeof(UpdateSkillVM),
-                HasUniqueCheck = true,
-                QueriesInterfaceType = typeof(ISkillQueries)
+                UpdateViewModelType = typeof(UpdateSkillVM)
             });
     }
 
