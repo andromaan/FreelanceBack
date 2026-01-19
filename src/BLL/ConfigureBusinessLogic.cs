@@ -6,6 +6,7 @@ using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Skills;
+using BLL.Extensions;
 using BLL.Services;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
@@ -34,7 +35,7 @@ public static class ConfigureBusinessLogic
     {
         services.AddMediatrConfig();
         services.AddRegistrations();
-        
+
         services.AddServices();
 
         services.AddJwtTokenAuth(builder);
@@ -46,121 +47,59 @@ public static class ConfigureBusinessLogic
                 policy => policy.RequireRole(Settings.Roles.AdminRole));
         });
     }
-    
+
     private static void AddMediatrConfig(this IServiceCollection services)
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-        
-       
     }
-    
+
     private static void AddRegistrations(this IServiceCollection services)
     {
         // registrations for Country
-        services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateCountryVM>, ServiceResponse>),
-            typeof(Create.CommandHandlerUniqueCheck<CreateCountryVM, CountryVM, Country, int, ICountryQueries>)
-        );
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Country, int>
+            {
+                ViewModelType = typeof(CountryVM),
+                CreateViewModelType = typeof(CreateCountryVM),
+                UpdateViewModelType = typeof(UpdateCountryVM),
+                HasUniqueCheck = true,
+                QueriesInterfaceType = typeof(ICountryQueries)
+            });
 
-        services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<CountryVM>, ServiceResponse>),
-            typeof(GetAll.QueryHandler<Country, int, CountryVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<int, CountryVM>, ServiceResponse>),
-            typeof(GetById.QueryHandler<Country, int, CountryVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateCountryVM, int>, ServiceResponse>),
-            typeof(Update.CommandHandlerUniqueCheck<UpdateCountryVM, CountryVM, Country, int, ICountryQueries>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<CountryVM, int>, ServiceResponse>),
-            typeof(Delete.CommandHandler<CountryVM, Country, int>)
-        );
-        
         // registrations for Language
-        services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateLanguageVM>, ServiceResponse>),
-            typeof(Create.CommandHandlerUniqueCheck<CreateLanguageVM, Language, Language, int, ILanguageQueries>)
-        );
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Language, int>
+            {
+                ViewModelType = typeof(LanguageVM),
+                CreateViewModelType = typeof(CreateLanguageVM),
+                UpdateViewModelType = typeof(UpdateLanguageVM),
+                HasUniqueCheck = true,
+                QueriesInterfaceType = typeof(ILanguageQueries)
+            });
 
-        services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<LanguageVM>, ServiceResponse>),
-            typeof(GetAll.QueryHandler<Language, int, LanguageVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<int, LanguageVM>, ServiceResponse>),
-            typeof(GetById.QueryHandler<Language, int, LanguageVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateLanguageVM, int>, ServiceResponse>),
-            typeof(Update.CommandHandlerUniqueCheck<UpdateLanguageVM, LanguageVM, Language, int, ILanguageQueries>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<LanguageVM, int>, ServiceResponse>),
-            typeof(Delete.CommandHandler<LanguageVM, Language, int>)
-        );
-        
         // registrations for Category
-        services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateCategoryVM>, ServiceResponse>),
-            typeof(Create.CommandHandlerUniqueCheck<CreateCategoryVM, CategoryVM, Category, Guid, ICategoryQueries>)
-        );
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Category, Guid>
+            {
+                ViewModelType = typeof(CategoryVM),
+                CreateViewModelType = typeof(CreateCategoryVM),
+                UpdateViewModelType = typeof(UpdateCategoryVM),
+                HasUniqueCheck = true,
+                QueriesInterfaceType = typeof(ICategoryQueries)
+            });
 
-        services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<CategoryVM>, ServiceResponse>),
-            typeof(GetAll.QueryHandler<Category, Guid, CategoryVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<Guid, CategoryVM>, ServiceResponse>),
-            typeof(GetById.QueryHandler<Category, Guid, CategoryVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateCategoryVM, Guid>, ServiceResponse>),
-            typeof(Update.CommandHandlerUniqueCheck<UpdateCategoryVM, CategoryVM, Category, Guid, ICategoryQueries>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<CategoryVM, Guid>, ServiceResponse>),
-            typeof(Delete.CommandHandler<CategoryVM, Category, Guid>)
-        );
-        
         // registrations for Skill
-        services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateSkillVM>, ServiceResponse>),
-            typeof(Create.CommandHandlerUniqueCheck<CreateSkillVM, SkillVM, Skill, int, ISkillQueries>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<SkillVM>, ServiceResponse>),
-            typeof(GetAll.QueryHandler<Skill, int, SkillVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<int, SkillVM>, ServiceResponse>),
-            typeof(GetById.QueryHandler<Skill, int, SkillVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateSkillVM, int>, ServiceResponse>),
-            typeof(Update.CommandHandlerUniqueCheck<UpdateSkillVM, SkillVM, Skill, int, ISkillQueries>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<SkillVM, int>, ServiceResponse>),
-            typeof(Delete.CommandHandler<SkillVM, Skill, int>)
-        );
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Skill, int>
+            {
+                ViewModelType = typeof(SkillVM),
+                CreateViewModelType = typeof(CreateSkillVM),
+                UpdateViewModelType = typeof(UpdateSkillVM),
+                HasUniqueCheck = true,
+                QueriesInterfaceType = typeof(ISkillQueries)
+            });
     }
 
     private static void AddServices(this IServiceCollection services)
