@@ -3,7 +3,6 @@ using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Services;
 using BLL.ViewModels.Employer;
-using Domain.Common.Interfaces;
 using MediatR;
 
 namespace BLL.Commands.Employers;
@@ -24,7 +23,7 @@ public class QueryHandler(
         {
             var userId = await userProvider.GetUserId();
 
-            var employer = await queriesEmployer.GetByUserId(userId, cancellationToken, includes: true);
+            var employer = await queriesEmployer.GetByUserId(userId, cancellationToken);
             if (employer == null)
             {
                 return ServiceResponse.NotFound("Employer not found");

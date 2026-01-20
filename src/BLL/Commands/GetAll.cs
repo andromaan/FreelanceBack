@@ -6,8 +6,9 @@ using MediatR;
 
 namespace BLL.Commands;
 
-public partial class GetAll
+public class GetAll
 {
+    // ReSharper disable once UnusedTypeParameter
     public record Query<TViewModel> : IRequest<ServiceResponse> where TViewModel : class;
 
     public class QueryHandler<TEntity, TKey, TViewModel, TQueries>(TQueries queries, IMapper mapper)

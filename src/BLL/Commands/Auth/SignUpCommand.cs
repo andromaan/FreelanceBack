@@ -14,7 +14,7 @@ using MediatR;
 
 namespace BLL.Commands.Auth;
 
-public record SignUpCommand(SignUpVm Vm) : IRequest<ServiceResponse>;
+public record SignUpCommand(SignUpVM Vm) : IRequest<ServiceResponse>;
 
 public class SignUpCommandHandler(
     IUserRepository userRepository,
@@ -33,7 +33,7 @@ public class SignUpCommandHandler(
             return ServiceResponse.BadRequest($"{vm.Email} вже використовується");
         }
 
-        var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count()! != 0;
+        var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count() != 0;
 
         var user = mapper.Map<User>(vm);
         user.Id = Guid.NewGuid();

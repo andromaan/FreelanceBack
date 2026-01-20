@@ -1,4 +1,3 @@
-using BLL.Common.Interfaces.Repositories;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using BLL.Services.JwtService;
@@ -14,7 +13,7 @@ namespace BLL.Commands.Auth;
 
 public record GoogleExternalLoginCommand : IRequest<ServiceResponse>
 {
-    public required ExternalLoginVm Model { get; init; }
+    public required ExternalLoginVM Model { get; init; }
 }
 
 public class GoogleExternalLoginCommandHandler(
@@ -28,19 +27,16 @@ public class GoogleExternalLoginCommandHandler(
     {
         try
         {
-            if (request.Model == null || string.IsNullOrEmpty(request.Model.Token))
+            if (string.IsNullOrEmpty(request.Model.Token))
                 return ServiceResponse.BadRequest("Google token not sent");
 
             var payload = await jwtTokenService.VerifyGoogleToken(request.Model);
 
-            if (payload is null)
-                return ServiceResponse.BadRequest("Invalid Google token");
-
             var info = new UserLoginInfo(request.Model.Provider, payload.Subject, request.Model.Provider);
 
-            var isUsersNullOrEmpty = (await userQueries.GetAllAsync(cancellationToken)).Any();
+            // var isUsersNullOrEmpty = (await userQueries.GetAllAsync(cancellationToken)).Any();
 
-            var user = await FindOrCreateUserAsync(payload, info, isUsersNullOrEmpty, cancellationToken);
+            var user = await FindOrCreateUserAsync(payload, info, cancellationToken);
 
             if (user is null)
                 return ServiceResponse.BadRequest("Failed to add Google login");
@@ -55,7 +51,7 @@ public class GoogleExternalLoginCommandHandler(
     }
 
     private async Task<User?> FindOrCreateUserAsync(GoogleJsonWebSignature.Payload payload,
-        UserLoginInfo info, bool isUsersNullOrEmpty, CancellationToken cancellationToken)
+        UserLoginInfo info, CancellationToken cancellationToken)
     {
         var user = await userQueries.FindByLoginAsync(info.LoginProvider, info.ProviderKey, cancellationToken);
         if (user != null)
@@ -64,7 +60,7 @@ public class GoogleExternalLoginCommandHandler(
         user = await userQueries.GetByEmailAsync(payload.Email, cancellationToken);
         if (user == null)
         {
-            user = await CreateUserAsync(payload, isUsersNullOrEmpty, cancellationToken);
+            user = await CreateUserAsync(payload, cancellationToken);
         }
 
         var loginResult = await userRepository.AddLoginAsync(user, info, cancellationToken);
@@ -72,21 +68,18 @@ public class GoogleExternalLoginCommandHandler(
     }
 
     private async Task<User> CreateUserAsync(GoogleJsonWebSignature.Payload payload,
-        bool isUsersNullOrEmpty,
         CancellationToken cancellationToken)
     {
         var userId = Guid.NewGuid();
         var randomPassword = GenerateRandomPassword();
 
-        var (name, patronymic) = SplitFullName(payload.Name);
+        // var (name, patronymic) = SplitFullName(payload.Name);
 
         var userModel = new User
         {
             Id = userId,
             Email = payload.Email,
-            RoleId = isUsersNullOrEmpty
-                ? Settings.Roles.AdminRole
-                : Settings.Roles.AdminRole, // TODO fix roles for user
+            RoleId = Settings.Roles.AdminRole,
             PasswordHash = hashPasswordService.HashPassword(randomPassword)
         };
 
@@ -100,17 +93,17 @@ public class GoogleExternalLoginCommandHandler(
         return result;
     }
 
-    private (string? name, string? patronymic) SplitFullName(string? fullName)
-    {
-        if (string.IsNullOrWhiteSpace(fullName))
-            return (null, null);
-
-        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var name = parts.ElementAtOrDefault(0);
-        var patronymic = parts.ElementAtOrDefault(1);
-
-        return (name, patronymic);
-    }
+    // private (string? name, string? patronymic) SplitFullName(string? fullName)
+    // {
+    //     if (string.IsNullOrWhiteSpace(fullName))
+    //         return (null, null);
+    //
+    //     var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    //     var name = parts.ElementAtOrDefault(0);
+    //     var patronymic = parts.ElementAtOrDefault(1);
+    //
+    //     return (name, patronymic);
+    // }
 
     private string GenerateRandomPassword()
     {

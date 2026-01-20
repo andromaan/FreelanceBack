@@ -61,7 +61,7 @@ public static partial class DataSeed
             var languagesDto = JsonSerializer.Deserialize<List<LanguageDto>>(json);
 
             var languages = languagesDto!
-                .Select((l, index) => new { Id = index + 1, Code = l.code, Name = l.name });
+                .Select((l, index) => new { Id = index + 1, l.Code, l.Name });
 
             modelBuilder.Entity<Language>().HasData(languages);
         }
@@ -86,14 +86,14 @@ public static partial class DataSeed
             }
 
             var countries = countryDtos
-                .Where(c => !string.IsNullOrWhiteSpace(c.alpha2) && !string.IsNullOrWhiteSpace(c.name) &&
-                            !string.IsNullOrWhiteSpace(c.alpha3))
+                .Where(c => !string.IsNullOrWhiteSpace(c.Alpha2) && !string.IsNullOrWhiteSpace(c.Name) &&
+                            !string.IsNullOrWhiteSpace(c.Alpha3))
                 .Select((c, index) => new Country
                 {
                     Id = index + 1,
-                    Name = c.name.Trim(),
-                    Alpha2Code = c.alpha2.Trim().ToUpper(),
-                    Alpha3Code = c.alpha3.Trim().ToUpper()
+                    Name = c.Name.Trim(),
+                    Alpha2Code = c.Alpha2.Trim().ToUpper(),
+                    Alpha3Code = c.Alpha3.Trim().ToUpper()
                 })
                 .ToList();
 

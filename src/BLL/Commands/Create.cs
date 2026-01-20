@@ -1,13 +1,12 @@
 using AutoMapper;
 using BLL.Common;
-using BLL.Common.Interfaces;
 using BLL.Services;
 using Domain.Common.Abstractions;
 using MediatR;
 
 namespace BLL.Commands;
 
-public partial class Create
+public class Create
 {
     public record Command<TCreateViewModel> : IRequest<ServiceResponse> where TCreateViewModel : class
     {

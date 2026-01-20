@@ -1,5 +1,3 @@
-using Domain.Models.Projects;
-
 namespace BLL.ViewModels.Project;
 
 public class CreateProjectVM

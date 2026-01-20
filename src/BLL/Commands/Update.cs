@@ -8,7 +8,7 @@ using MediatR;
 
 namespace BLL.Commands;
 
-public partial class Update
+public class Update
 {
     public record Command<TUpdateViewModel, TKey> : IRequest<ServiceResponse> where TUpdateViewModel : class
     {

@@ -7,8 +7,9 @@ using MediatR;
 
 namespace BLL.Commands;
 
-public partial class Delete
+public class Delete
 {
+    // ReSharper disable once UnusedTypeParameter
     public record Command<TViewModel, TKey> : IRequest<ServiceResponse> where TViewModel : class
     {
         public required TKey Id { get; init; }

@@ -4,7 +4,6 @@ using BLL.Common.Interfaces;
 using DAL.Data;
 using DAL.Extensions;
 using Domain.Common.Abstractions;
-using Domain.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;

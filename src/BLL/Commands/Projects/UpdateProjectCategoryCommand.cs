@@ -25,7 +25,7 @@ public class UpdateProjectCategoryCommandHandler(
 {
     public async Task<ServiceResponse> Handle(UpdateProjectCategoryCommand request, CancellationToken cancellationToken)
     {
-        var categoriesIds = request.Vm;
+        var categoriesIds = request.Vm.CategoryIds.Distinct();
         var projectId = request.ProjectId;
 
         var existingProject = await projectQueries.GetByIdAsync(projectId, cancellationToken);
@@ -44,7 +44,7 @@ public class UpdateProjectCategoryCommandHandler(
         
         existingProject.Categories.Clear();
 
-        foreach (var categId in categoriesIds.CategoryIds)
+        foreach (var categId in categoriesIds)
         {
             var existingCategory = await categoryQueries.GetByIdAsync(categId, cancellationToken);
             if (existingCategory == null)

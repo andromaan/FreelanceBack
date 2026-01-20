@@ -7,7 +7,7 @@ using MediatR;
 
 namespace BLL.Commands.Projects;
 
-public record CreateProjectCommand(CreateProjectVM createVM) : IRequest<ServiceResponse>
+public record CreateProjectCommand(CreateProjectVM CreateVm) : IRequest<ServiceResponse>
 {
 }
 
@@ -16,9 +16,9 @@ public class CreateProjectCommandHandler(IProjectRepository repository, IMapper 
 {
     public async Task<ServiceResponse> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        var createVM = request.createVM;
+        var createVm = request.CreateVm;
         
-        var project = mapper.Map<Project>(createVM);
+        var project = mapper.Map<Project>(createVm);
         project.Status = ProjectStatus.Open;
         
         try

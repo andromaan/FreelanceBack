@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text;
-using BLL.Commands;
 using BLL.Common.Behaviours;
 using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.Countries;
@@ -8,7 +7,6 @@ using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Extensions;
-using BLL.Services;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
@@ -142,7 +140,7 @@ public static class ConfigureBusinessLogic
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey =
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder!.Configuration["AuthSettings:key"]!)),
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AuthSettings:key"]!)),
                     ValidIssuer = builder.Configuration["AuthSettings:issuer"],
                     ValidAudience = builder.Configuration["AuthSettings:audience"]
                 };

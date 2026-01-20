@@ -4,7 +4,6 @@ using BLL;
 using BLL.Common.Interfaces;
 using BLL.Middlewares;
 using DAL;
-using Domain.Common.Interfaces;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

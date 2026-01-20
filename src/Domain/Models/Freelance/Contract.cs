@@ -1,5 +1,4 @@
 using Domain.Common.Abstractions;
-using Domain.Models.Auth.Users;
 using Domain.Models.Employers;
 using Domain.Models.Projects;
 

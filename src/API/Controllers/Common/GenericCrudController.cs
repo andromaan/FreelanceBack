@@ -1,4 +1,3 @@
-using AutoMapper;
 using BLL.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

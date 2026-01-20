@@ -2,7 +2,6 @@ using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.Employers;
 using DAL.Data;
 using DAL.Extensions;
-using Domain.Common.Interfaces;
 using Domain.Models.Employers;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,14 +20,9 @@ public class EmployerRepository(AppDbContext appDbContext, IUserProvider userPro
         return entity;
     }
 
-    public async Task<Employer?> GetByUserId(Guid userId, CancellationToken token, bool includes = false)
+    public async Task<Employer?> GetByUserId(Guid userId, CancellationToken token)
     {
         var query = _appDbContext.Employers.AsQueryable();
-
-        if (includes)
-        {
-            query = query;
-        }
         
         return await query.FirstOrDefaultAsync(up => up.UserId == userId, token);
     }

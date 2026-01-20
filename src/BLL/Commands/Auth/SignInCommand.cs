@@ -1,4 +1,3 @@
-using BLL.Common.Interfaces.Repositories;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using BLL.Services.JwtService;
@@ -8,10 +7,9 @@ using MediatR;
 
 namespace BLL.Commands.Auth;
 
-public record SignInCommand(SignInVm Vm) : IRequest<ServiceResponse>;
+public record SignInCommand(SignInVM Vm) : IRequest<ServiceResponse>;
 
 public class SignInCommandHandler(
-    IUserRepository userRepository,
     IUserQueries userQueries,
     IPasswordHasher passwordHasher,
     IJwtTokenService jwtService) : IRequestHandler<SignInCommand, ServiceResponse>

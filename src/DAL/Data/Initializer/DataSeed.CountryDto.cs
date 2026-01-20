@@ -4,13 +4,13 @@ public static partial class DataSeed
 {
     private class CountryDto
     {
-        public string name { get; set; } = string.Empty;
-        public string alpha2 { get; set; } = string.Empty;
-        public string alpha3 { get; set; } = string.Empty;
-        public string unicode { get; set; } = string.Empty;
-        public string emoji { get; set; } = string.Empty;
-        public string dialCode { get; set; } = string.Empty;
-        public string region { get; set; } = string.Empty;
-        public string capital { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Alpha2 { get; set; } = string.Empty;
+        public string Alpha3 { get; set; } = string.Empty;
+        // public string Unicode { get; set; } = string.Empty;
+        // public string Emoji { get; set; } = string.Empty;
+        // public string DialCode { get; set; } = string.Empty;
+        // public string Region { get; set; } = string.Empty;
+        // public string Capital { get; set; } = string.Empty;
     }
 }

@@ -1,7 +1,6 @@
 using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.Categories;
 using DAL.Data;
-using Domain.Common.Interfaces;
 using Domain.Models.Projects;
 using Microsoft.EntityFrameworkCore;
 

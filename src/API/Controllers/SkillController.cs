@@ -1,7 +1,4 @@
 using API.Controllers.Common;
-using AutoMapper;
-using BLL.Commands;
-using BLL.Services;
 using BLL.ViewModels.Skill;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
