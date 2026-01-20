@@ -5,12 +5,12 @@ using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
+using BLL.Common.Interfaces.Repositories.FreelancerSkills;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Proposals;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Interfaces.Repositories.Users;
-using BLL.Common.Interfaces.Repositories.UserSkills;
 using DAL.Data;
 using DAL.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -78,9 +78,9 @@ public static class ConfigureDataAccess
         services.AddScoped<ISkillRepository>(provider => provider.GetRequiredService<SkillRepository>());
         services.AddScoped<ISkillQueries>(provider => provider.GetRequiredService<SkillRepository>());
 
-        services.AddScoped<UserSkillRepository>();
-        services.AddScoped<IUserSkillRepository>(provider => provider.GetRequiredService<UserSkillRepository>());
-        services.AddScoped<IUserSkillQueries>(provider => provider.GetRequiredService<UserSkillRepository>());
+        services.AddScoped<FreelancerSkillRepository>();
+        services.AddScoped<IFreelancerSkillRepository>(provider => provider.GetRequiredService<FreelancerSkillRepository>());
+        services.AddScoped<IFreelancerSkillQueries>(provider => provider.GetRequiredService<FreelancerSkillRepository>());
 
         services.AddScoped<LanguageRepository>();
         services.AddScoped<ILanguageRepository>(provider => provider.GetRequiredService<LanguageRepository>());

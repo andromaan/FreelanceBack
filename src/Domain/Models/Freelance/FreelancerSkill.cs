@@ -4,7 +4,7 @@ using Domain.Models.Projects;
 
 namespace Domain.Models.Freelance;
 
-public class UserSkill : Entity<Guid>
+public class FreelancerSkill : Entity<Guid>
 {
     public required Guid FreelancerId { get; set; }
     public Freelancer? Freelancer { get; set; }

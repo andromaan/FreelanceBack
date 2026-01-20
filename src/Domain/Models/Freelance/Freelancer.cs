@@ -20,6 +20,6 @@ public class Freelancer : AuditableEntity<Guid>
     public Country? Country { get; set; }
     
     public ICollection<Language> Languages { get; set; } = new List<Language>();
-    public ICollection<UserSkill> Skills { get; set; } = new List<UserSkill>();
+    public ICollection<FreelancerSkill> Skills { get; set; } = new List<FreelancerSkill>();
     public ICollection<PortfolioItem> Portfolio { get; set; } = new List<PortfolioItem>();
 }

@@ -14,11 +14,13 @@ public static class AuditableConfigurationExtension
         builder.HasOne<User>()
             .WithMany()
             .HasForeignKey(x => x.CreatedBy)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
         
         builder.HasOne<User>()
             .WithMany()
             .HasForeignKey(x => x.ModifiedBy)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
         
         builder.Property(x => x.CreatedAt)

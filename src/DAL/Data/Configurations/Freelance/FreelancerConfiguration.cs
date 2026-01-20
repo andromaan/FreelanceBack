@@ -3,13 +3,13 @@ using Domain.Models.Freelance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DAL.Data.Configurations.Auth.Users;
+namespace DAL.Data.Configurations.Freelance;
 
 public class FreelancerConfiguration : IEntityTypeConfiguration<Freelancer>
 {
     public void Configure(EntityTypeBuilder<Freelancer> builder)
     {
-        builder.ToTable("freelancers_info");
+        builder.ToTable("freelancers");
         
         builder.HasKey(p => p.Id);
 

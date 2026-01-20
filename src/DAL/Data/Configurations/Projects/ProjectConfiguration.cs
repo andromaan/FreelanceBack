@@ -15,16 +15,19 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.Property(p => p.Title).IsRequired().HasMaxLength(200);
         builder.Property(p => p.Description).HasMaxLength(2000);
-        builder.Property(p => p.Category).HasMaxLength(100);
         builder.Property(p => p.BudgetMin).HasPrecision(18, 2);
         builder.Property(p => p.BudgetMax).HasPrecision(18, 2);
         builder.Property(p => p.IsHourly).IsRequired();
-        builder.Property(p => p.Status).HasMaxLength(32).IsRequired();
+        
+        // TODO: rethink this 
+        // builder.Property(p => p.Status).HasMaxLength(32).IsRequired();
+        builder.Property(p => p.Status).HasMaxLength(32)
+            .HasConversion(
+                v => v.ToString(), 
+                v => (ProjectStatus)Enum.Parse(typeof(ProjectStatus), v)).IsRequired();
 
-        builder.HasOne(p => p.Employer)
-            .WithMany()
-            .HasForeignKey(p => p.EmployerId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(p => p.Categories)
+            .WithMany();
         
         builder.ConfigureAudit();
     }

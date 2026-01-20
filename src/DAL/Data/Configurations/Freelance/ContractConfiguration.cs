@@ -17,7 +17,7 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.Property(p => p.Status).HasMaxLength(32).IsRequired();
 
         builder.HasOne(p => p.Project)
-            .WithMany(j => j.Contracts)
+            .WithMany()
             .HasForeignKey(p => p.ProjectId)
             .OnDelete(DeleteBehavior.Restrict);
 

@@ -45,7 +45,7 @@ public partial class Create
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalError(exception.Message);
+                return ServiceResponse.InternalError(exception.Message, data: exception.InnerException?.Message );
             }
         }
     }

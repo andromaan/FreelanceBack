@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DAL.Data.Configurations.Freelance;
 
-public class UserSkillConfiguration : IEntityTypeConfiguration<UserSkill>
+public class FreelancerSkillConfiguration : IEntityTypeConfiguration<FreelancerSkill>
 {
-    public void Configure(EntityTypeBuilder<UserSkill> builder)
+    public void Configure(EntityTypeBuilder<FreelancerSkill> builder)
     {
-        builder.ToTable("user_skills");
+        builder.ToTable("freelancers_skills");
         
         builder.HasKey(p => p.Id);
 

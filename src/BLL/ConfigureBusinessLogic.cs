@@ -5,6 +5,7 @@ using BLL.Common.Behaviours;
 using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Languages;
+using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Extensions;
 using BLL.Services;
@@ -14,6 +15,7 @@ using BLL.Services.PasswordHasher;
 using BLL.ViewModels.Category;
 using BLL.ViewModels.Country;
 using BLL.ViewModels.Language;
+using BLL.ViewModels.Project;
 using BLL.ViewModels.Skill;
 using Domain;
 using Domain.Models.Countries;
@@ -91,6 +93,15 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(SkillVM),
                 CreateViewModelType = typeof(CreateSkillVM),
                 UpdateViewModelType = typeof(UpdateSkillVM)
+            });
+        
+        // registrations for Project
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Project, Guid, IProjectQueries>
+            {
+                ViewModelType = typeof(ProjectVM),
+                CreateViewModelType = typeof(CreateProjectVM),
+                UpdateViewModelType = typeof(UpdateProjectVM)
             });
     }
 
