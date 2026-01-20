@@ -13,10 +13,11 @@ public partial class GetById
         public required TKey Id { get; init; }
     }
 
-    public class QueryHandler<TEntity, TKey, TViewModel>(IQueries<TEntity, TKey> queries, IMapper mapper)
+    public class QueryHandler<TEntity, TKey, TViewModel, TQueries>(TQueries queries, IMapper mapper)
         : IRequestHandler<Query<TKey, TViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TViewModel : class
+        where TQueries : IQueries<TEntity, TKey>
     {
         public async Task<ServiceResponse> Handle(Query<TKey, TViewModel> request, CancellationToken cancellationToken)
         {

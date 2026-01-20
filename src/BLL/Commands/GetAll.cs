@@ -10,10 +10,11 @@ public partial class GetAll
 {
     public record Query<TViewModel> : IRequest<ServiceResponse> where TViewModel : class;
 
-    public class QueryHandler<TEntity, TKey, TViewModel>(IQueries<TEntity, TKey> queries, IMapper mapper)
+    public class QueryHandler<TEntity, TKey, TViewModel, TQueries>(TQueries queries, IMapper mapper)
         : IRequestHandler<Query<TViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TViewModel : class
+        where TQueries : IQueries<TEntity, TKey>
     {
         public async Task<ServiceResponse> Handle(Query<TViewModel> request, CancellationToken cancellationToken)
         {

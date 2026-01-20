@@ -30,22 +30,24 @@ public static class CrudRegistrationExtensions
 
             new HandlerDescriptor(
                 typeof(GetAll.Query<>),
-                typeof(GetAll.QueryHandler<,,>),
+                typeof(GetAll.QueryHandler<,,,>),
                 [reg.ViewModelType],
                 [
                     reg.EntityType,
                     reg.KeyType,
-                    reg.ViewModelType
+                    reg.ViewModelType,
+                    reg.QueriesInterfaceType
                 ]),
 
             new HandlerDescriptor(
                 typeof(GetById.Query<,>),
-                typeof(GetById.QueryHandler<,,>),
+                typeof(GetById.QueryHandler<,,,>),
                 [reg.KeyType, reg.ViewModelType],
                 [
                     reg.EntityType,
                     reg.KeyType,
-                    reg.ViewModelType
+                    reg.ViewModelType,
+                    reg.QueriesInterfaceType
                 ]),
 
             new HandlerDescriptor(
