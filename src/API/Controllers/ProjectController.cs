@@ -2,7 +2,6 @@ using API.Controllers.Common;
 using BLL.Commands.Projects;
 using BLL.ViewModels.Project;
 using Domain;
-using Domain.Models.Projects;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +19,19 @@ public class ProjectController(ISender sender)
     public override async Task<IActionResult> Create(CreateProjectVM vm, CancellationToken ct)
     {
         var command = new CreateProjectCommand(vm);
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+
+    [HttpPatch("categories/{projectId}")]
+    public async Task<IActionResult> UpdateProjectCategories(Guid projectId, [FromBody] UpdateProjectCategoriesVM vm,
+        CancellationToken ct)
+    {
+        var command = new UpdateProjectCategoryCommand
+        {
+            ProjectId = projectId,
+            Vm = vm
+        };
         var result = await Sender.Send(command, ct);
         return GetResult(result);
     }

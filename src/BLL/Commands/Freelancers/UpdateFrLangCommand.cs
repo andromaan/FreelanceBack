@@ -17,43 +17,40 @@ public record UpdateFrInfoLangCommand(UpdateFrInfoLangVM Vm) : IRequest<ServiceR
 public class UpdateFrInfoLangCommandHandler(
     IUserProvider userProvider,
     IMapper mapper,
-    IUserQueries userQueries,
     IFreelancerQueries freelancerQueries,
     IFreelancerRepository freelancerRepository,
     ILanguageQueries languageQueries
-    ) : IRequestHandler<UpdateFrInfoLangCommand, ServiceResponse>
+) : IRequestHandler<UpdateFrInfoLangCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(UpdateFrInfoLangCommand request, CancellationToken cancellationToken)
     {
         var vm = request.Vm;
         var userId = await userProvider.GetUserId();
-        
-        if (await userQueries.GetByIdAsync(userId, cancellationToken) == null)
-        {
-            return ServiceResponse.NotFound($"User with id {userId} not found");
-        }
-        
+
         var existingFreelancer = await freelancerQueries.GetByUserId(userId, cancellationToken, true);
         if (existingFreelancer == null)
         {
             return ServiceResponse.NotFound($"User with id {userId} does not have a profile");
         }
+        
+        existingFreelancer.Languages.Clear();
 
         foreach (var langId in vm.LanguageIds)
         {
-            var existingLanguage = await languageQueries.GetByIdAsync(langId, cancellationToken);  
+            var existingLanguage = await languageQueries.GetByIdAsync(langId, cancellationToken);
             if (existingLanguage == null)
             {
                 return ServiceResponse.NotFound($"Language with id {langId} not found");
             }
-            
+
             existingFreelancer.Languages.Add(existingLanguage);
         }
-        
+
         try
         {
             await freelancerRepository.UpdateAsync(existingFreelancer, cancellationToken);
-            return ServiceResponse.Ok("User profile languages updated successfully", existingFreelancer);
+            return ServiceResponse.Ok("User profile languages updated successfully",
+                mapper.Map<FreelancerVM>(existingFreelancer));
         }
         catch (Exception exception)
         {
