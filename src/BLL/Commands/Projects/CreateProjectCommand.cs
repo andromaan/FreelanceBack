@@ -7,9 +7,7 @@ using MediatR;
 
 namespace BLL.Commands.Projects;
 
-public record CreateProjectCommand(CreateProjectVM CreateVm) : IRequest<ServiceResponse>
-{
-}
+public record CreateProjectCommand(CreateProjectVM CreateVm) : IRequest<ServiceResponse>;
 
 public class CreateProjectCommandHandler(IProjectRepository repository, IMapper mapper)
     : IRequestHandler<CreateProjectCommand, ServiceResponse>

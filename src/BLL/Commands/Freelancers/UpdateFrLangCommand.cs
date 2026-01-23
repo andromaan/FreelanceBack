@@ -8,9 +8,7 @@ using MediatR;
 
 namespace BLL.Commands.Freelancers;
 
-public record UpdateFrInfoLangCommand(UpdateFrInfoLangVM Vm) : IRequest<ServiceResponse>
-{
-}
+public record UpdateFrInfoLangCommand(UpdateFrInfoLangVM Vm) : IRequest<ServiceResponse>;
 
 public class UpdateFrInfoLangCommandHandler(
     IUserProvider userProvider,

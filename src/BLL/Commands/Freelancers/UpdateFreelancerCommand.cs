@@ -9,9 +9,7 @@ using MediatR;
 
 namespace BLL.Commands.Freelancers;
 
-public record UpdateFreelancerCommand(UpdateFreelancerVM Vm) : IRequest<ServiceResponse>
-{
-}
+public record UpdateFreelancerCommand(UpdateFreelancerVM Vm) : IRequest<ServiceResponse>;
 
 public class UpdateFreelancerCommandHandler(
     IUserQueries userQueries,

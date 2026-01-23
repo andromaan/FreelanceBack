@@ -35,4 +35,12 @@ public class ProjectController(ISender sender)
         var result = await Sender.Send(command, ct);
         return GetResult(result);
     }
+
+    [HttpGet("by-employer")]
+    public async Task<IActionResult> GetProjectsByEmployer(CancellationToken ct)
+    {
+        var query = new GetProjectsByEmployerQuery();
+        var result = await Sender.Send(query, ct);
+        return GetResult(result);
+    }
 }

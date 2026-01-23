@@ -7,9 +7,7 @@ using MediatR;
 
 namespace BLL.Commands.Freelancers;
 
-public class GetFreelancerByUserQuery : IRequest<ServiceResponse>
-{
-}
+public record GetFreelancerByUserQuery : IRequest<ServiceResponse>;
 
 public class QueryHandler(
     IFreelancerQueries queriesFreelancer,
