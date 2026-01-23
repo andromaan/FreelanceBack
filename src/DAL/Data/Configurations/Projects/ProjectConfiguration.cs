@@ -19,7 +19,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(p => p.BudgetMax).HasPrecision(18, 2);
         builder.Property(p => p.IsHourly).IsRequired();
         
-        // TODO: rethink this 
+        // TODO: rethink this mb
         // builder.Property(p => p.Status).HasMaxLength(32).IsRequired();
         builder.Property(p => p.Status).HasMaxLength(32)
             .HasConversion(
@@ -27,7 +27,8 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
                 v => (ProjectStatus)Enum.Parse(typeof(ProjectStatus), v)).IsRequired();
 
         builder.HasMany(p => p.Categories)
-            .WithMany();
+            .WithMany()
+            .UsingEntity(join => join.ToTable("projects_categories"));
         
         builder.ConfigureAudit();
     }

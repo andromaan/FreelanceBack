@@ -30,12 +30,12 @@ public class FreelancerConfiguration : IEntityTypeConfiguration<Freelancer>
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(p => p.Languages)
-            .WithMany();
+            .WithMany()
+            .UsingEntity(join => join.ToTable("freelancers_languages"));
         
         builder.HasMany(p => p.Skills)
-            .WithOne(s => s.Freelancer!)
-            .HasForeignKey(s => s.FreelancerId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .WithMany()
+            .UsingEntity(join => join.ToTable("freelancers_skills"));
 
         builder.ConfigureAudit();
     }

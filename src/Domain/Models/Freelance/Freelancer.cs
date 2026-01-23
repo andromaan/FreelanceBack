@@ -2,6 +2,7 @@ using Domain.Common.Abstractions;
 using Domain.Models.Auth.Users;
 using Domain.Models.Countries;
 using Domain.Models.Languages;
+using Domain.Models.Projects;
 
 namespace Domain.Models.Freelance;
 
@@ -20,6 +21,6 @@ public class Freelancer : AuditableEntity<Guid>
     public Country? Country { get; set; }
     
     public ICollection<Language> Languages { get; set; } = new List<Language>();
-    public ICollection<FreelancerSkill> Skills { get; set; } = new List<FreelancerSkill>();
+    public ICollection<Skill> Skills { get; set; } = new List<Skill>();
     public ICollection<PortfolioItem> Portfolio { get; set; } = new List<PortfolioItem>();
 }
