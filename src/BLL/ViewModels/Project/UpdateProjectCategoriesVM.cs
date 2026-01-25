@@ -2,5 +2,5 @@ namespace BLL.ViewModels.Project;
 
 public class UpdateProjectCategoriesVM
 {
-    public List<Guid> CategoryIds { get; set; } = [];
+    public List<int> CategoryIds { get; set; } = [];
 }

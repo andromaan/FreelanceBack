@@ -77,7 +77,7 @@ public static class ConfigureBusinessLogic
 
         // registrations for Category
         services.RegisterCrudHandlers(
-            new CrudRegistration<Category, Guid, ICategoryQueries>
+            new CrudRegistration<Category, int, ICategoryQueries>
             {
                 ViewModelType = typeof(CategoryVM),
                 CreateViewModelType = typeof(CreateCategoryVM),

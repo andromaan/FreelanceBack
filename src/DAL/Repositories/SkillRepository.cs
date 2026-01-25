@@ -13,7 +13,8 @@ public class SkillRepository(AppDbContext appDbContext, IUserProvider userProvid
 
     public async Task<bool> IsUniqueAsync(Skill entity, CancellationToken token)
     {
-        return !await _appDbContext.Set<Skill>().AnyAsync(c => c.Name == entity.Name, token);
+        return await _appDbContext.Set<Skill>()
+            .FirstOrDefaultAsync(c => c.Name == entity.Name && c.Id != entity.Id, token) == null;
     }
 }
 

@@ -13,7 +13,8 @@ public class LanguageRepository(AppDbContext appDbContext, IUserProvider userPro
 
     public async Task<bool> IsUniqueAsync(Language entity, CancellationToken token)
     {
-        return !await _appDbContext.Set<Language>().AnyAsync(c => c.Name == entity.Name, token);
+        return await _appDbContext.Set<Language>()
+            .FirstOrDefaultAsync(c => c.Name == entity.Name && c.Id != entity.Id, token) == null;
     }
 }
 

@@ -24,8 +24,8 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("CategoryProject", b =>
                 {
-                    b.Property<Guid>("CategoriesId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("CategoriesId")
+                        .HasColumnType("integer")
                         .HasColumnName("categories_id");
 
                     b.Property<Guid>("ProjectId")
@@ -205,13 +205,13 @@ namespace DAL.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 1, 24, 12, 0, 42, 148, DateTimeKind.Utc).AddTicks(4206),
+                            CreatedAt = new DateTime(2026, 1, 25, 14, 16, 3, 579, DateTimeKind.Utc).AddTicks(5164),
                             CreatedBy = new Guid("11111111-1111-1111-1111-111111111111"),
                             DisplayName = "Admin",
                             Email = "admin@mail.com",
-                            ModifiedAt = new DateTime(2026, 1, 24, 12, 0, 42, 148, DateTimeKind.Utc).AddTicks(4217),
+                            ModifiedAt = new DateTime(2026, 1, 25, 14, 16, 3, 579, DateTimeKind.Utc).AddTicks(5170),
                             ModifiedBy = new Guid("11111111-1111-1111-1111-111111111111"),
-                            PasswordHash = "8F1B4208E95E29A5B36351C300E31F39DC1732F5728DC32FD1FCFC9B882FB0F2-EE52B84F0CC1A85E8F84C9D88A5F08A2",
+                            PasswordHash = "A5566B40AED28E094BC69898A81686A7A946BE9B664BAED105CA5CCEF9113CCC-9EB04467721120139D0760ED1A2CDED9",
                             RoleId = "admin"
                         });
                 });
@@ -2028,26 +2028,12 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Domain.Models.Projects.Category", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("modified_at");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("modified_by");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -7,12 +7,13 @@ using Microsoft.EntityFrameworkCore;
 namespace DAL.Repositories;
 
 public class CategoryRepository(AppDbContext appDbContext, IUserProvider userProvider)
-    : Repository<Category, Guid>(appDbContext, userProvider), ICategoryRepository, ICategoryQueries
+    : Repository<Category, int>(appDbContext, userProvider), ICategoryRepository, ICategoryQueries
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
     public async Task<bool> IsUniqueAsync(Category entity, CancellationToken token)
     {
-        return !await _appDbContext.Set<Category>().AnyAsync(c => c.Name == entity.Name, token);
+        return await _appDbContext.Set<Category>()
+            .FirstOrDefaultAsync(c => c.Name == entity.Name && c.Id != entity.Id, token) == null;
     }
 }

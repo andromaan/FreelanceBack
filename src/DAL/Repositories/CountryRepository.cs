@@ -13,7 +13,8 @@ public class CountryRepository(AppDbContext appDbContext, IUserProvider userProv
 
     public async Task<bool> IsUniqueAsync(Country entity, CancellationToken token)
     {
-        return !await _appDbContext.Set<Country>().AnyAsync(c => c.Name == entity.Name, token);
+        return await _appDbContext.Set<Country>()
+            .FirstOrDefaultAsync(c => c.Name == entity.Name && c.Id != entity.Id, token) == null;
     }
 }
 
