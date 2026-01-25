@@ -1,3 +1,4 @@
+using DAL.Converters;
 using DAL.Extensions;
 using Domain.Models.Freelance;
 using Microsoft.EntityFrameworkCore;
@@ -11,24 +12,25 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
     {
         builder.ToTable("contracts");
         
-        builder.HasKey(p => p.Id);
+        builder.HasKey(c => c.Id);
 
-        builder.Property(p => p.Amount).IsRequired();
-        builder.Property(p => p.Status).HasMaxLength(32).IsRequired();
+        builder.Property(c => c.Amount).IsRequired();
+        builder.Property(c => c.Status).HasMaxLength(32).IsRequired();
+        builder.Property(c => c.StartDate)
+            .HasConversion(new DateTimeUtcConverter())
+            .HasDefaultValueSql("timezone('utc', now())");
+        builder.Property(c => c.EndDate)
+            .HasConversion(new DateTimeUtcConverter())
+            .HasDefaultValueSql("timezone('utc', now())");
 
-        builder.HasOne(p => p.Project)
+        builder.HasOne(c => c.Project)
             .WithMany()
-            .HasForeignKey(p => p.ProjectId)
+            .HasForeignKey(c => c.ProjectId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(p => p.Employer)
+        builder.HasOne(c => c.Freelancer)
             .WithMany()
-            .HasForeignKey(p => p.EmployerId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(p => p.Freelancer)
-            .WithMany()
-            .HasForeignKey(p => p.FreelancerId)
+            .HasForeignKey(c => c.FreelancerId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.ConfigureAudit();
