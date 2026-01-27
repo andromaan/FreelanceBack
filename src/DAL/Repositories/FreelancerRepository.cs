@@ -20,7 +20,7 @@ public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userP
         return entity;
     }
 
-    public async Task<Freelancer?> GetByUserId(Guid userId, CancellationToken token, bool includes = false)
+    public async Task<Freelancer?> GetByUserIdAsync(Guid userId, CancellationToken token, bool includes = false)
     {
         var query = _appDbContext.Freelancers.AsQueryable();
 

@@ -31,7 +31,7 @@ public class UpdateFreelancerCommandHandler(
             return ServiceResponse.NotFound($"User with id {userId} not found");
         }
         
-        var existingFreelancer = await freelancerQueries.GetByUserId(userId, cancellationToken);
+        var existingFreelancer = await freelancerQueries.GetByUserIdAsync(userId, cancellationToken);
         if (existingFreelancer == null)
         {
             return ServiceResponse.NotFound($"User with id {userId} is not a freelancer");

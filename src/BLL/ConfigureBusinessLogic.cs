@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using BLL.Common.Behaviours;
+using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Languages;
@@ -11,6 +12,7 @@ using BLL.Extensions;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
+using BLL.ViewModels.Bid;
 using BLL.ViewModels.Category;
 using BLL.ViewModels.Country;
 using BLL.ViewModels.Language;
@@ -104,13 +106,22 @@ public static class ConfigureBusinessLogic
                 UpdateViewModelType = typeof(UpdateProjectVM)
             });
         
-        // registrations for Project
+        // registrations for ProjectMilestone
         services.RegisterCrudHandlers(
             new CrudRegistration<ProjectMilestone, Guid, IProjectMilestoneQueries>
             {
                 ViewModelType = typeof(ProjectMilestoneVM),
                 CreateViewModelType = typeof(CreateProjectMilestoneVM),
                 UpdateViewModelType = typeof(UpdateProjectMilestoneVM)
+            });
+        
+        // registrations for Bids
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Bid, Guid, IBidQueries>
+            {
+                ViewModelType = typeof(BidVM),
+                CreateViewModelType = typeof(CreateBidVM),
+                UpdateViewModelType = typeof(UpdateBidVM)
             });
     }
 

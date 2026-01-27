@@ -4,5 +4,5 @@ namespace BLL.Common.Interfaces.Repositories.Freelancers;
 
 public interface IFreelancerQueries : IQueries<Freelancer, Guid>
 {
-    Task<Freelancer?> GetByUserId(Guid userId, CancellationToken token, bool includes = false);
+    Task<Freelancer?> GetByUserIdAsync(Guid userId, CancellationToken token, bool includes = false);
 }

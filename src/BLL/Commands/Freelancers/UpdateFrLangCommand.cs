@@ -23,7 +23,7 @@ public class UpdateFrInfoLangCommandHandler(
         var vm = request.Vm.LanguageIds.Distinct();
         var userId = await userProvider.GetUserId();
 
-        var existingFreelancer = await freelancerQueries.GetByUserId(userId, cancellationToken, true);
+        var existingFreelancer = await freelancerQueries.GetByUserIdAsync(userId, cancellationToken, true);
         if (existingFreelancer == null)
         {
             return ServiceResponse.NotFound($"User with id {userId} does not have a profile");

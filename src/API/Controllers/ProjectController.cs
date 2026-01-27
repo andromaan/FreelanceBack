@@ -43,4 +43,12 @@ public class ProjectController(ISender sender)
         var result = await Sender.Send(query, ct);
         return GetResult(result);
     }
+
+    [AllowAnonymous]
+    public override Task<IActionResult> GetAll(CancellationToken ct)
+        => base.GetAll(ct);
+
+    [AllowAnonymous]
+    public override Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        => base.GetById(id, ct);
 }

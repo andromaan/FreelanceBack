@@ -21,7 +21,7 @@ public class QueryHandler(
         {
             var userId = await userProvider.GetUserId();
 
-            var freelancer = await queriesFreelancer.GetByUserId(userId, cancellationToken, includes: true);
+            var freelancer = await queriesFreelancer.GetByUserIdAsync(userId, cancellationToken, includes: true);
             if (freelancer == null)
             {
                 return ServiceResponse.NotFound("Freelancer not found");
