@@ -1,15 +1,21 @@
 using BLL.Common;
 using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
+using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
+using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Proposals;
+using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Interfaces.Repositories.Users;
+using BLL.Common.Interfaces.Repositories.UserWallets;
+using BLL.Common.Interfaces.Repositories.WalletTransactions;
 using DAL.Data;
 using DAL.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -92,5 +98,29 @@ public static class ConfigureDataAccess
         services.AddScoped<CategoryRepository>();
         services.AddScoped<ICategoryRepository>(provider => provider.GetRequiredService<CategoryRepository>());
         services.AddScoped<ICategoryQueries>(provider => provider.GetRequiredService<CategoryRepository>());
+        
+        services.AddScoped<ProjectMilestoneRepository>();
+        services.AddScoped<IProjectMilestoneRepository>(provider => provider.GetRequiredService<ProjectMilestoneRepository>());
+        services.AddScoped<IProjectMilestoneQueries>(provider => provider.GetRequiredService<ProjectMilestoneRepository>());
+        
+        services.AddScoped<ContractMilestoneRepository>();
+        services.AddScoped<IContractMilestoneRepository>(provider => provider.GetRequiredService<ContractMilestoneRepository>());
+        services.AddScoped<IContractMilestoneQueries>(provider => provider.GetRequiredService<ContractMilestoneRepository>());
+        
+        services.AddScoped<BidRepository>();
+        services.AddScoped<IBidRepository>(provider => provider.GetRequiredService<BidRepository>());
+        services.AddScoped<IBidQueries>(provider => provider.GetRequiredService<BidRepository>());
+        
+        services.AddScoped<QuoteRepository>();
+        services.AddScoped<IQuoteRepository>(provider => provider.GetRequiredService<QuoteRepository>());
+        services.AddScoped<IQuoteQueries>(provider => provider.GetRequiredService<QuoteRepository>());
+        
+        services.AddScoped<UserWalletRepository>();
+        services.AddScoped<IUserWalletRepository>(provider => provider.GetRequiredService<UserWalletRepository>());
+        services.AddScoped<IUserWalletQueries>(provider => provider.GetRequiredService<UserWalletRepository>());
+        
+        services.AddScoped<WalletTransactionRepository>();
+        services.AddScoped<IWalletTransactionRepository>(provider => provider.GetRequiredService<WalletTransactionRepository>());
+        services.AddScoped<IWalletTransactionQueries>(provider => provider.GetRequiredService<WalletTransactionRepository>());
     }
 }
