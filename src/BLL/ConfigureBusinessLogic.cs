@@ -7,6 +7,7 @@ using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
+using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Extensions;
 using BLL.Services.ImageService;
@@ -18,6 +19,7 @@ using BLL.ViewModels.Country;
 using BLL.ViewModels.Language;
 using BLL.ViewModels.Project;
 using BLL.ViewModels.ProjectMilestone;
+using BLL.ViewModels.Quote;
 using BLL.ViewModels.Skill;
 using Domain;
 using Domain.Models.Countries;
@@ -122,6 +124,15 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(BidVM),
                 CreateViewModelType = typeof(CreateBidVM),
                 UpdateViewModelType = typeof(UpdateBidVM)
+            });
+        
+        // registrations for Quotes
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Quote, Guid, IQuoteQueries>
+            {
+                ViewModelType = typeof(QuoteVM),
+                CreateViewModelType = typeof(CreateQuoteVM),
+                UpdateViewModelType = typeof(UpdateQuoteVM)
             });
     }
 
