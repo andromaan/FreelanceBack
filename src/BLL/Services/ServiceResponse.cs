@@ -44,4 +44,9 @@ public class ServiceResponse
     {
         return GetResponse(message, false, data, HttpStatusCode.Forbidden);
     }
+    
+    public static ServiceResponse Unauthorized(string message, object? data = null)
+    {
+        return GetResponse(message, false, data, HttpStatusCode.Unauthorized);
+    }
 }

@@ -1,5 +1,4 @@
 using Domain.Common.Abstractions;
-using Domain.Models.Freelance;
 
 namespace Domain.Models.Projects;
 
@@ -13,7 +12,8 @@ public class Project : AuditableEntity<Guid>
     public bool IsHourly { get; set; }
     public ProjectStatus Status { get; set; } = ProjectStatus.Open;
 
-    public ICollection<Proposal> Proposals { get; set; } = new List<Proposal>();
+    public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+    public ICollection<Quote> Quotes { get; set; } = new List<Quote>();
     public ICollection<Category> Categories { get; set; } = new List<Category>();
 }
 

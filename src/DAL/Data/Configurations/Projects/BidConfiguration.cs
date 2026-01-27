@@ -16,7 +16,7 @@ public class BidConfiguration : IEntityTypeConfiguration<Bid>
         builder.Property(b => b.Message).IsRequired(false);
 
         builder.HasOne(b => b.Project)
-            .WithMany()
+            .WithMany(b => b.Bids)
             .HasForeignKey(b => b.ProjectId)
             .OnDelete(DeleteBehavior.Cascade);
         

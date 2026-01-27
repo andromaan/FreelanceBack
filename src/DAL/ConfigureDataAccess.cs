@@ -10,7 +10,6 @@ using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
-using BLL.Common.Interfaces.Repositories.Proposals;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Interfaces.Repositories.Users;
@@ -70,10 +69,6 @@ public static class ConfigureDataAccess
         services.AddScoped<FreelancerRepository>();
         services.AddScoped<IFreelancerRepository>(provider => provider.GetRequiredService<FreelancerRepository>());
         services.AddScoped<IFreelancerQueries>(provider => provider.GetRequiredService<FreelancerRepository>());
-
-        services.AddScoped<ProposalRepository>();
-        services.AddScoped<IProposalRepository>(provider => provider.GetRequiredService<ProposalRepository>());
-        services.AddScoped<IProposalQueries>(provider => provider.GetRequiredService<ProposalRepository>());
 
         services.AddScoped<ContractRepository>();
         services.AddScoped<IContractRepository>(provider => provider.GetRequiredService<ContractRepository>());

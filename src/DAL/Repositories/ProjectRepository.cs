@@ -15,14 +15,14 @@ public class ProjectRepository(AppDbContext appDbContext, IUserProvider userProv
     public override Task<IEnumerable<Project>> GetAllAsync(CancellationToken token)
     {
         return base.GetAllAsync(token, p => p.Categories,
-            p => p.Proposals);
+            p => p.Bids, p => p.Quotes);
     }
 
     public override Task<Project?> GetByIdAsync(Guid id, CancellationToken token, bool asNoTracking = false)
     {
         return base.GetByIdAsync(id, token, asNoTracking,
             p => p.Categories,
-            p => p.Proposals);
+            p => p.Bids, p => p.Quotes);
     }
 
     public Task<List<Project>> GetByEmployer(CancellationToken cancellationToken)
@@ -31,7 +31,8 @@ public class ProjectRepository(AppDbContext appDbContext, IUserProvider userProv
         
         return _appDbContext.Set<Project>().Where(p => p.CreatedBy == userId)
             .Include(p => p.Categories)
-            .Include(p => p.Proposals)
+            .Include(p => p.Bids)
+            .Include(p => p.Quotes)
             .AsNoTracking().ToListAsync(cancellationToken);
     }
 }

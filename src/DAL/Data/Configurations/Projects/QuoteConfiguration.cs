@@ -16,7 +16,7 @@ public class QuoteConfiguration : IEntityTypeConfiguration<Quote>
         builder.Property(q => q.Message).IsRequired(false);
 
         builder.HasOne(q => q.Project)
-            .WithMany()
+            .WithMany(q => q.Quotes)
             .HasForeignKey(q => q.ProjectId)
             .OnDelete(DeleteBehavior.Cascade);
         

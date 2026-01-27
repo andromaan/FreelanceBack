@@ -2,6 +2,7 @@ using AutoMapper;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Users;
+using BLL.Common.Interfaces.Repositories.UserWallets;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
@@ -23,7 +24,8 @@ public class SignUpCommandHandler(
     IUserQueries userQueries,
     IMapper mapper,
     IFreelancerRepository freelancerRepository,
-    IEmployerRepository employerRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
+    IEmployerRepository employerRepository,
+    IUserWalletRepository userWalletRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
@@ -67,6 +69,18 @@ public class SignUpCommandHandler(
                 };
 
                 await employerRepository.CreateAsync(employer, user.Id, cancellationToken);
+            }
+            
+            if (user.RoleId != Settings.Roles.AdminRole)
+            {
+                var userWallet = new UserWallet
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedBy =  user.Id,
+                    Balance = 0m
+                };
+
+                await userWalletRepository.CreateAsync(userWallet, cancellationToken);
             }
         }
         catch (Exception e)
