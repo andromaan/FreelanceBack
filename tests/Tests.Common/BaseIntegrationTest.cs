@@ -54,7 +54,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
         Context.ChangeTracker.Clear();
     }
 
-    protected string GenerateJwtToken()
+    private string GenerateJwtToken()
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSecretKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

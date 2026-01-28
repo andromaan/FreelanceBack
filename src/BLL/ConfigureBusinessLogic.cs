@@ -3,6 +3,7 @@ using System.Text;
 using BLL.Common.Behaviours;
 using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
+using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
@@ -15,6 +16,7 @@ using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using BLL.ViewModels.Bid;
 using BLL.ViewModels.Category;
+using BLL.ViewModels.ContractMilestone;
 using BLL.ViewModels.Country;
 using BLL.ViewModels.Language;
 using BLL.ViewModels.Project;
@@ -23,6 +25,7 @@ using BLL.ViewModels.Quote;
 using BLL.ViewModels.Skill;
 using Domain;
 using Domain.Models.Countries;
+using Domain.Models.Freelance;
 using Domain.Models.Languages;
 using Domain.Models.Projects;
 using FluentValidation;
@@ -115,6 +118,15 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(ProjectMilestoneVM),
                 CreateViewModelType = typeof(CreateProjectMilestoneVM),
                 UpdateViewModelType = typeof(UpdateProjectMilestoneVM)
+            });
+        
+        // registrations for ContractMilestone
+        services.RegisterCrudHandlers(
+            new CrudRegistration<ContractMilestone, Guid, IContractMilestoneQueries>
+            {
+                ViewModelType = typeof(ContractMilestoneVM),
+                CreateViewModelType = typeof(CreateContractMilestoneVM),
+                UpdateViewModelType = typeof(UpdateContractMilestoneVM)
             });
         
         // registrations for Bids

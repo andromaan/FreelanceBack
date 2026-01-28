@@ -1,6 +1,6 @@
 ﻿using Domain.Models.Languages;
 
-namespace Api.Tests.Integration.Data;
+namespace TestsData;
 
 public class LanguageData
 {

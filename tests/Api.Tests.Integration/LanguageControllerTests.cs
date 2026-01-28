@@ -1,13 +1,13 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Api.Tests.Integration.Data;
 using BLL.ViewModels.Language;
 using Domain.Models.Languages;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Tests.Common;
+using TestsData;
 
-namespace Api.Tests.Integration.Tests;
+namespace Api.Tests.Integration;
 
 public class LanguageControllerTests(IntegrationTestWebFactory factory)
     : BaseIntegrationTest(factory), IAsyncLifetime
@@ -28,7 +28,7 @@ public class LanguageControllerTests(IntegrationTestWebFactory factory)
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
 
-        var languageFromResponse = await JsonHelper.GetPayloadAsync<Language>(response);
+        var languageFromResponse = await JsonHelper.GetPayloadAsync<LanguageVM>(response);
         var languageId = languageFromResponse.Id;
 
         var languageFromDb = await Context.Set<Language>().FirstOrDefaultAsync(x => x.Id == languageId);
@@ -52,7 +52,7 @@ public class LanguageControllerTests(IntegrationTestWebFactory factory)
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
         
-        var languageFromResponse = await JsonHelper.GetPayloadAsync<Language>(response);
+        var languageFromResponse = await JsonHelper.GetPayloadAsync<LanguageVM>(response);
         var languageId = languageFromResponse.Id;
         
         var languageFromDb = await Context.Set<Language>().FirstOrDefaultAsync(x => x.Id == languageId);
@@ -102,6 +102,17 @@ public class LanguageControllerTests(IntegrationTestWebFactory factory)
     }
     
     [Fact]
+    public async Task ShouldNotGetByIdBecauseNotFound()
+    {
+        // Act
+        var response = await Client.GetAsync($"Language/{int.MaxValue}");
+        
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+    
+    [Fact]
     public async Task ShouldNotCreateBecauseDuplicateCode()
     {
         // Arrange
@@ -138,7 +149,7 @@ public class LanguageControllerTests(IntegrationTestWebFactory factory)
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
         
-        var languages = await JsonHelper.GetPayloadAsync<List<Language>>(response);
+        var languages = await JsonHelper.GetPayloadAsync<List<LanguageVM>>(response);
         
         languages.Should().NotBeEmpty();
     }

@@ -27,6 +27,7 @@
       <ProjectReference Include="..\..\src\DAL\DAL.csproj" />
       <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
       <ProjectReference Include="..\Tests.Common\Tests.Common.csproj" />
+      <ProjectReference Include="..\TestsData\TestsData.csproj" />
     </ItemGroup>
 
 </Project>

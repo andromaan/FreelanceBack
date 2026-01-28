@@ -1,7 +1,9 @@
 using API.Controllers.Common;
 using BLL.Commands.Bids;
 using BLL.ViewModels.Bid;
+using Domain;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,8 +11,8 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-// [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-// [Authorize(Roles = $"{Settings.Roles.AdminRole}, {Settings.Roles.FreelancerRole}")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+[Authorize(Roles = $"{Settings.Roles.AdminRole}, {Settings.Roles.FreelancerRole}")]
 public class BidController(ISender sender)
     : GenericCrudController<Guid, BidVM, CreateBidVM, UpdateBidVM>(sender)
 {
