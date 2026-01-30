@@ -5,6 +5,8 @@ public static class Settings
     public static class Roles
     {
         public const string AnyAuthenticated = "AnyAuthenticated";
+        public const string AdminOrEmployer = "AdminOrEmployer";
+        public const string AdminOrFreelancer = "AdminOrFreelancer";
         
         public const string AdminRole = "admin";
         public const string EmployerRole = "employer";
@@ -16,5 +18,6 @@ public static class Settings
             EmployerRole,
             FreelancerRole
         };
+
     }
 }

@@ -12,7 +12,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Authorize(Roles = $"{Settings.Roles.AdminRole}, {Settings.Roles.FreelancerRole}")]
+[Authorize(Roles = Settings.Roles.AdminOrFreelancer)]
 public class BidController(ISender sender)
     : GenericCrudController<Guid, BidVM, CreateBidVM, UpdateBidVM>(sender)
 {

@@ -12,7 +12,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Authorize(Roles = $"{Settings.Roles.AdminRole}, {Settings.Roles.EmployerRole}")]
+[Authorize(Roles = Settings.Roles.AdminOrEmployer)]
 public class ContractMilestoneController(ISender sender)
     : GenericCrudController<Guid, ContractMilestoneVM, CreateContractMilestoneVM, UpdateContractMilestoneVM>(sender)
 {

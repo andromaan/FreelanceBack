@@ -53,7 +53,12 @@ public static class ConfigureBusinessLogic
         services.AddAuthorization(options =>
         {
             options.AddPolicy(Settings.Roles.AnyAuthenticated,
-                policy => policy.RequireRole(Settings.Roles.AdminRole));
+                policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole,
+                    Settings.Roles.FreelancerRole));
+            options.AddPolicy(Settings.Roles.AdminOrEmployer,
+                policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole));
+            options.AddPolicy(Settings.Roles.AdminOrFreelancer,
+                policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.FreelancerRole));
         });
     }
 
@@ -101,7 +106,7 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateSkillVM),
                 UpdateViewModelType = typeof(UpdateSkillVM)
             });
-        
+
         // registrations for Project
         services.RegisterCrudHandlers(
             new CrudRegistration<Project, Guid, IProjectQueries>
@@ -110,7 +115,7 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateProjectVM),
                 UpdateViewModelType = typeof(UpdateProjectVM)
             });
-        
+
         // registrations for ProjectMilestone
         services.RegisterCrudHandlers(
             new CrudRegistration<ProjectMilestone, Guid, IProjectMilestoneQueries>
@@ -119,7 +124,7 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateProjectMilestoneVM),
                 UpdateViewModelType = typeof(UpdateProjectMilestoneVM)
             });
-        
+
         // registrations for ContractMilestone
         services.RegisterCrudHandlers(
             new CrudRegistration<ContractMilestone, Guid, IContractMilestoneQueries>
@@ -128,7 +133,7 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateContractMilestoneVM),
                 UpdateViewModelType = typeof(UpdateContractMilestoneVM)
             });
-        
+
         // registrations for Bids
         services.RegisterCrudHandlers(
             new CrudRegistration<Bid, Guid, IBidQueries>
@@ -137,7 +142,7 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateBidVM),
                 UpdateViewModelType = typeof(UpdateBidVM)
             });
-        
+
         // registrations for Quotes
         services.RegisterCrudHandlers(
             new CrudRegistration<Quote, Guid, IQuoteQueries>

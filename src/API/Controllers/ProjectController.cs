@@ -12,7 +12,7 @@ namespace API.Controllers;
 [Route("[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Authorize(Roles = $"{Settings.Roles.AdminRole}, {Settings.Roles.EmployerRole}")]
+[Authorize(Roles = Settings.Roles.AdminOrEmployer)]
 public class ProjectController(ISender sender)
     : GenericCrudController<Guid, ProjectVM, CreateProjectVM, UpdateProjectVM>(sender)
 {
