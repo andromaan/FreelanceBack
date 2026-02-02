@@ -1,7 +1,7 @@
 using BLL.ViewModels.Language;
 using FluentValidation;
 
-namespace BLL.Commands.Languages.Validators;
+namespace BLL.Commands.Languages.FluentValidations;
 
 public class UpdateLanguageCommandValidator : AbstractValidator<Update.Command<CreateLanguageVM, int>>
 {

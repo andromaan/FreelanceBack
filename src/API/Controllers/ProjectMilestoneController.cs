@@ -2,6 +2,7 @@ using API.Controllers.Common;
 using BLL.Commands.ProjectMilestones;
 using BLL.ViewModels.ProjectMilestone;
 using Domain;
+using Domain.Models.Projects;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -16,13 +17,6 @@ namespace API.Controllers;
 public class ProjectMilestoneController(ISender sender)
     : GenericCrudController<Guid, ProjectMilestoneVM, CreateProjectMilestoneVM, UpdateProjectMilestoneVM>(sender)
 {
-    public override async Task<IActionResult> Create(CreateProjectMilestoneVM vm, CancellationToken ct)
-    {
-        var command = new CreateProjectMilestoneCommand(vm);
-        var result = await Sender.Send(command, ct);
-        return GetResult(result);
-    }
-
     [AllowAnonymous]
     [HttpGet("by-project/{projectId}")]
     public async Task<IActionResult> GetByProjectId(Guid projectId, CancellationToken ct)
@@ -32,7 +26,15 @@ public class ProjectMilestoneController(ISender sender)
         return GetResult(result);
     }
     
-    
+    [HttpGet("milestone-status-enums")]
+    public IActionResult GetPlatformsAsync()
+    {
+        var platforms = Enum.GetValues<ProjectMilestoneStatus>()
+            .Select(x => new { Name = x.ToString(), Value = (int)x })
+            .ToList();
+
+        return Ok(platforms);
+    }
 
     [ApiExplorerSettings(IgnoreApi = true)]
     public override Task<IActionResult> GetAll(CancellationToken ct)

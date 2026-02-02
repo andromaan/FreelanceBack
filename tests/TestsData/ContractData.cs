@@ -4,14 +4,14 @@ namespace TestsData;
 
 public class ContractData
 {
-    public static Contract CreateContract(Guid? id = null, Guid? projectId = null, Guid? freelancerId = null)
+    public static Contract CreateContract(Guid? id = null, Guid? projectId = null, Guid? freelancerId = null, decimal? agreedRate = null)
     {
         return new Contract
         {
             Id = id ?? Guid.NewGuid(),
             ProjectId = projectId ?? Guid.NewGuid(),
             FreelancerId = freelancerId ?? Guid.NewGuid(),
-            AgreedRate = 1000m,
+            AgreedRate = agreedRate ?? 1000m,
             Status = "Pending",
             StartDate = DateTime.UtcNow
         };

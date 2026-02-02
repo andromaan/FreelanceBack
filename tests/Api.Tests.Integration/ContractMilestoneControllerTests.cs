@@ -28,7 +28,7 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         {
             ContractId = _contract.Id,
             Description = "New contract milestone",
-            Amount = 600m,
+            Amount = _contract.AgreedRate - _contractMilestone.Amount,
             DueDate = dueDate
         };
 
@@ -46,7 +46,7 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         milestoneFromDb.Should().NotBeNull();
         milestoneFromDb.ContractId.Should().Be(_contract.Id);
         milestoneFromDb.Description.Should().Be("New contract milestone");
-        milestoneFromDb.Amount.Should().Be(600m);
+        milestoneFromDb.Amount.Should().Be(request.Amount);
     }
 
     [Fact]
@@ -69,7 +69,8 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
 
         var milestoneFromResponse = await JsonHelper.GetPayloadAsync<ContractMilestoneVM>(response);
 
-        var milestoneFromDb = await Context.Set<ContractMilestone>().FirstOrDefaultAsync(x => x.Id == milestoneFromResponse.Id);
+        var milestoneFromDb = await Context.Set<ContractMilestone>()
+            .FirstOrDefaultAsync(x => x.Id == milestoneFromResponse.Id);
 
         milestoneFromDb.Should().NotBeNull();
         milestoneFromDb.Description.Should().Be("Updated contract milestone");
@@ -85,7 +86,8 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
 
-        var milestoneFromDb = await Context.Set<ContractMilestone>().FirstOrDefaultAsync(x => x.Id == _contractMilestone.Id);
+        var milestoneFromDb =
+            await Context.Set<ContractMilestone>().FirstOrDefaultAsync(x => x.Id == _contractMilestone.Id);
 
         milestoneFromDb.Should().BeNull();
     }
@@ -195,13 +197,82 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
 
         // Act
         var response = await Client.GetAsync($"ContractMilestone/by-contract/{contractWithoutMilestones.Id}");
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
-        
+
         var milestones = await JsonHelper.GetPayloadAsync<List<ContractMilestoneVM>>(response);
-        
+
         milestones.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ShouldNotCreateContractMilestone_WhenAmountExceedsContractBudget()
+    {
+        // Arrange
+        var contract =
+            ContractData.CreateContract(agreedRate: 1000m, projectId: _project.Id, 
+                freelancerId: _freelancerUser.Id);
+        await Context.AddAsync(contract);
+        await SaveChangesAsync();
+
+        var firstMilestone = new CreateContractMilestoneVM
+        {
+            ContractId = contract.Id,
+            Description = "First contract milestone",
+            Amount = 900m,
+            DueDate = DateTime.UtcNow.AddDays(10)
+        };
+        var response1 = await Client.PostAsJsonAsync("ContractMilestone", firstMilestone);
+        response1.IsSuccessStatusCode.Should().BeTrue();
+
+        var secondMilestone = new CreateContractMilestoneVM
+        {
+            ContractId = contract.Id,
+            Description = "Second contract milestone",
+            Amount = 200m,
+            DueDate = DateTime.UtcNow.AddDays(20)
+        };
+        // Act
+        var response2 = await Client.PostAsJsonAsync("ContractMilestone", secondMilestone);
+
+        // Assert
+        response2.IsSuccessStatusCode.Should().BeFalse();
+        response2.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task ShouldNotUpdateContractMilestone_WhenAmountExceedsContractBudget()
+    {
+        // Arrange
+        var contract =
+            ContractData.CreateContract(agreedRate: 1000m, 
+                projectId: _project.Id, freelancerId: _freelancerUser.Id);
+        await Context.AddAsync(contract);
+        var milestone = new ContractMilestone
+        {
+            Id = Guid.NewGuid(),
+            ContractId = contract.Id,
+            Description = "Milestone",
+            Amount = 900m,
+            DueDate = DateTime.UtcNow.AddDays(10),
+            Status = ContractMilestoneStatus.Pending
+        };
+        await Context.AddAsync(milestone);
+        await SaveChangesAsync();
+
+        var updateRequest = new UpdateContractMilestoneVM
+        {
+            Description = "Milestone updated",
+            Amount = 1100m, // перевищує бюджет
+            DueDate = DateTime.UtcNow.AddDays(20)
+        };
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/{milestone.Id}", updateRequest);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     public async Task InitializeAsync()
@@ -210,14 +281,15 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         _project = ProjectData.CreateProject();
         _contract = ContractData.CreateContract(
             projectId: _project.Id,
-            freelancerId: _freelancerUser.Id
+            freelancerId: _freelancerUser.Id,
+            agreedRate: 1000m
         );
         _contractMilestone = new ContractMilestone
         {
             Id = Guid.NewGuid(),
             ContractId = _contract.Id,
             Description = "Test contract milestone",
-            Amount = 1200m,
+            Amount = _contract.AgreedRate / 2,
             DueDate = DateTime.UtcNow.AddDays(30),
             Status = ContractMilestoneStatus.Pending
         };

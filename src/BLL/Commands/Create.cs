@@ -1,5 +1,6 @@
 using AutoMapper;
 using BLL.Common;
+using BLL.Common.Validators;
 using BLL.Services;
 using Domain.Common.Abstractions;
 using MediatR;
@@ -16,7 +17,8 @@ public class Create
     public class CommandHandler<TCreateViewModel, TViewModel, TEntity, TKey, TQueries>(
         IRepository<TEntity, TKey> repository,
         IMapper mapper,
-        TQueries queries)
+        TQueries queries,
+        IEnumerable<ICreateValidator<TCreateViewModel>> validators)
         : IRequestHandler<Command<TCreateViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TCreateViewModel : class
@@ -33,6 +35,18 @@ public class Create
                 if (!await uniqueQuery.IsUniqueAsync(entity, cancellationToken))
                 {
                     return ServiceResponse.BadRequest($"{typeof(TEntity).Name} with the same unique fields already exists");
+                }
+            }
+            
+            foreach (var validator in validators)
+            {
+                var validationResult = await validator.ValidateAsync(
+                    request.Model, 
+                    cancellationToken);
+                    
+                if (validationResult != null && !validationResult.Success)
+                {
+                    return validationResult;
                 }
             }
 

@@ -1,12 +1,15 @@
 using BLL.ViewModels.Country;
 using FluentValidation;
 
-namespace BLL.Commands.Countries.Validators;
+namespace BLL.Commands.Countries.FluentValidations;
 
-public class CreateCountryCommandValidator : AbstractValidator<Create.Command<CreateCountryVM>>
+public class UpdateCountryCommandValidator : AbstractValidator<Update.Command<UpdateCountryVM, int>>
 {
-    public CreateCountryCommandValidator()
+    public UpdateCountryCommandValidator()
     {
+        RuleFor(x => x.Id)
+            .GreaterThan(0).WithMessage("Country ID must be greater than 0");
+
         RuleFor(x => x.Model.Name)
             .NotEmpty().WithMessage("Country name is required")
             .Must(name => name.Trim().Length > 0).WithMessage("Country name cannot be empty or whitespace")
@@ -21,3 +24,4 @@ public class CreateCountryCommandValidator : AbstractValidator<Create.Command<Cr
             .Length(3).WithMessage("Alpha-3 code must be exactly 3 characters long");
     }
 }
+

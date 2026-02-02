@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace BLL.Commands.Freelancers.Validators;
+namespace BLL.Commands.Freelancers.FluentValidations;
 
 public class UpdateFreelancerCommandValidator : AbstractValidator<UpdateFreelancerCommand>
 {

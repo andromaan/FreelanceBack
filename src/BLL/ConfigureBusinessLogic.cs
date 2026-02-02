@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Text;
+using BLL.Commands.ContractMilestones;
+using BLL.Commands.ProjectMilestones;
 using BLL.Common.Behaviours;
 using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
@@ -10,6 +12,7 @@ using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Skills;
+using BLL.Common.Validators;
 using BLL.Extensions;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
@@ -126,6 +129,12 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateProjectMilestoneVM),
                 UpdateViewModelType = typeof(UpdateProjectMilestoneVM)
             });
+        
+        services.AddScoped<IUpdateValidator<ProjectMilestone, UpdateProjectMilestoneVM>, 
+            UpdateProjectMilestoneBudgetValidator>();
+        
+        services.AddScoped<ICreateValidator<CreateProjectMilestoneVM>, 
+            CreateProjectMilestoneBudgetValidator>();
 
         // registrations for ContractMilestone
         services.RegisterCrudHandlers(
@@ -135,6 +144,12 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateContractMilestoneVM),
                 UpdateViewModelType = typeof(UpdateContractMilestoneVM)
             });
+        
+        services.AddScoped<IUpdateValidator<ContractMilestone, UpdateContractMilestoneVM>, 
+            UpdateContractMilestoneBudgetValidator>();
+        
+        services.AddScoped<ICreateValidator<CreateContractMilestoneVM>, 
+            CreateContractMilestoneBudgetValidator>();
 
         // registrations for Bids
         services.RegisterCrudHandlers(

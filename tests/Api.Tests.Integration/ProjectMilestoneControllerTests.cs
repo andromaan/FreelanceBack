@@ -26,7 +26,7 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
         { 
             ProjectId = _project.Id,
             Description = "New milestone",
-            Amount = 500m,
+            Amount = (decimal)_project.BudgetMax! - _projectMilestone.Amount,
             DueDate = dueDate
         };
 
@@ -44,7 +44,7 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
         milestoneFromDb.Should().NotBeNull();
         milestoneFromDb.ProjectId.Should().Be(_project.Id);
         milestoneFromDb.Description.Should().Be("New milestone");
-        milestoneFromDb.Amount.Should().Be(500m);
+        milestoneFromDb.Amount.Should().Be(request.Amount);
     }
     
     [Fact]
@@ -199,6 +199,72 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
         milestones.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task ShouldNotCreateProjectMilestone_WhenAmountExceedsProjectBudget()
+    {
+        // Arrange
+        var project = ProjectData.CreateProject(budgetMin: 1000m, budgetMax: 1000m);
+        await Context.AddAsync(project);
+        await SaveChangesAsync();
+
+        var firstMilestone = new CreateProjectMilestoneVM
+        {
+            ProjectId = project.Id,
+            Description = "First milestone",
+            Amount = 900m,
+            DueDate = DateTime.UtcNow.AddDays(10)
+        };
+        var response1 = await Client.PostAsJsonAsync("ProjectMilestone", firstMilestone);
+        response1.IsSuccessStatusCode.Should().BeTrue();
+
+        var secondMilestone = new CreateProjectMilestoneVM
+        {
+            ProjectId = project.Id,
+            Description = "Second milestone",
+            Amount = 200m,
+            DueDate = DateTime.UtcNow.AddDays(20)
+        };
+        // Act
+        var response2 = await Client.PostAsJsonAsync("ProjectMilestone", secondMilestone);
+
+        // Assert
+        response2.IsSuccessStatusCode.Should().BeFalse();
+        response2.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task ShouldNotUpdateProjectMilestone_WhenAmountExceedsProjectBudget()
+    {
+        // Arrange
+        var project = ProjectData.CreateProject(budgetMin: 1000m, budgetMax: 1000m);
+        await Context.AddAsync(project);
+        var milestone = new ProjectMilestone
+        {
+            Id = Guid.NewGuid(),
+            ProjectId = project.Id,
+            Description = "Milestone",
+            Amount = 900m,
+            DueDate = DateTime.UtcNow.AddDays(10),
+            Status = ProjectMilestoneStatus.Pending,
+            CreatedBy = UserId
+        };
+        await Context.AddAsync(milestone);
+        await SaveChangesAsync();
+
+        var updateRequest = new UpdateProjectMilestoneVM
+        {
+            Description = "Milestone updated",
+            Amount = 1100m, // перевищує бюджет
+            DueDate = DateTime.UtcNow.AddDays(20)
+        };
+        // Act
+        var response = await Client.PutAsJsonAsync($"ProjectMilestone/{milestone.Id}", updateRequest);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
     public async Task InitializeAsync()
     {
         _employerUser = UserData.CreateTestUser(UserId);
@@ -208,7 +274,7 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
             Id = Guid.NewGuid(),
             ProjectId = _project.Id,
             Description = "Test milestone",
-            Amount = 1000m,
+            Amount = (decimal)_project.BudgetMax! / 2,
             DueDate = DateTime.UtcNow.AddDays(30),
             Status = ProjectMilestoneStatus.Pending,
             CreatedBy = _employerUser.Id

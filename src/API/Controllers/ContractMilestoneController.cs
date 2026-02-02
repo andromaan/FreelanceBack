@@ -16,13 +16,6 @@ namespace API.Controllers;
 public class ContractMilestoneController(ISender sender)
     : GenericCrudController<Guid, ContractMilestoneVM, CreateContractMilestoneVM, UpdateContractMilestoneVM>(sender)
 {
-    public override async Task<IActionResult> Create(CreateContractMilestoneVM vm, CancellationToken ct)
-    {
-        var command = new CreateContractMilestoneCommand(vm);
-        var result = await Sender.Send(command, ct);
-        return GetResult(result);
-    }
-
     [AllowAnonymous]
     [HttpGet("by-contract/{contractId}")]
     public async Task<IActionResult> GetByContractId(Guid contractId, CancellationToken ct)
