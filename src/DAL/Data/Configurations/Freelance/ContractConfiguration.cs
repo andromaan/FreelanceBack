@@ -14,7 +14,9 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Amount).IsRequired();
+        builder.Property(c => c.AgreedRate)
+            .HasPrecision(18, 2)
+            .IsRequired();
         builder.Property(c => c.Status).HasMaxLength(32).IsRequired();
         builder.Property(c => c.StartDate)
             .HasConversion(new DateTimeUtcConverter())

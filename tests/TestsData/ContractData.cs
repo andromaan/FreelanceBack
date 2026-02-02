@@ -11,7 +11,7 @@ public class ContractData
             Id = id ?? Guid.NewGuid(),
             ProjectId = projectId ?? Guid.NewGuid(),
             FreelancerId = freelancerId ?? Guid.NewGuid(),
-            Amount = 1000m,
+            AgreedRate = 1000m,
             Status = "Pending",
             StartDate = DateTime.UtcNow
         };
