@@ -12,7 +12,7 @@ namespace API.Controllers;
 [Route("[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Authorize(Roles = $"{Settings.Roles.AdminRole}, {Settings.Roles.EmployerRole}")]
+[Authorize(Policy = Settings.Roles.AdminOrEmployer)]
 public class EmployerController(ISender sender) : BaseController
 {
     [HttpGet]

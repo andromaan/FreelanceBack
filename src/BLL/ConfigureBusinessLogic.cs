@@ -55,8 +55,10 @@ public static class ConfigureBusinessLogic
             options.AddPolicy(Settings.Roles.AnyAuthenticated,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole,
                     Settings.Roles.FreelancerRole));
+            
             options.AddPolicy(Settings.Roles.AdminOrEmployer,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole));
+            
             options.AddPolicy(Settings.Roles.AdminOrFreelancer,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.FreelancerRole));
         });

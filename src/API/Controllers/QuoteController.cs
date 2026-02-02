@@ -12,7 +12,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Authorize(Roles = Settings.Roles.AdminOrFreelancer)]
+[Authorize(Policy = Settings.Roles.AdminOrFreelancer)]
 public class QuoteController(ISender sender)
     : GenericCrudController<Guid, QuoteVM, CreateQuoteVM, UpdateQuoteVM>(sender)
 {

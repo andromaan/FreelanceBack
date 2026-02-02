@@ -12,7 +12,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Authorize(Roles = Settings.Roles.AdminOrEmployer)]
+[Authorize(Policy = Settings.Roles.AdminOrEmployer)]
 public class ProjectMilestoneController(ISender sender)
     : GenericCrudController<Guid, ProjectMilestoneVM, CreateProjectMilestoneVM, UpdateProjectMilestoneVM>(sender)
 {
