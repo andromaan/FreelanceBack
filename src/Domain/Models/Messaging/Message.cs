@@ -6,12 +6,12 @@ namespace Domain.Models.Messaging;
 
 public class Message : AuditableEntity<Guid>
 {
-    public required Guid ContractId { get; set; }
+    public Guid? ContractId { get; set; }
     public Contract? Contract { get; set; }
 
-    public required Guid SenderId { get; set; }
-    public User? Sender { get; set; }
+    public required Guid ReceiverId { get; set; }
+    public User? Receiver { get; set; }
 
-    public required string Content { get; set; }
+    public required string Text { get; set; }
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
 }

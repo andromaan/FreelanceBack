@@ -8,6 +8,7 @@ using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
+using BLL.Common.Interfaces.Repositories.Messages;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
@@ -117,5 +118,9 @@ public static class ConfigureDataAccess
         services.AddScoped<WalletTransactionRepository>();
         services.AddScoped<IWalletTransactionRepository>(provider => provider.GetRequiredService<WalletTransactionRepository>());
         services.AddScoped<IWalletTransactionQueries>(provider => provider.GetRequiredService<WalletTransactionRepository>());
+        
+        services.AddScoped<MessageRepository>();
+        services.AddScoped<IMessageRepository>(provider => provider.GetRequiredService<MessageRepository>());
+        services.AddScoped<IMessageQueries>(provider => provider.GetRequiredService<MessageRepository>());
     }
 }
