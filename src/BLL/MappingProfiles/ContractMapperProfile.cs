@@ -10,6 +10,6 @@ public class ContractMapperProfile : Profile
     {
         CreateMap<Contract, ContractVM>().ReverseMap();
         CreateMap<Contract, UpdateContractVM>().ReverseMap();
-        CreateMap<Contract, UpdateContracStatusVM>().ReverseMap();
+        CreateMap<Contract, UpdateContractStatusVM>().ReverseMap();
     }
 }

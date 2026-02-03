@@ -201,8 +201,8 @@ public static class ConfigureBusinessLogic
         );
         
         services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateContracStatusVM, Guid>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateContracStatusVM, ContractVM, Contract, Guid, IContractQueries>)
+            typeof(IRequestHandler<Update.Command<UpdateContractStatusVM, Guid>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateContractStatusVM, ContractVM, Contract, Guid, IContractQueries>)
         );
     }
 

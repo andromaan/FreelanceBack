@@ -265,6 +265,43 @@ public class ContractControllerTests(IntegrationTestWebFactory factory)
         contractFromDb.EndDate.Should().BeCloseTo(milestone2.DueDate, TimeSpan.FromSeconds(1));
     }
 
+    [Fact]
+    public async Task ShouldUpdateContractStatus()
+    {
+        // Arrange
+        var request = new UpdateContractStatusVM
+        {
+            Status = ContractStatus.Active // Use a valid status different from current
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"Contract/update-status/{_contract.Id}", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        var contractFromDb = await Context.Set<Contract>().FirstOrDefaultAsync(x => x.Id == _contract.Id);
+        contractFromDb.Should().NotBeNull();
+        contractFromDb.Status.Should().Be(ContractStatus.Active);
+    }
+
+    [Fact]
+    public async Task ShouldNotUpdateContractStatusWithInvalidStatus()
+    {
+        // Arrange
+        var request = new UpdateContractStatusVM
+        {
+            Status = (ContractStatus)999 // Invalid enum value
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"Contract/update-status/{_contract.Id}", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
     public async Task InitializeAsync()
     {
         _employerUser = UserData.CreateTestUser(UserId, "employer@test.com");
