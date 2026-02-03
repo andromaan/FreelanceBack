@@ -19,4 +19,14 @@ public class MessageRepository(AppDbContext appDbContext, IUserProvider userProv
         return _appDbContext.Set<Message>().Where(m => m.CreatedBy == userId || m.ReceiverId == userId)
             .AsNoTracking().ToListAsync(cancellationToken);
     }
+
+    public Task<List<Message>> GetByContractAsync(Guid contractId, CancellationToken cancellationToken)
+    {
+        var userId = _userProvider.GetUserId().GetAwaiter().GetResult();
+
+        return _appDbContext.Set<Message>()
+            .Where(m => m.CreatedBy == userId || m.ReceiverId == userId 
+                && m.ContractId == contractId)
+            .AsNoTracking().ToListAsync(cancellationToken);
+    }
 }

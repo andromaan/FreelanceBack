@@ -46,4 +46,7 @@ app.UseMiddleware<MiddlewareExceptionsHandling>();
 
 app.Run();
 
-public partial class Program;
+namespace API
+{
+    public class Program;
+}

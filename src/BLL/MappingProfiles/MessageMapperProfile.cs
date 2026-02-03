@@ -13,6 +13,7 @@ public class MessageMapperProfile : Profile
                 opt => opt.MapFrom(src => src.CreatedBy));
 
         CreateMap<CreateMessageVM, Message>().ReverseMap();
+        CreateMap<CreateMessageWithoutContractVM, Message>().ReverseMap();
         CreateMap<UpdateMessageVM, Message>().ReverseMap();
     }
 }

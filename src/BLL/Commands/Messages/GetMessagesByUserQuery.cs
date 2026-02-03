@@ -1,10 +1,10 @@
 using AutoMapper;
 using BLL.Common.Interfaces.Repositories.Messages;
 using BLL.Services;
-using BLL.ViewModels.Project;
+using BLL.ViewModels.Message;
 using MediatR;
 
-namespace BLL.Commands.Contracts;
+namespace BLL.Commands.Messages;
 
 public record GetMessagesByUserQuery : IRequest<ServiceResponse>;
 
@@ -15,9 +15,9 @@ public class QueryHandler(IMessageQueries messageQueries, IMapper mapper)
     {
         try
         {
-            var projects = await messageQueries.GetByUserAsync(cancellationToken);
+            var messages = await messageQueries.GetByUserAsync(cancellationToken);
 
-            return ServiceResponse.Ok("Projects retrieved", mapper.Map<List<ProjectVM>>(projects));
+            return ServiceResponse.Ok("Messages retrieved", mapper.Map<List<MessageVM>>(messages));
         }
         catch (Exception exception)
         {
