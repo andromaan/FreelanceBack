@@ -1,7 +1,5 @@
 using System.Reflection;
 using System.Text;
-using BLL.Commands.ContractMilestones;
-using BLL.Commands.ProjectMilestones;
 using BLL.Common.Behaviours;
 using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
@@ -12,6 +10,7 @@ using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Skills;
+using BLL.Common.Processors;
 using BLL.Common.Validators;
 using BLL.Extensions;
 using BLL.Services.ImageService;
@@ -58,10 +57,10 @@ public static class ConfigureBusinessLogic
             options.AddPolicy(Settings.Roles.AnyAuthenticated,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole,
                     Settings.Roles.FreelancerRole));
-            
+
             options.AddPolicy(Settings.Roles.AdminOrEmployer,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole));
-            
+
             options.AddPolicy(Settings.Roles.AdminOrFreelancer,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.FreelancerRole));
         });
@@ -76,6 +75,23 @@ public static class ConfigureBusinessLogic
 
     private static void AddRegistrations(this IServiceCollection services)
     {
+        // Автоматична реєстрація всіх валідаторів та процесорів
+        services.Scan(scan => scan
+            .FromAssemblyOf<BLLClassForScanning>()
+            .AddClasses(classes => classes.AssignableTo(typeof(ICreateValidator<>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IUpdateValidator<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(ICreateProcessor<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IUpdateProcessor<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+        );
+
         // registrations for Country
         services.RegisterCrudHandlers(
             new CrudRegistration<Country, int, ICountryQueries>
@@ -129,12 +145,6 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateProjectMilestoneVM),
                 UpdateViewModelType = typeof(UpdateProjectMilestoneVM)
             });
-        
-        services.AddScoped<IUpdateValidator<ProjectMilestone, UpdateProjectMilestoneVM>, 
-            UpdateProjectMilestoneBudgetValidator>();
-        
-        services.AddScoped<ICreateValidator<CreateProjectMilestoneVM>, 
-            CreateProjectMilestoneBudgetValidator>();
 
         // registrations for ContractMilestone
         services.RegisterCrudHandlers(
@@ -144,12 +154,6 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateContractMilestoneVM),
                 UpdateViewModelType = typeof(UpdateContractMilestoneVM)
             });
-        
-        services.AddScoped<IUpdateValidator<ContractMilestone, UpdateContractMilestoneVM>, 
-            UpdateContractMilestoneBudgetValidator>();
-        
-        services.AddScoped<ICreateValidator<CreateContractMilestoneVM>, 
-            CreateContractMilestoneBudgetValidator>();
 
         // registrations for Bids
         services.RegisterCrudHandlers(
@@ -218,7 +222,7 @@ public static class ConfigureBusinessLogic
     {
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "softstream", Version = "v1" });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "freelance", Version = "v1" });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
@@ -247,3 +251,5 @@ public static class ConfigureBusinessLogic
         });
     }
 }
+
+public class BLLClassForScanning;

@@ -16,13 +16,6 @@ namespace API.Controllers;
 public class QuoteController(ISender sender)
     : GenericCrudController<Guid, QuoteVM, CreateQuoteVM, UpdateQuoteVM>(sender)
 {
-    public override async Task<IActionResult> Create(CreateQuoteVM vm, CancellationToken ct)
-    {
-        var command = new CreateQuoteCommand(vm);
-        var result = await Sender.Send(command, ct);
-        return GetResult(result);
-    }
-
     [AllowAnonymous]
     [HttpGet("by-project/{projectId}")]
     public async Task<IActionResult> GetByProjectId(Guid projectId, CancellationToken ct)

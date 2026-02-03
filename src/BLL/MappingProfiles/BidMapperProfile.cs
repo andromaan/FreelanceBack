@@ -11,9 +11,5 @@ public class BidMapperProfile : Profile
         CreateMap<Bid, BidVM>().ReverseMap();
         CreateMap<Bid, CreateBidVM>().ReverseMap();
         CreateMap<Bid, UpdateBidVM>().ReverseMap();
-        
-        CreateMap<CreateBidVM, Bid>()
-            .ForMember(dest => dest.FreelancerId, 
-                opt => opt.MapFrom(src => ProjectMilestoneStatus.Pending));
     }
 }

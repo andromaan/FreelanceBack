@@ -1,5 +1,6 @@
 using AutoMapper;
 using BLL.Common;
+using BLL.Common.Processors;
 using BLL.Common.Validators;
 using BLL.Services;
 using Domain.Common.Abstractions;
@@ -18,7 +19,8 @@ public class Create
         IRepository<TEntity, TKey> repository,
         IMapper mapper,
         TQueries queries,
-        IEnumerable<ICreateValidator<TCreateViewModel>> validators)
+        IEnumerable<ICreateValidator<TCreateViewModel>> validators,
+        IEnumerable<ICreateProcessor<TEntity, TCreateViewModel>> processors)
         : IRequestHandler<Command<TCreateViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TCreateViewModel : class
@@ -28,16 +30,6 @@ public class Create
         public async Task<ServiceResponse> Handle(Command<TCreateViewModel> request,
             CancellationToken cancellationToken)
         {
-            var entity = mapper.Map<TEntity>(request.Model);
-            
-            if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
-            {
-                if (!await uniqueQuery.IsUniqueAsync(entity, cancellationToken))
-                {
-                    return ServiceResponse.BadRequest($"{typeof(TEntity).Name} with the same unique fields already exists");
-                }
-            }
-            
             foreach (var validator in validators)
             {
                 var validationResult = await validator.ValidateAsync(
@@ -49,7 +41,25 @@ public class Create
                     return validationResult;
                 }
             }
+            
+            var entity = mapper.Map<TEntity>(request.Model);
+            
+            if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
+            {
+                if (!await uniqueQuery.IsUniqueAsync(entity, cancellationToken))
+                {
+                    return ServiceResponse.BadRequest($"{typeof(TEntity).Name} with the same unique fields already exists");
+                }
+            }
 
+            foreach (var processor in processors)
+            {
+                entity = await processor.ProcessAsync(
+                    entity, 
+                    request.Model,
+                    cancellationToken);
+            }
+            
             try
             {
                 var createdEntity = await repository.CreateAsync(entity, cancellationToken);

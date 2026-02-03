@@ -1,6 +1,7 @@
 using AutoMapper;
 using BLL.Common;
 using BLL.Common.Interfaces;
+using BLL.Common.Processors;
 using BLL.Common.Validators;
 using BLL.Services;
 using Domain;
@@ -23,7 +24,8 @@ public class Update
         TQueries queries,
         IMapper mapper,
         IUserProvider userProvider,
-        IEnumerable<IUpdateValidator<TEntity, TUpdateViewModel>> validators) // Додано validators
+        IEnumerable<IUpdateValidator<TEntity, TUpdateViewModel>> validators, // Додано validators
+        IEnumerable<IUpdateProcessor<TEntity, TUpdateViewModel>> processors) 
         : IRequestHandler<Command<TUpdateViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TUpdateViewModel : class
@@ -82,8 +84,17 @@ public class Update
                         $"{typeof(TEntity).Name} with the same unique fields already exists");
                 }
             }
+            
+            // 6. ВИКОНАННЯ CUSTOM PROCESSORS
+            foreach (var processor in processors)
+            {
+                entity = await processor.ProcessAsync(
+                    entity, 
+                    request.Model,
+                    cancellationToken);
+            }
 
-            // 6. Збереження
+            // 7. Збереження
             try
             {
                 await repository.UpdateAsync(entity, cancellationToken);

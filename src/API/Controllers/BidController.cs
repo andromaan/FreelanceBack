@@ -16,13 +16,7 @@ namespace API.Controllers;
 public class BidController(ISender sender)
     : GenericCrudController<Guid, BidVM, CreateBidVM, UpdateBidVM>(sender)
 {
-    public override async Task<IActionResult> Create(CreateBidVM vm, CancellationToken ct)
-    {
-        var command = new CreateBidCommand(vm);
-        var result = await Sender.Send(command, ct);
-        return GetResult(result);
-    }
-
+    // TODO Продумати логіку доступу роботодавців і чи можуть не авторизовані користувачі бачити заявки
     [AllowAnonymous]
     [HttpGet("by-project/{projectId}")]
     public async Task<IActionResult> GetByProjectId(Guid projectId, CancellationToken ct)
