@@ -1,11 +1,13 @@
 using System.Reflection;
 using System.Text;
+using BLL.Commands;
 using BLL.Common.Behaviours;
 using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Languages;
+using BLL.Common.Interfaces.Repositories.Messages;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
@@ -13,6 +15,7 @@ using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Processors;
 using BLL.Common.Validators;
 using BLL.Extensions;
+using BLL.Services;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
@@ -21,6 +24,7 @@ using BLL.ViewModels.Category;
 using BLL.ViewModels.ContractMilestone;
 using BLL.ViewModels.Country;
 using BLL.ViewModels.Language;
+using BLL.ViewModels.Message;
 using BLL.ViewModels.Project;
 using BLL.ViewModels.ProjectMilestone;
 using BLL.ViewModels.Quote;
@@ -29,6 +33,7 @@ using Domain;
 using Domain.Models.Countries;
 using Domain.Models.Freelance;
 using Domain.Models.Languages;
+using Domain.Models.Messaging;
 using Domain.Models.Projects;
 using FluentValidation;
 using MediatR;
@@ -172,6 +177,20 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateQuoteVM),
                 UpdateViewModelType = typeof(UpdateQuoteVM)
             });
+
+        // registrations for Messages
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Message, Guid, IMessageQueries>
+            {
+                ViewModelType = typeof(MessageVM),
+                CreateViewModelType = typeof(CreateMessageVM),
+                UpdateViewModelType = typeof(UpdateMessageVM)
+            });
+        
+        services.AddTransient(
+            typeof(IRequestHandler<Create.Command<CreateMessageWithoutContractVM>, ServiceResponse>),
+            typeof(Create.CommandHandler<CreateMessageWithoutContractVM, MessageVM, Message, Guid, IMessageQueries>)
+        );
     }
 
     private static void AddServices(this IServiceCollection services)

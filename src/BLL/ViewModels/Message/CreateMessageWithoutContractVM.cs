@@ -1,11 +1,8 @@
 namespace BLL.ViewModels.Message;
 
-public class CreateMessageVM
+public class CreateMessageWithoutContractVM
 {
-    public Guid ContractId { get; set; }
-
     public string ReceiverEmail { get; set; } = string.Empty;
 
     public string Text { get; set; } = string.Empty;
-    
 }
