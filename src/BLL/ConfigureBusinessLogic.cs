@@ -5,6 +5,7 @@ using BLL.Common.Behaviours;
 using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
+using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
@@ -21,6 +22,7 @@ using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using BLL.ViewModels.Bid;
 using BLL.ViewModels.Category;
+using BLL.ViewModels.Contract;
 using BLL.ViewModels.ContractMilestone;
 using BLL.ViewModels.Country;
 using BLL.ViewModels.Language;
@@ -190,6 +192,17 @@ public static class ConfigureBusinessLogic
         services.AddTransient(
             typeof(IRequestHandler<Create.Command<CreateMessageWithoutContractVM>, ServiceResponse>),
             typeof(Create.CommandHandler<CreateMessageWithoutContractVM, MessageVM, Message, Guid, IMessageQueries>)
+        );
+        
+        // registrations for Contracts
+        services.AddTransient(
+            typeof(IRequestHandler<Update.Command<UpdateContractVM, Guid>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateContractVM, ContractVM, Contract, Guid, IContractQueries>)
+        );
+        
+        services.AddTransient(
+            typeof(IRequestHandler<Update.Command<UpdateContracStatusVM, Guid>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdateContracStatusVM, ContractVM, Contract, Guid, IContractQueries>)
         );
     }
 

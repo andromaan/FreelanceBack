@@ -6,5 +6,5 @@ public class UpdateProjectVM
     public string? Description { get; set; }
     public decimal? BudgetMin { get; set; }
     public decimal? BudgetMax { get; set; }
-    public bool IsHourly { get; set; }
+    public DateTime Deadline { get; set; }
 }

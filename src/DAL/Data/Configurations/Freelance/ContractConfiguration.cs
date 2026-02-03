@@ -11,13 +11,16 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
     public void Configure(EntityTypeBuilder<Contract> builder)
     {
         builder.ToTable("contracts");
-        
+
         builder.HasKey(c => c.Id);
 
         builder.Property(c => c.AgreedRate)
             .HasPrecision(18, 2)
             .IsRequired();
-        builder.Property(c => c.Status).HasMaxLength(32).IsRequired();
+        builder.Property(c => c.Status).HasMaxLength(32).HasConversion(
+                v => v.ToString(),
+                v => (ContractStatus)Enum.Parse(typeof(ContractStatus), v))
+            .IsRequired();
         builder.Property(c => c.StartDate)
             .HasConversion(new DateTimeUtcConverter())
             .HasDefaultValueSql("timezone('utc', now())");

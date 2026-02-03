@@ -2,6 +2,7 @@ using API.Controllers.Common;
 using BLL.Commands.ContractMilestones;
 using BLL.ViewModels.ContractMilestone;
 using Domain;
+using Domain.Models.Freelance;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -25,7 +26,15 @@ public class ContractMilestoneController(ISender sender)
         return GetResult(result);
     }
     
-    
+    [HttpGet("milestone-status-enums")]
+    public IActionResult GetPlatformsAsync()
+    {
+        var platforms = Enum.GetValues<ContractMilestoneStatus>()
+            .Select(x => new { Name = x.ToString(), Value = (int)x })
+            .ToList();
+
+        return Ok(platforms);
+    }
 
     [ApiExplorerSettings(IgnoreApi = true)]
     public override Task<IActionResult> GetAll(CancellationToken ct)

@@ -17,7 +17,7 @@ public class Contract : AuditableEntity<Guid>
     public DateTime? EndDate { get; set; }
 
     public decimal AgreedRate { get; set; }
-    public string Status { get; set; } = nameof(ContractStatus.Pending);
+    public ContractStatus Status { get; set; } = ContractStatus.Pending;
 }
 
 public enum ContractStatus

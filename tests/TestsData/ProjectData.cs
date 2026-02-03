@@ -13,7 +13,6 @@ public class ProjectData
             Description = "Test Project Description",
             BudgetMin = budgetMin ?? 1000m,
             BudgetMax = budgetMax ?? 5000m,
-            IsHourly = false,
             Status = ProjectStatus.Open,
             CreatedBy = userId ?? Guid.NewGuid()
         };

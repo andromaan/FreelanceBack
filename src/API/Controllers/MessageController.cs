@@ -1,5 +1,6 @@
 using API.Controllers.Common;
 using BLL.Commands;
+using BLL.Commands.Contracts;
 using BLL.ViewModels.Message;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,4 +22,20 @@ public class MessageController(ISender sender)
         var result = await Sender.Send(command, ct);
         return GetResult(result);
     }
+    
+    [HttpGet("by-user")]
+    public async Task<IActionResult> GetProjectsByEmployer(CancellationToken ct)
+    {
+        var query = new GetMessagesByUserQuery();
+        var result = await Sender.Send(query, ct);
+        return GetResult(result);
+    }
+    
+    // [HttpGet("by-contract/{contractId}")]
+    // public async Task<IActionResult> GetProjectsByEmployer(Guid contractId, CancellationToken ct)
+    // {
+    //     var query = new GetMessagesByContract { ContractId = contractId };
+    //     var result = await Sender.Send(query, ct);
+    //     return GetResult(result);
+    // }
 }

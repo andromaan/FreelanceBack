@@ -1,3 +1,4 @@
+using DAL.Converters;
 using DAL.Extensions;
 using Domain.Models.Projects;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,9 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(p => p.Description).HasMaxLength(2000);
         builder.Property(p => p.BudgetMin).HasPrecision(18, 2);
         builder.Property(p => p.BudgetMax).HasPrecision(18, 2);
-        builder.Property(p => p.IsHourly).IsRequired();
+        builder.Property(p => p.Deadline)
+            .HasConversion(new DateTimeUtcConverter())
+            .HasDefaultValueSql("timezone('utc', now())");
         
         // TODO: rethink this mb
         // builder.Property(p => p.Status).HasMaxLength(32).IsRequired();

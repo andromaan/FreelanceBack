@@ -9,8 +9,8 @@ public class Project : AuditableEntity<Guid>
     
     public decimal? BudgetMin { get; set; }
     public decimal? BudgetMax { get; set; }
-    public bool IsHourly { get; set; }
     public ProjectStatus Status { get; set; } = ProjectStatus.Open;
+    public DateTime Deadline { get; set; }
 
     public ICollection<Bid> Bids { get; set; } = new List<Bid>();
     public ICollection<Quote> Quotes { get; set; } = new List<Quote>();
