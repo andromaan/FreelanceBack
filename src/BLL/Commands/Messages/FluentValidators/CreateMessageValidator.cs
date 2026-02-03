@@ -3,13 +3,16 @@ using FluentValidation;
 
 namespace BLL.Commands.Messages.FluentValidators;
 
-public class CreateMessageWithoutContractValidator : AbstractValidator<Create.Command<CreateMessageWithoutContractVM>>
+public class CreateMessageValidator : AbstractValidator<Create.Command<CreateMessageVM>>
 {
-    public CreateMessageWithoutContractValidator()
+    public CreateMessageValidator()
     {
         RuleFor(m => m.Model.Text)
             .NotEmpty().WithMessage("Text cannot be empty")
             .MaximumLength(2000).WithMessage("Text cannot exceed 2000 characters");
+
+        RuleFor(m => m.Model.ContractId)
+            .NotEmpty().WithMessage("Contract ID is required");
 
         RuleFor(m => m.Model.ReceiverEmail)
             .NotEmpty().WithMessage("Receiver email is required")

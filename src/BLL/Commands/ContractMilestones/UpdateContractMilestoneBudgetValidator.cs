@@ -49,7 +49,7 @@ public class UpdateContractMilestoneBudgetValidator(
         {
             return ServiceResponse.BadRequest(
                 $"The total amount ({totalAmount}) of milestones exceeds " +
-                $"the contract's maximum budget ({contract.AgreedRate})");
+                $"the contract's agreed rate ({contract.AgreedRate})");
         }
 
         return null; // Валідація пройшла успішно

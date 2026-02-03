@@ -21,7 +21,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
     protected readonly HttpClient Client;
     protected readonly Guid UserId = Guid.NewGuid();
 
-    protected BaseIntegrationTest(IntegrationTestWebFactory factory, bool useJwtToken = true)
+    protected BaseIntegrationTest(IntegrationTestWebFactory factory, bool useJwtToken = true, string? customRole = null)
     {
         var scope = factory.Services.CreateScope();
         Context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -39,12 +39,12 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
             });
 
         if (useJwtToken)
-            SetAuthorizationHeader();
+            SetAuthorizationHeader(customRole);
     }
 
-    private void SetAuthorizationHeader()
+    private void SetAuthorizationHeader(string? customRole = null)
     {
-        var token = GenerateJwtToken();
+        var token = GenerateJwtToken(customRole);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
@@ -54,14 +54,15 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
         Context.ChangeTracker.Clear();
     }
 
-    private string GenerateJwtToken()
+    private string GenerateJwtToken(string? customRole = null)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSecretKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+        var role = customRole ?? Settings.Roles.AdminRole;
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Role, Settings.Roles.AdminRole),
+            new(ClaimTypes.Role, role),
             new("id", UserId.ToString()),
         };
         var token = new JwtSecurityToken(

@@ -41,7 +41,7 @@ public class CreateContractMilestoneBudgetValidator(
         {
             return ServiceResponse.GetResponse(
                 $"The total amount ({totalMilestoneAmount}) of milestones exceeds " +
-                $"the contract's maximum budget ({existingContract.AgreedRate})",
+                $"the contract's agreed rate ({existingContract.AgreedRate})",
                 false, null, System.Net.HttpStatusCode.BadRequest);
         }
 

@@ -25,7 +25,7 @@ public class MessageRepository(AppDbContext appDbContext, IUserProvider userProv
         var userId = _userProvider.GetUserId().GetAwaiter().GetResult();
 
         return _appDbContext.Set<Message>()
-            .Where(m => m.CreatedBy == userId || m.ReceiverId == userId 
+            .Where(m => (m.CreatedBy == userId || m.ReceiverId == userId) 
                 && m.ContractId == contractId)
             .AsNoTracking().ToListAsync(cancellationToken);
     }
