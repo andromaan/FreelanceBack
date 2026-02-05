@@ -12,7 +12,7 @@ public class Result<TSuccess, TFailure>
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
 
-    private Result(TSuccess success)
+    private Result(TSuccess? success)
     {
         _success = success;
         _failure = default;
@@ -29,7 +29,7 @@ public class Result<TSuccess, TFailure>
     /// <summary>
     /// Creates a successful result with the entity.
     /// </summary>
-    public static Result<TSuccess, TFailure> Success(TSuccess value) => new(value);
+    public static Result<TSuccess, TFailure> Success(TSuccess? value) => new(value);
 
     /// <summary>
     /// Creates a failed result with the error response.
@@ -39,8 +39,8 @@ public class Result<TSuccess, TFailure>
     /// <summary>
     /// Gets the success value. Throws if result is not successful.
     /// </summary>
-    public TSuccess GetSuccess() => 
-        IsSuccess ? _success! : throw new InvalidOperationException("Result is not successful");
+    public TSuccess? GetSuccess() => 
+        IsSuccess ? _success : throw new InvalidOperationException("Result is not successful");
 
     /// <summary>
     /// Gets the failure value. Throws if result is successful.

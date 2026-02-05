@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using BLL.Commands;
 using BLL.Common.Behaviours;
+using BLL.Common.Handlers;
 using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
@@ -13,9 +14,6 @@ using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Skills;
-using BLL.Common.Processors;
-using BLL.Common.Validators;
-using BLL.Common.Handlers;
 using BLL.Extensions;
 using BLL.Services;
 using BLL.Services.ImageService;
@@ -86,20 +84,6 @@ public static class ConfigureBusinessLogic
         // Автоматична реєстрація всіх валідаторів, процесорів та нових хендлерів
         services.Scan(scan => scan
             .FromAssemblyOf<BLLClassForScanning>()
-            // Legacy validators
-            .AddClasses(classes => classes.AssignableTo(typeof(ICreateValidator<>)))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(IUpdateValidator<,>)))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime()
-            // Legacy processors
-            .AddClasses(classes => classes.AssignableTo(typeof(ICreateProcessor<,>)))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(IUpdateProcessor<,>)))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime()
             // New unified handlers
             .AddClasses(classes => classes.AssignableTo(typeof(ICreateHandler<,>)))
             .AsImplementedInterfaces()

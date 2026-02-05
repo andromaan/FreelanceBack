@@ -250,13 +250,14 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
         };
         await Context.AddAsync(milestone);
         await SaveChangesAsync();
-
+        
         var updateRequest = new UpdateProjectMilestoneVM
         {
             Description = "Milestone updated",
             Amount = 1100m, // перевищує бюджет
             DueDate = DateTime.UtcNow.AddDays(20)
         };
+        
         // Act
         var response = await Client.PutAsJsonAsync($"ProjectMilestone/{milestone.Id}", updateRequest);
 

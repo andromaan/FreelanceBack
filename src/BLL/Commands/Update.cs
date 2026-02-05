@@ -2,8 +2,6 @@ using AutoMapper;
 using BLL.Common;
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces;
-using BLL.Common.Processors;
-using BLL.Common.Validators;
 using BLL.Services;
 using Domain;
 using Domain.Common.Abstractions;
@@ -25,8 +23,6 @@ public class Update
         TQueries queries,
         IMapper mapper,
         IUserProvider userProvider,
-        IEnumerable<IUpdateValidator<TEntity, TUpdateViewModel>> validators,
-        IEnumerable<IUpdateProcessor<TEntity, TUpdateViewModel>> processors,
         IEnumerable<IUpdateHandler<TEntity, TUpdateViewModel>> handlers) 
         : IRequestHandler<Command<TUpdateViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
@@ -39,7 +35,7 @@ public class Update
             CancellationToken cancellationToken)
         {
             // 1. Check entity existence
-            var existingEntity = await queries.GetByIdAsync(request.Id, cancellationToken);
+            var existingEntity = await queries.GetByIdAsync(request.Id, cancellationToken, asNoTracking: true);
 
             if (existingEntity == null)
             {
@@ -60,24 +56,11 @@ public class Update
                 }
             }
 
-            // 3. Execute legacy validators (for backward compatibility)
-            foreach (var validator in validators)
-            {
-                var validationResult = await validator.ValidateAsync(
-                    existingEntity, 
-                    request.Model, 
-                    cancellationToken);
-                    
-                if (validationResult != null && !validationResult.Success)
-                {
-                    return validationResult;
-                }
-            }
+            // 3. Mapping
+            var entity = mapper.Map<TEntity>(existingEntity); // створює новий об'єкт
+            mapper.Map(request.Model, entity); // змінює новий об'єкт
 
-            // 4. Mapping
-            var entity = mapper.Map(request.Model, existingEntity);
-
-            // 5. Check uniqueness
+            // 4. Check uniqueness
             if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
             {
                 if (!await uniqueQuery.IsUniqueAsync(entity, cancellationToken))
@@ -87,36 +70,32 @@ public class Update
                 }
             }
             
-            // 6. Execute legacy processors (for backward compatibility)
-            foreach (var processor in processors)
-            {
-                entity = await processor.ProcessAsync(
-                    entity, 
-                    request.Model,
-                    cancellationToken);
-            }
             
-            // 7. Execute new unified handlers (validation + processing in one place)
-            foreach (var handler in handlers)
-            {
-                var result = await handler.HandleAsync(
-                    existingEntity,
-                    entity, 
-                    request.Model,
-                    cancellationToken);
-                    
-                if (result.IsFailure)
-                {
-                    return result.GetFailure();
-                }
-                
-                entity = result.GetSuccess();
-            }
 
-            // 8. Save to database
+            // 6. Save to database
             try
             {
-                await repository.UpdateAsync(entity, cancellationToken);
+                // 5. Execute new unified handlers (validation + processing in one place)
+                foreach (var handler in handlers)
+                {
+                    var result = await handler.HandleAsync(
+                        existingEntity,
+                        entity!, 
+                        request.Model,
+                        cancellationToken);
+                    
+                    if (result.IsFailure)
+                    {
+                        return result.GetFailure();
+                    }
+                
+                    if (result.GetSuccess() is not null)
+                    {
+                        entity = result.GetSuccess();
+                    }
+                }
+                
+                await repository.UpdateAsync(entity!, cancellationToken);
                 return ServiceResponse.Ok(
                     $"{typeof(TEntity).Name} updated", 
                     mapper.Map<TViewModel>(entity));

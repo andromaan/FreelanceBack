@@ -1,8 +1,6 @@
 using AutoMapper;
 using BLL.Common;
 using BLL.Common.Handlers;
-using BLL.Common.Processors;
-using BLL.Common.Validators;
 using BLL.Services;
 using Domain.Common.Abstractions;
 using MediatR;
@@ -20,8 +18,6 @@ public class Create
         IRepository<TEntity, TKey> repository,
         IMapper mapper,
         TQueries queries,
-        IEnumerable<ICreateValidator<TCreateViewModel>> validators,
-        IEnumerable<ICreateProcessor<TEntity, TCreateViewModel>> processors,
         IEnumerable<ICreateHandler<TEntity, TCreateViewModel>> handlers)
         : IRequestHandler<Command<TCreateViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
@@ -32,45 +28,23 @@ public class Create
         public async Task<ServiceResponse> Handle(Command<TCreateViewModel> request,
             CancellationToken cancellationToken)
         {
-            // 1. Execute legacy validators (for backward compatibility)
-            foreach (var validator in validators)
-            {
-                var validationResult = await validator.ValidateAsync(
-                    request.Model, 
-                    cancellationToken);
-                    
-                if (validationResult != null && !validationResult.Success)
-                {
-                    return validationResult;
-                }
-            }
+            // 1. Map to entity
+            var mappedEntity = mapper.Map<TEntity>(request.Model);
             
-            // 2. Map to entity
-            var entity = mapper.Map<TEntity>(request.Model);
-            
-            // 3. Check uniqueness
+            // 2. Check uniqueness
             if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
             {
-                if (!await uniqueQuery.IsUniqueAsync(entity, cancellationToken))
+                if (!await uniqueQuery.IsUniqueAsync(mappedEntity, cancellationToken))
                 {
                     return ServiceResponse.BadRequest($"{typeof(TEntity).Name} with the same unique fields already exists");
                 }
             }
-
-            // 4. Execute legacy processors (for backward compatibility)
-            foreach (var processor in processors)
-            {
-                entity = await processor.ProcessAsync(
-                    entity, 
-                    request.Model,
-                    cancellationToken);
-            }
             
-            // 5. Execute new unified handlers (validation + processing in one place)
+            // 3. Execute new unified handlers (validation + processing in one place)
             foreach (var handler in handlers)
             {
                 var result = await handler.HandleAsync(
-                    entity, 
+                    mappedEntity!, 
                     request.Model,
                     cancellationToken);
                     
@@ -78,14 +52,17 @@ public class Create
                 {
                     return result.GetFailure();
                 }
-                
-                entity = result.GetSuccess();
+
+                if (result.GetSuccess() is not null)
+                {
+                    mappedEntity = result.GetSuccess();
+                }
             }
             
-            // 6. Save to database
+            // 4. Save to database
             try
             {
-                var createdEntity = await repository.CreateAsync(entity, cancellationToken);
+                var createdEntity = await repository.CreateAsync(mappedEntity!, cancellationToken);
                 return ServiceResponse.Ok($"{typeof(TEntity).Name} created",
                     mapper.Map<TViewModel>(createdEntity));
             }
