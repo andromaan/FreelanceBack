@@ -1,0 +1,391 @@
+using System.Net;
+using System.Net.Http.Json;
+using BLL.ViewModels.ContractMilestone;
+using Domain;
+using Domain.Models.Auth.Users;
+using Domain.Models.Freelance;
+using Domain.Models.Projects;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Tests.Common;
+using TestsData;
+
+namespace Api.Tests.Integration;
+
+public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory factory)
+    : BaseIntegrationTest(factory, customRole: Settings.Roles.EmployerRole), IAsyncLifetime
+{
+    private ContractMilestone _contractMilestone = null!;
+    private Contract _contract = null!;
+    private Project _project = null!;
+    private Freelancer _freelancer = null!;
+    private User _freelancerUser = null!;
+    private User _employerUser = null!;
+
+    [Fact]
+    public async Task ShouldApproveContractMilestone_AndCreateWalletTransactions()
+    {
+        // Arrange
+        var employerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 10000m,
+            Currency = "USD",
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        var freelancerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 0m,
+            Currency = "USD",
+            CreatedBy = _freelancerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _freelancerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        
+        var milestone = new ContractMilestone
+        {
+            Id = Guid.NewGuid(),
+            ContractId = _contract.Id,
+            Description = "Milestone for approval",
+            Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(10),
+            Status = ContractMilestoneStatus.Submitted,
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        await Context.AddAsync(employerWallet);
+        await Context.AddAsync(freelancerWallet);
+        await Context.AddAsync(milestone);
+        await SaveChangesAsync();
+
+        var request = new UpdContractMilestoneStatusEmployerVM
+        {
+            Status = ContractMilestoneEmployerStatus.Approved
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone.Id}/employer", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        // Verify milestone status changed
+        var updatedMilestone = await Context.Set<ContractMilestone>()
+            .FirstOrDefaultAsync(x => x.Id == milestone.Id);
+        updatedMilestone.Should().NotBeNull();
+        updatedMilestone.Status.Should().Be(ContractMilestoneStatus.Approved);
+
+        // Verify employer wallet was debited
+        var updatedEmployerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _employerUser.Id);
+        updatedEmployerWallet.Should().NotBeNull();
+        updatedEmployerWallet.Balance.Should().Be(9500m); // 10000 - 500
+
+        // Verify freelancer wallet was credited
+        var updatedFreelancerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _freelancerUser.Id);
+        updatedFreelancerWallet.Should().NotBeNull();
+        updatedFreelancerWallet.Balance.Should().Be(500m); // 0 + 500
+    }
+
+    [Fact]
+    public async Task ShouldNotApproveContractMilestone_WhenEmployerHasInsufficientFunds()
+    {
+        // Arrange
+        var employerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 100m, // Insufficient balance
+            Currency = "USD",
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        
+        var milestone = new ContractMilestone
+        {
+            Id = Guid.NewGuid(),
+            ContractId = _contract.Id,
+            Description = "Milestone for approval",
+            Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(10),
+            Status = ContractMilestoneStatus.Submitted,
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        await Context.AddAsync(employerWallet);
+        await Context.AddAsync(milestone);
+        await SaveChangesAsync();
+
+        var request = new UpdContractMilestoneStatusEmployerVM
+        {
+            Status = ContractMilestoneEmployerStatus.Approved
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone.Id}/employer", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        // Verify milestone status remains unchanged
+        var unchangedMilestone = await Context.Set<ContractMilestone>()
+            .FirstOrDefaultAsync(x => x.Id == milestone.Id);
+        unchangedMilestone.Should().NotBeNull();
+        unchangedMilestone.Status.Should().Be(ContractMilestoneStatus.Submitted);
+
+        // Verify wallet balances remain unchanged
+        var unchangedEmployerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _employerUser.Id);
+        unchangedEmployerWallet!.Balance.Should().Be(100m);
+    }
+
+    [Fact]
+    public async Task ShouldNotChangeStatus_WhenMilestoneIsAlreadyApproved()
+    {
+        // Arrange
+        var employerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 10000m,
+            Currency = "USD",
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        
+        var milestone = new ContractMilestone
+        {
+            Id = Guid.NewGuid(),
+            ContractId = _contract.Id,
+            Description = "Already approved milestone",
+            Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(10),
+            Status = ContractMilestoneStatus.Approved, // Already approved
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        await Context.AddAsync(employerWallet);
+        await Context.AddAsync(milestone);
+        await SaveChangesAsync();
+
+        var request = new UpdContractMilestoneStatusEmployerVM
+        {
+            Status = ContractMilestoneEmployerStatus.Rejected
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone.Id}/employer", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        // Verify milestone status remains approved
+        var unchangedMilestone = await Context.Set<ContractMilestone>()
+            .FirstOrDefaultAsync(x => x.Id == milestone.Id);
+        unchangedMilestone.Should().NotBeNull();
+        unchangedMilestone.Status.Should().Be(ContractMilestoneStatus.Approved);
+    }
+
+    [Fact]
+    public async Task ShouldRejectContractMilestone_WithoutCreatingTransactions()
+    {
+        // Arrange
+        var employerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 10000m,
+            Currency = "USD",
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        var freelancerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 0m,
+            Currency = "USD",
+            CreatedBy = _freelancerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _freelancerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        
+        var milestone = new ContractMilestone
+        {
+            Id = Guid.NewGuid(),
+            ContractId = _contract.Id,
+            Description = "Milestone for rejection",
+            Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(10),
+            Status = ContractMilestoneStatus.Submitted,
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        await Context.AddAsync(employerWallet);
+        await Context.AddAsync(freelancerWallet);
+        await Context.AddAsync(milestone);
+        await SaveChangesAsync();
+
+        var request = new UpdContractMilestoneStatusEmployerVM
+        {
+            Status = ContractMilestoneEmployerStatus.Rejected
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone.Id}/employer", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        // Verify milestone status changed to Rejected
+        var updatedMilestone = await Context.Set<ContractMilestone>()
+            .FirstOrDefaultAsync(x => x.Id == milestone.Id);
+        updatedMilestone.Should().NotBeNull();
+        updatedMilestone.Status.Should().Be(ContractMilestoneStatus.Rejected);
+
+        // Verify wallet balances remain unchanged (no transaction on rejection)
+        var unchangedEmployerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _employerUser.Id);
+        unchangedEmployerWallet!.Balance.Should().Be(10000m);
+
+        var unchangedFreelancerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _freelancerUser.Id);
+        unchangedFreelancerWallet!.Balance.Should().Be(0m);
+    }
+
+    [Fact]
+    public async Task ShouldChangeStatusToUnderReview_WithoutCreatingTransactions()
+    {
+        // Arrange
+        var employerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 10000m,
+            Currency = "USD",
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        var freelancerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 0m,
+            Currency = "USD",
+            CreatedBy = _freelancerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _freelancerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        
+        var milestone = new ContractMilestone
+        {
+            Id = Guid.NewGuid(),
+            ContractId = _contract.Id,
+            Description = "Milestone for review",
+            Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(10),
+            Status = ContractMilestoneStatus.Submitted,
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        await Context.AddAsync(employerWallet);
+        await Context.AddAsync(freelancerWallet);
+        await Context.AddAsync(milestone);
+        await SaveChangesAsync();
+
+        var request = new UpdContractMilestoneStatusEmployerVM
+        {
+            Status = ContractMilestoneEmployerStatus.UnderReview
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone.Id}/employer", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        // Verify milestone status changed to UnderReview
+        var updatedMilestone = await Context.Set<ContractMilestone>()
+            .FirstOrDefaultAsync(x => x.Id == milestone.Id);
+        updatedMilestone.Should().NotBeNull();
+        updatedMilestone.Status.Should().Be(ContractMilestoneStatus.UnderReview);
+
+        // Verify wallet balances remain unchanged (no transaction on under review)
+        var unchangedEmployerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _employerUser.Id);
+        unchangedEmployerWallet!.Balance.Should().Be(10000m);
+
+        var unchangedFreelancerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _freelancerUser.Id);
+        unchangedFreelancerWallet!.Balance.Should().Be(0m);
+    }
+
+    public async Task InitializeAsync()
+    {
+        _employerUser = UserData.CreateTestUser(UserId);
+        _freelancerUser = UserData.CreateTestUser(Guid.NewGuid());
+        _freelancer = FreelancerData.CreateFreelancer(userId: _freelancerUser.Id);
+        _project = ProjectData.CreateProject();
+        _contract = ContractData.CreateContract(
+            projectId: _project.Id,
+            freelancerId: _freelancer.Id,
+            agreedRate: 2000m
+        );
+        _contract.CreatedBy = _employerUser.Id;
+        _contractMilestone = new ContractMilestone
+        {
+            Id = Guid.NewGuid(),
+            ContractId = _contract.Id,
+            Description = "Test contract milestone",
+            Amount = _contract.AgreedRate / 2,
+            DueDate = DateTime.UtcNow.AddDays(30),
+            Status = ContractMilestoneStatus.Pending
+        };
+
+        await Context.AddAsync(_employerUser);
+        await Context.AddAsync(_freelancerUser);
+        await Context.AddAsync(_freelancer);
+        await Context.AddAsync(_project);
+        await Context.AddAsync(_contract);
+        await Context.AddAsync(_contractMilestone);
+        await SaveChangesAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        Context.Set<ContractMilestone>().RemoveRange(Context.Set<ContractMilestone>());
+        Context.Set<Contract>().RemoveRange(Context.Set<Contract>());
+        Context.Set<Project>().RemoveRange(Context.Set<Project>());
+        Context.Set<UserWallet>().RemoveRange(Context.Set<UserWallet>());
+        Context.Set<Freelancer>().RemoveRange(Context.Set<Freelancer>());
+        Context.Set<User>().RemoveRange(Context.Set<User>());
+        await SaveChangesAsync();
+    }
+}

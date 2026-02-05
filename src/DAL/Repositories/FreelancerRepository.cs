@@ -33,6 +33,6 @@ public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userP
                 .Include(up => up.Languages);
         }
         
-        return await query.FirstOrDefaultAsync(up => up.UserId == userId, token);
+        return await query.FirstOrDefaultAsync(up => up.CreatedBy == userId, token);
     }
 }

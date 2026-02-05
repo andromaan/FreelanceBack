@@ -53,4 +53,12 @@ public class ContractController(ISender sender) : BaseController
         var result = await sender.Send(command, ct);
         return GetResult(result);
     }
+    
+    [HttpGet("by-user")]
+    public async Task<IActionResult> GetProjectsByEmployer(CancellationToken ct)
+    {
+        var query = new GetContractByUserQuery();
+        var result = await sender.Send(query, ct);
+        return GetResult(result);
+    }
 }

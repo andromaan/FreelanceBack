@@ -26,8 +26,7 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
         { 
             Title = projectTitle,
             Description = "New Test Project Description",
-            BudgetMin = 2000m,
-            BudgetMax = 10000m
+            Budget = 10000m
         };
 
         // Act
@@ -44,8 +43,7 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
         projectFromDb.Should().NotBeNull();
         projectFromDb.Title.Should().Be(projectTitle);
         projectFromDb.Description.Should().Be("New Test Project Description");
-        projectFromDb.BudgetMin.Should().Be(2000m);
-        projectFromDb.BudgetMax.Should().Be(10000m);
+        projectFromDb.Budget.Should().Be(10000m);
     }
     
     [Fact]
@@ -57,8 +55,7 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
         { 
             Title = projectTitle,
             Description = "Updated Description",
-            BudgetMin = 3000m,
-            BudgetMax = 15000m
+            Budget = 15000m
         };
 
         // Act
@@ -114,8 +111,7 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
         { 
             Title = "Test",
             Description = "Test",
-            BudgetMin = 1000m,
-            BudgetMax = 5000m
+            Budget = 5000m
         };
         
         // Act

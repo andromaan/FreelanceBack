@@ -4,7 +4,6 @@ public class CreateProjectVM
 {
     public required string Title { get; set; }
     public string? Description { get; set; }
-    public decimal? BudgetMin { get; set; }
-    public decimal? BudgetMax { get; set; }
+    public decimal Budget { get; set; }
     public DateTime Deadline { get; set; }
 }

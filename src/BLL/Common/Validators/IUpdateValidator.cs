@@ -7,7 +7,7 @@ public interface IUpdateValidator<TEntity, TUpdateViewModel>
     where TUpdateViewModel : class
 {
     Task<ServiceResponse?> ValidateAsync(
-        TEntity existingEmployer, 
+        TEntity existingMilestone, 
         TUpdateViewModel updateModel, 
         CancellationToken cancellationToken);
 }

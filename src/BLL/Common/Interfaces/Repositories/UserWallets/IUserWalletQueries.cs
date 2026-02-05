@@ -1,7 +1,7 @@
-using Domain.Models.Auth.Users;
-
 namespace BLL.Common.Interfaces.Repositories.UserWallets;
 
-public interface IUserWalletQueries : IQueries<UserWallet, Guid>
+public interface IUserWalletQueries
 {
+    Task<decimal?> GetAmountByUserAsync(Guid userId, CancellationToken token);
+    Task<bool> IsWithdrawSuccessAsync(Guid userId, decimal amount, CancellationToken token);
 }

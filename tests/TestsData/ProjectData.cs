@@ -4,15 +4,14 @@ namespace TestsData;
 
 public class ProjectData
 {
-    public static Project CreateProject(Guid? id = null, Guid? userId = null, decimal? budgetMin = null, decimal? budgetMax = null)
+    public static Project CreateProject(Guid? id = null, Guid? userId = null, decimal? budget = null)
     {
         return new Project
         {
             Id = id ?? Guid.NewGuid(),
             Title = "Test Project",
             Description = "Test Project Description",
-            BudgetMin = budgetMin ?? 1000m,
-            BudgetMax = budgetMax ?? 5000m,
+            Budget = budget ?? 5000m,
             Status = ProjectStatus.Open,
             CreatedBy = userId ?? Guid.NewGuid()
         };

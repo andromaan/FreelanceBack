@@ -26,7 +26,7 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
         { 
             ProjectId = _project.Id,
             Description = "New milestone",
-            Amount = (decimal)_project.BudgetMax! - _projectMilestone.Amount,
+            Amount = _project.Budget - _projectMilestone.Amount,
             DueDate = dueDate
         };
 
@@ -203,7 +203,7 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
     public async Task ShouldNotCreateProjectMilestone_WhenAmountExceedsProjectBudget()
     {
         // Arrange
-        var project = ProjectData.CreateProject(budgetMin: 1000m, budgetMax: 1000m);
+        var project = ProjectData.CreateProject(budget: 1000m);
         await Context.AddAsync(project);
         await SaveChangesAsync();
 
@@ -236,7 +236,7 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
     public async Task ShouldNotUpdateProjectMilestone_WhenAmountExceedsProjectBudget()
     {
         // Arrange
-        var project = ProjectData.CreateProject(budgetMin: 1000m, budgetMax: 1000m);
+        var project = ProjectData.CreateProject(budget: 1000m);
         await Context.AddAsync(project);
         var milestone = new ProjectMilestone
         {
@@ -274,7 +274,7 @@ public class ProjectMilestoneControllerTests(IntegrationTestWebFactory factory)
             Id = Guid.NewGuid(),
             ProjectId = _project.Id,
             Description = "Test milestone",
-            Amount = (decimal)_project.BudgetMax! / 2,
+            Amount = _project.Budget / 2,
             DueDate = DateTime.UtcNow.AddDays(30),
             Status = ProjectMilestoneStatus.Pending,
             CreatedBy = _employerUser.Id

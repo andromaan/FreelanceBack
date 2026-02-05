@@ -162,6 +162,12 @@ public static class ConfigureBusinessLogic
                 UpdateViewModelType = typeof(UpdateContractMilestoneVM)
             });
 
+        services.AddTransient(
+            typeof(IRequestHandler<Update.Command<UpdContractMilestoneStatusEmployerVM, Guid>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdContractMilestoneStatusEmployerVM, ContractMilestoneVM, ContractMilestone,
+                Guid, IContractMilestoneQueries>)
+        );
+
         // registrations for Bids
         services.RegisterCrudHandlers(
             new CrudRegistration<Bid, Guid, IBidQueries>
@@ -188,18 +194,18 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateMessageVM),
                 UpdateViewModelType = typeof(UpdateMessageVM)
             });
-        
+
         services.AddTransient(
             typeof(IRequestHandler<Create.Command<CreateMessageWithoutContractVM>, ServiceResponse>),
             typeof(Create.CommandHandler<CreateMessageWithoutContractVM, MessageVM, Message, Guid, IMessageQueries>)
         );
-        
+
         // registrations for Contracts
         services.AddTransient(
             typeof(IRequestHandler<Update.Command<UpdateContractVM, Guid>, ServiceResponse>),
             typeof(Update.CommandHandler<UpdateContractVM, ContractVM, Contract, Guid, IContractQueries>)
         );
-        
+
         services.AddTransient(
             typeof(IRequestHandler<Update.Command<UpdateContractStatusVM, Guid>, ServiceResponse>),
             typeof(Update.CommandHandler<UpdateContractStatusVM, ContractVM, Contract, Guid, IContractQueries>)

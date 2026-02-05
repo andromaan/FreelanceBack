@@ -59,7 +59,7 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
         // var freelancerFromResponse = await JsonHelper.GetPayloadAsync<FreelancerVM>(response);
         
         var freelancerFromDb = await Context.Set<Freelancer>()
-            .FirstOrDefaultAsync(x => x.UserId == _user.Id);
+            .FirstOrDefaultAsync(x => x.CreatedBy == _user.Id);
         
         freelancerFromDb.Should().NotBeNull();
         freelancerFromDb.Bio.Should().Be("Updated Bio");
@@ -85,7 +85,7 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
         
         var freelancerFromDb = await Context.Set<Freelancer>()
             .Include(f => f.Languages)
-            .FirstOrDefaultAsync(x => x.UserId == _user.Id);
+            .FirstOrDefaultAsync(x => x.CreatedBy == _user.Id);
         
         freelancerFromDb.Should().NotBeNull();
         freelancerFromDb.Languages.Should().HaveCount(2);
@@ -130,7 +130,7 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
         
         var freelancerFromDb = await Context.Set<Freelancer>()
             .Include(f => f.Languages)
-            .FirstOrDefaultAsync(x => x.UserId == _user.Id);
+            .FirstOrDefaultAsync(x => x.CreatedBy == _user.Id);
         
         freelancerFromDb.Should().NotBeNull();
         freelancerFromDb.Languages.Should().BeEmpty();

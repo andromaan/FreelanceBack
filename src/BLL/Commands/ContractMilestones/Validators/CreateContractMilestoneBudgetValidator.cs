@@ -6,7 +6,7 @@ using BLL.Services;
 using BLL.ViewModels.ContractMilestone;
 using Domain;
 
-namespace BLL.Commands.ContractMilestones;
+namespace BLL.Commands.ContractMilestones.Validators;
 
 public class CreateContractMilestoneBudgetValidator(
     IContractQueries contractQueries,

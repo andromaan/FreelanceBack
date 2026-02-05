@@ -274,7 +274,7 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         response.IsSuccessStatusCode.Should().BeFalse();
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-
+    
     public async Task InitializeAsync()
     {
         _freelancerUser = UserData.CreateTestUser(UserId);
@@ -306,6 +306,7 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         Context.Set<ContractMilestone>().RemoveRange(Context.Set<ContractMilestone>());
         Context.Set<Contract>().RemoveRange(Context.Set<Contract>());
         Context.Set<Project>().RemoveRange(Context.Set<Project>());
+        Context.Set<UserWallet>().RemoveRange(Context.Set<UserWallet>());
         Context.Set<User>().RemoveRange(Context.Set<User>());
         await SaveChangesAsync();
     }

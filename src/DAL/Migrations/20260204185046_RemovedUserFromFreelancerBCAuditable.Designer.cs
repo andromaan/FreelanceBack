@@ -3,6 +3,7 @@ using System;
 using DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260204185046_RemovedUserFromFreelancerBCAuditable")]
+    partial class RemovedUserFromFreelancerBCAuditable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -205,13 +208,13 @@ namespace DAL.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 2, 4, 19, 55, 31, 162, DateTimeKind.Utc).AddTicks(851),
+                            CreatedAt = new DateTime(2026, 2, 4, 18, 50, 46, 246, DateTimeKind.Utc).AddTicks(9598),
                             CreatedBy = new Guid("11111111-1111-1111-1111-111111111111"),
                             DisplayName = "Admin",
                             Email = "admin@mail.com",
-                            ModifiedAt = new DateTime(2026, 2, 4, 19, 55, 31, 162, DateTimeKind.Utc).AddTicks(858),
+                            ModifiedAt = new DateTime(2026, 2, 4, 18, 50, 46, 246, DateTimeKind.Utc).AddTicks(9603),
                             ModifiedBy = new Guid("11111111-1111-1111-1111-111111111111"),
-                            PasswordHash = "8151A75B677A43B88AE4A94614136B872BDA9DF688BC69330E30E39F9705B99C-844A51BD64C2AD086DB8F9C46F607919",
+                            PasswordHash = "FC7FBA33A7AC9F8A352BDFAAEA2FEB55BBB3DCAE4339D8A2A79F288679A6848A-78341D04C91E742D0705F7AAB279775B",
                             RoleId = "admin"
                         });
                 });
@@ -1979,10 +1982,15 @@ namespace DAL.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<decimal>("Budget")
+                    b.Property<decimal?>("BudgetMax")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
-                        .HasColumnName("budget");
+                        .HasColumnName("budget_max");
+
+                    b.Property<decimal?>("BudgetMin")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("budget_min");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()

@@ -1,4 +1,5 @@
 using API.Controllers.Common;
+using BLL.Commands;
 using BLL.Commands.ContractMilestones;
 using BLL.ViewModels.ContractMilestone;
 using Domain;
@@ -13,7 +14,6 @@ namespace API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Authorize(Policy = Settings.Roles.AdminOrEmployer)]
 public class ContractMilestoneController(ISender sender)
     : GenericCrudController<Guid, ContractMilestoneVM, CreateContractMilestoneVM, UpdateContractMilestoneVM>(sender)
 {
@@ -34,6 +34,58 @@ public class ContractMilestoneController(ISender sender)
             .ToList();
 
         return Ok(platforms);
+    }
+    
+    [HttpGet("status-freelancer-enums")]
+    public IActionResult GetFreelancerStatusEnumsAsync()
+    {
+        var platforms = Enum.GetValues<ContractMilestoneFreelancerStatus>()
+            .Select(x => new { Name = x.ToString(), Value = (int)x })
+            .ToList();
+
+        return Ok(platforms);
+    }
+    
+    [Authorize(Roles = Settings.Roles.FreelancerRole)]
+    [HttpPut("status/{id:guid}/freelancer")]
+    public async Task<IActionResult> UpdateContractMilestoneStatusForFreelancer(
+        Guid id,
+        [FromBody] UpdContractMilestoneStatusFreelancerVM vm,
+        CancellationToken ct)
+    {
+        var command = new UpdCMilestoneForFreelancerCmd
+        {
+            Id = id,
+            Status = vm.Status
+        };
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+    
+    [HttpGet("status-employer-enums")]
+    public IActionResult GetEmployerStatusEnumsAsync()
+    {
+        var platforms = Enum.GetValues<ContractMilestoneEmployerStatus>()
+            .Select(x => new { Name = x.ToString(), Value = (int)x })
+            .ToList();
+
+        return Ok(platforms);
+    }
+    
+    [Authorize(Roles = Settings.Roles.EmployerRole)]
+    [HttpPut("status/{id:guid}/employer")]
+    public async Task<IActionResult> UpdateContractMilestoneStatusForEmployer(
+        Guid id,
+        [FromBody] UpdContractMilestoneStatusEmployerVM vm,
+        CancellationToken ct)
+    {
+        var command = new Update.Command<UpdContractMilestoneStatusEmployerVM, Guid>
+        {
+            Id = id,
+            Model = vm
+        };
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]

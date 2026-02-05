@@ -18,11 +18,6 @@ public class FreelancerConfiguration : IEntityTypeConfiguration<Freelancer>
         builder.Property(p => p.Location).HasMaxLength(128);
         builder.Property(p => p.AvatarLogo).HasMaxLength(256);
 
-        builder.HasOne(p => p.User)
-            .WithOne()
-            .HasForeignKey<Freelancer>(p => p.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.Property(p => p.CountryId).IsRequired(false);
         builder.HasOne(p => p.Country)
             .WithMany()

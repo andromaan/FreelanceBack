@@ -37,11 +37,11 @@ public class CreateProjectMilestoneBudgetValidator(
             await milestoneQueries.GetByProjectIdAsync(createModel.ProjectId, cancellationToken);
 
         var totalMilestoneAmount = existingMilestones.Sum(x => x.Amount) + createModel.Amount;
-        if (totalMilestoneAmount > existingProject.BudgetMax)
+        if (totalMilestoneAmount > existingProject.Budget)
         {
             return ServiceResponse.GetResponse(
                 $"The total amount ({totalMilestoneAmount}) of milestones exceeds " +
-                $"the project's maximum budget ({existingProject.BudgetMax})",
+                $"the project's maximum budget ({existingProject.Budget})",
                 false, null, System.Net.HttpStatusCode.BadRequest);
         }
 

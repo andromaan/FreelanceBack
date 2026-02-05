@@ -6,6 +6,6 @@ public interface IUpdateProcessor<TEntity, TCreateViewModel>
 {
     Task<TEntity> ProcessAsync(
         TEntity entity, 
-        TCreateViewModel createModel,
+        TCreateViewModel updateVm,
         CancellationToken cancellationToken);
 }

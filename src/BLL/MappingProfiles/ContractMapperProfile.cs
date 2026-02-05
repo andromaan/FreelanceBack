@@ -11,5 +11,9 @@ public class ContractMapperProfile : Profile
         CreateMap<Contract, ContractVM>().ReverseMap();
         CreateMap<Contract, UpdateContractVM>().ReverseMap();
         CreateMap<Contract, UpdateContractStatusVM>().ReverseMap();
+        
+        CreateMap<Contract, ContractVM>()
+            .ForMember(dest => dest.EmployerUserId,
+                opt => opt.MapFrom(src => src.CreatedBy));
     }
 }

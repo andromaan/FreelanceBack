@@ -11,5 +11,11 @@ public class ContractMilestoneMapperProfile : Profile
         CreateMap<ContractMilestone, ContractMilestoneVM>().ReverseMap();
         CreateMap<ContractMilestone, CreateContractMilestoneVM>().ReverseMap();
         CreateMap<ContractMilestone, UpdateContractMilestoneVM>().ReverseMap();
+        CreateMap<ContractMilestone, UpdContractMilestoneStatusFreelancerVM>().ReverseMap();
+        
+        CreateMap<UpdContractMilestoneStatusEmployerVM, ContractMilestone>()
+            .ForMember(dest => dest.Status,
+            opt
+                => opt.MapFrom(src => (ContractMilestoneStatus)src.Status));
     }
 }

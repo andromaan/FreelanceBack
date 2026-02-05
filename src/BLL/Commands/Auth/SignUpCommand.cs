@@ -54,7 +54,7 @@ public class SignUpCommandHandler(
                 var freelancer = new Freelancer
                 {
                     Id = Guid.NewGuid(),
-                    UserId = user.Id,
+                    CreatedBy = user.Id,
                 };
 
                 await freelancerRepository.CreateAsync(freelancer, user.Id, cancellationToken);

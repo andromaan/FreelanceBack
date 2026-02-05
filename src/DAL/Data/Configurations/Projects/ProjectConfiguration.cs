@@ -16,8 +16,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.Property(p => p.Title).IsRequired().HasMaxLength(200);
         builder.Property(p => p.Description).HasMaxLength(2000);
-        builder.Property(p => p.BudgetMin).HasPrecision(18, 2);
-        builder.Property(p => p.BudgetMax).HasPrecision(18, 2);
+        builder.Property(p => p.Budget).HasPrecision(18, 2);
         builder.Property(p => p.Deadline)
             .HasConversion(new DateTimeUtcConverter())
             .HasDefaultValueSql("timezone('utc', now())");

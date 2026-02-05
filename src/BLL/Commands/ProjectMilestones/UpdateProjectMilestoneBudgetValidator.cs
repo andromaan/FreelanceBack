@@ -13,43 +13,43 @@ public class UpdateProjectMilestoneBudgetValidator(
     : IUpdateValidator<ProjectMilestone, UpdateProjectMilestoneVM>
 {
     public async Task<ServiceResponse?> ValidateAsync(
-        ProjectMilestone existingEmployer,
+        ProjectMilestone existingMilestone,
         UpdateProjectMilestoneVM updateModel,
         CancellationToken cancellationToken)
     {
         // Перевірка чи змінився amount
-        if (existingEmployer.Amount == updateModel.Amount)
+        if (existingMilestone.Amount == updateModel.Amount)
         {
             return null; // Якщо amount не змінився, валідація не потрібна
         }
 
         // Отримай проект
         var project = await projectQueries.GetByIdAsync(
-            existingEmployer.ProjectId, 
+            existingMilestone.ProjectId, 
             cancellationToken);
             
         if (project == null)
         {
             return ServiceResponse.NotFound(
-                $"Project with ID {existingEmployer.ProjectId} not found");
+                $"Project with ID {existingMilestone.ProjectId} not found");
         }
 
         // Отримай всі milestone для проекту
         var allMilestones = await milestoneQueries.GetByProjectIdAsync(
-            existingEmployer.ProjectId, 
+            existingMilestone.ProjectId, 
             cancellationToken);
 
         // Порахуй загальну суму (виключаючи поточний milestone)
         var totalAmount = allMilestones
-            .Where(m => m.Id != existingEmployer.Id)
+            .Where(m => m.Id != existingMilestone.Id)
             .Sum(m => m.Amount) + updateModel.Amount;
 
         // Перевір чи не перевищує бюджет
-        if (totalAmount > project.BudgetMax)
+        if (totalAmount > project.Budget)
         {
             return ServiceResponse.BadRequest(
                 $"The total amount ({totalAmount}) of milestones exceeds " +
-                $"the project's maximum budget ({project.BudgetMax})");
+                $"the project's maximum budget ({project.Budget})");
         }
 
         return null; // Валідація пройшла успішно

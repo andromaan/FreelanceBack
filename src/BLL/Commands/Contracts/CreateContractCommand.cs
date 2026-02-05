@@ -52,6 +52,8 @@ public class CreateContractCommandHandler(
 
         try
         {
+            var createdEntity = await contractRepository.CreateAsync(contract, cancellationToken);
+            
             foreach (var pMilestone in projectMilestones)
             {
                 var cMilestone = new ContractMilestone
@@ -66,8 +68,7 @@ public class CreateContractCommandHandler(
                 
                 await contractMilestoneRepository.CreateAsync(cMilestone, cancellationToken);
             }
-
-            var createdEntity = await contractRepository.CreateAsync(contract, cancellationToken);
+            
             return ServiceResponse.Ok($"Contract created",
                 mapper.Map<ContractVM>(createdEntity));
         }

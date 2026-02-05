@@ -7,8 +7,7 @@ public class ProjectVM
     public Guid Id { get; set; }
     public required string Title { get; set; }
     public string? Description { get; set; }
-    public decimal? BudgetMin { get; set; }
-    public decimal? BudgetMax { get; set; }
+    public decimal Budget { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime Deadline { get; set; }
     // public ICollection<Proposal> Proposals { get; set; } = new List<Proposal>();
