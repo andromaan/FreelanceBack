@@ -21,7 +21,7 @@ public interface ICreateHandler<TEntity, TCreateViewModel>
     /// - Success case contains the processed entity
     /// - Failure case contains ServiceResponse with error details
     /// </returns>
-    Task<Result<TEntity, ServiceResponse>> HandleAsync(
+    Task<ServiceResponse?> HandleAsync(
         TEntity entity,
         TCreateViewModel createModel,
         CancellationToken cancellationToken);

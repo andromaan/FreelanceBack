@@ -14,14 +14,14 @@ public class UpdateProjectMilestoneHandler(
     IMapper mapper
     ) : IUpdateHandler<ProjectMilestone, UpdateProjectMilestoneVM>
 {
-    public async Task<Result<ProjectMilestone, ServiceResponse>> HandleAsync(
+    public async Task<ServiceResponse?> HandleAsync(
         ProjectMilestone existingEntity,
         UpdateProjectMilestoneVM updateModel, CancellationToken cancellationToken)
     {
         // Перевірка чи змінився amount
         if (existingEntity.Amount == updateModel.Amount)
         {
-            return Result<ProjectMilestone, ServiceResponse>.Success(null); // Якщо amount не змінився, повертаємо null - це означає використовувати entity після маппінгу в Update.cs
+            return ServiceResponse.Ok(); // Якщо amount не змінився, повертаємо null - це означає використовувати entity після маппінгу в Update.cs
         }
 
         // Отримай проєкт
@@ -32,8 +32,8 @@ public class UpdateProjectMilestoneHandler(
             
         if (project == null)
         {
-            return Result<ProjectMilestone, ServiceResponse>.Failure(ServiceResponse.NotFound(
-                $"Project with ID {existingEntity.ProjectId} not found"));
+            return ServiceResponse.NotFound(
+                $"Project with ID {existingEntity.ProjectId} not found");
         }
 
         // Отримай всі milestone для проєкту
@@ -49,14 +49,14 @@ public class UpdateProjectMilestoneHandler(
         // Перевір чи не перевищує бюджет
         if (totalAmount > project.Budget)
         {
-            return Result<ProjectMilestone, ServiceResponse>.Failure(ServiceResponse.BadRequest(
+            return ServiceResponse.BadRequest(
                 $"The total amount ({totalAmount}) of milestones exceeds " +
-                $"the project's budged ({project.Budget})"));
+                $"the project's budged ({project.Budget})");
         }
         
         mapper.Map(updateModel, existingEntity);
 
         // Валідація пройшла успішно, повертаємо null щоб використати entity після маппінгу в Update.cs
-        return Result<ProjectMilestone, ServiceResponse>.Success(null);
+        return ServiceResponse.Ok();
     }
 }

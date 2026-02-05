@@ -161,6 +161,11 @@ public static class ConfigureBusinessLogic
             typeof(Update.CommandHandler<UpdContractMilestoneStatusEmployerVM, ContractMilestoneVM, ContractMilestone,
                 Guid, IContractMilestoneQueries>)
         );
+        services.AddTransient(
+            typeof(IRequestHandler<Update.Command<UpdContractMilestoneStatusFreelancerVM, Guid>, ServiceResponse>),
+            typeof(Update.CommandHandler<UpdContractMilestoneStatusFreelancerVM, ContractMilestoneVM, ContractMilestone,
+                Guid, IContractMilestoneQueries>)
+        );
 
         // registrations for Bids
         services.RegisterCrudHandlers(

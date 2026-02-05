@@ -14,14 +14,14 @@ public class UpdateContractMilestoneHandler(
     IMapper mapper
     ) : IUpdateHandler<ContractMilestone, UpdateContractMilestoneVM>
 {
-    public async Task<Result<ContractMilestone, ServiceResponse>> HandleAsync(
+    public async Task<ServiceResponse?> HandleAsync(
         ContractMilestone existingEntity,
         UpdateContractMilestoneVM updateModel, CancellationToken cancellationToken)
     {
         // Перевірка чи змінився amount
         if (existingEntity.Amount == updateModel.Amount)
         {
-            return Result<ContractMilestone, ServiceResponse>.Success(null); // Якщо amount не змінився, валідація не потрібна і змінна сутності теж
+            return ServiceResponse.Ok();// Якщо amount не змінився, валідація не потрібна і змінна сутності теж
         }
 
         // Отримай контракт
@@ -31,8 +31,8 @@ public class UpdateContractMilestoneHandler(
             
         if (contract == null)
         {
-            return Result<ContractMilestone, ServiceResponse>.Failure(ServiceResponse.NotFound(
-                $"Contract with ID {existingEntity.ContractId} not found"));
+            return ServiceResponse.NotFound(
+                $"Contract with ID {existingEntity.ContractId} not found");
         }
 
         // Отримай всі milestone для контракту
@@ -48,13 +48,13 @@ public class UpdateContractMilestoneHandler(
         // Перевір чи не перевищує бюджет
         if (totalAmount > contract.AgreedRate)
         {
-            return Result<ContractMilestone, ServiceResponse>.Failure(ServiceResponse.BadRequest(
+            return ServiceResponse.BadRequest(
                 $"The total amount ({totalAmount}) of milestones exceeds " +
-                $"the contract's agreed rate ({contract.AgreedRate})"));
+                $"the contract's agreed rate ({contract.AgreedRate})");
         }
         
         mapper.Map(updateModel, existingEntity);
 
-        return Result<ContractMilestone, ServiceResponse>.Success(null);  // Валідація пройшла успішно
+        return ServiceResponse.Ok();  // Валідація пройшла успішно
     }
 }

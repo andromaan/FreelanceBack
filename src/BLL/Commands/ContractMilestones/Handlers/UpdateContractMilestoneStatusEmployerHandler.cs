@@ -16,7 +16,7 @@ namespace BLL.Commands.ContractMilestones.Handlers;
 /// Unified handler for ContractMilestone status update that combines validation and processing.
 /// Replaces UpdateContractMilestoneStatusValidator.
 /// </summary>
-public class UpdateContractMilestoneStatusHandler(
+public class UpdateContractMilestoneStatusEmployerHandler(
     IUserWalletRepository userWalletRepository,
     IWalletTransactionRepository walletTransactionRepository,
     IContractQueries contractQueries,
@@ -25,7 +25,7 @@ public class UpdateContractMilestoneStatusHandler(
 )
     : IUpdateHandler<ContractMilestone, UpdContractMilestoneStatusEmployerVM>
 {
-    public async Task<Result<ContractMilestone, ServiceResponse>> HandleAsync(
+    public async Task<ServiceResponse?> HandleAsync(
         ContractMilestone existingEntity,
         UpdContractMilestoneStatusEmployerVM updateModel,
         CancellationToken cancellationToken)
@@ -33,10 +33,9 @@ public class UpdateContractMilestoneStatusHandler(
         // Validation: Check if milestone is already approved
         if (existingEntity.Status == ContractMilestoneStatus.Approved)
         {
-            return Result<ContractMilestone, ServiceResponse>.Failure(
-                ServiceResponse.GetResponse(
+            return ServiceResponse.GetResponse(
                     "Cannot change the status of an approved contract milestone.",
-                    false, null, HttpStatusCode.BadRequest));
+                    false, null, HttpStatusCode.BadRequest);
         }
 
         // Validation: Check wallet balance if approving
@@ -50,10 +49,9 @@ public class UpdateContractMilestoneStatusHandler(
 
             if (employerWallet is null)
             {
-                return Result<ContractMilestone, ServiceResponse>.Failure(
-                    ServiceResponse.GetResponse(
+                return ServiceResponse.GetResponse(
                         "Insufficient funds in the employer's wallet to approve this milestone.",
-                        false, null, HttpStatusCode.BadRequest));
+                        false, null, HttpStatusCode.BadRequest);
             }
 
             var freelancerWallet =
@@ -82,6 +80,6 @@ public class UpdateContractMilestoneStatusHandler(
         mapper.Map(updateModel, existingEntity);
         
         // Processing: No additional processing needed, return mapped entity
-        return Result<ContractMilestone, ServiceResponse>.Success(null);
+        return ServiceResponse.Ok();
     }
 }

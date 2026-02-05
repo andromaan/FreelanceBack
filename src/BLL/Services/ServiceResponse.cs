@@ -20,7 +20,7 @@ public class ServiceResponse
         };
     }
 
-    public static ServiceResponse Ok(string message, object? data = null)
+    public static ServiceResponse Ok(string message = "Ok", object? data = null)
     {
         return GetResponse(message, true, data, HttpStatusCode.OK);
     }

@@ -48,14 +48,9 @@ public class Create
                     request.Model,
                     cancellationToken);
                     
-                if (result.IsFailure)
+                if (result is {Success: false})
                 {
-                    return result.GetFailure();
-                }
-
-                if (result.GetSuccess() is not null)
-                {
-                    mappedEntity = result.GetSuccess();
+                    return result;
                 }
             }
             

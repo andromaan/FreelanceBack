@@ -14,7 +14,6 @@ public interface IUpdateHandler<TEntity, TUpdateViewModel>
     /// Handles validation and processing for entity update.
     /// </summary>
     /// <param name="existingEntity">The existing entity from database</param>
-    /// <param name="mappedEntity">The entity after mapping with update data</param>
     /// <param name="updateModel">The update view model</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>
@@ -22,7 +21,7 @@ public interface IUpdateHandler<TEntity, TUpdateViewModel>
     /// - Success case contains the processed entity
     /// - Failure case contains ServiceResponse with error details
     /// </returns>
-    Task<Result<TEntity, ServiceResponse>> HandleAsync(
+    Task<ServiceResponse?> HandleAsync(
         TEntity existingEntity,
         TUpdateViewModel updateModel,
         CancellationToken cancellationToken);

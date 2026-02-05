@@ -53,10 +53,10 @@ public class ContractMilestoneController(ISender sender)
         [FromBody] UpdContractMilestoneStatusFreelancerVM vm,
         CancellationToken ct)
     {
-        var command = new UpdCMilestoneForFreelancerCmd
+        var command = new Update.Command<UpdContractMilestoneStatusFreelancerVM, Guid>
         {
             Id = id,
-            Status = vm.Status
+            Model = vm
         };
         var result = await Sender.Send(command, ct);
         return GetResult(result);

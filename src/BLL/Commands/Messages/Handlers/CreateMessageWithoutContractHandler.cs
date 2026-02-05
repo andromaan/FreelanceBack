@@ -12,7 +12,7 @@ public class CreateMessageWithoutContractHandler(
     IUserQueries userQueries
 ) : ICreateHandler<Message, CreateMessageWithoutContractVM>
 {
-    public async Task<Result<Message, ServiceResponse>> HandleAsync(Message entity,
+    public async Task<ServiceResponse?> HandleAsync(Message entity,
         CreateMessageWithoutContractVM createModel, CancellationToken cancellationToken)
     {
         var senderId = await userProvider.GetUserId();
@@ -20,18 +20,16 @@ public class CreateMessageWithoutContractHandler(
         var receiver = await userQueries.GetByEmailAsync(createModel.ReceiverEmail, cancellationToken);
         if (receiver == null)
         {
-            return Result<Message, ServiceResponse>.Failure(
-                ServiceResponse.BadRequest("Receiver with the specified email does not exist"));
+            return ServiceResponse.BadRequest("Receiver with the specified email does not exist");
         }
 
         if (receiver.Id == senderId)
         {
-            return Result<Message, ServiceResponse>.Failure(
-                ServiceResponse.BadRequest("Cannot send a message to yourself"));
+            return ServiceResponse.BadRequest("Cannot send a message to yourself");
         }
 
         entity.ReceiverId = receiver.Id;
 
-        return Result<Message, ServiceResponse>.Success(null); // Validation passed
+        return ServiceResponse.Ok(); // Validation passed
     }
 }

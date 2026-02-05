@@ -18,7 +18,7 @@ public class CreateQuoteHandler(
     IFreelancerQueries freelancerQueries)
     : ICreateHandler<Quote, CreateQuoteVM>
 {
-    public async Task<Result<Quote, ServiceResponse>> HandleAsync(
+    public async Task<ServiceResponse?> HandleAsync(
         Quote entity,
         CreateQuoteVM createModel,
         CancellationToken cancellationToken)
@@ -28,8 +28,7 @@ public class CreateQuoteHandler(
         
         if (existingProject is null)
         {
-            return Result<Quote, ServiceResponse>.Failure(
-                ServiceResponse.NotFound($"Project with Id {createModel.ProjectId} not found"));
+            return ServiceResponse.NotFound($"Project with Id {createModel.ProjectId} not found");
         }
 
         // Processing: Set FreelancerId from current user
@@ -38,13 +37,12 @@ public class CreateQuoteHandler(
         
         if (existingFreelancer is null)
         {
-            return Result<Quote, ServiceResponse>.Failure(
-                ServiceResponse.NotFound("Freelancer not found for current user"));
+            return ServiceResponse.NotFound("Freelancer not found for current user");
         }
         
         entity.FreelancerId = existingFreelancer.Id;
 
         // Return success with processed entity
-        return Result<Quote, ServiceResponse>.Success(entity);
+        return ServiceResponse.Ok();
     }
 }

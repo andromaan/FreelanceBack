@@ -1,8 +1,9 @@
+using BLL.Common.Interfaces;
 using Domain.Models.Freelance;
 
 namespace BLL.ViewModels.ContractMilestone;
 
-public class UpdContractMilestoneStatusFreelancerVM
+public class UpdContractMilestoneStatusFreelancerVM : ISkipAuditable
 {
     public ContractMilestoneFreelancerStatus Status { get; set; }
 }

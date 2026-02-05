@@ -11,7 +11,7 @@ namespace BLL.Commands;
 
 public class Update
 {
-    public record Command<TUpdateViewModel, TKey> : IRequest<ServiceResponse> 
+    public record Command<TUpdateViewModel, TKey> : IRequest<ServiceResponse>
         where TUpdateViewModel : class
     {
         public required TKey Id { get; init; }
@@ -23,7 +23,7 @@ public class Update
         TQueries queries,
         IMapper mapper,
         IUserProvider userProvider,
-        IEnumerable<IUpdateHandler<TEntity, TUpdateViewModel>> handlers) 
+        IEnumerable<IUpdateHandler<TEntity, TUpdateViewModel>> handlers)
         : IRequestHandler<Command<TUpdateViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TUpdateViewModel : class
@@ -42,17 +42,20 @@ public class Update
                 return ServiceResponse.NotFound(
                     $"{typeof(TEntity).Name} with ID {request.Id} not found");
             }
-            
-            // 2. Check access rights (auditable)
-            if (entity is AuditableEntity<TKey> auditable)
-            {
-                var userId = await userProvider.GetUserId();
-                var userRole = userProvider.GetUserRole();
 
-                if (auditable.CreatedBy != userId && userRole != Settings.Roles.AdminRole)
+            // 2. Check access rights (auditable)
+            if (request.Model is not ISkipAuditable)
+            {
+                if (entity is AuditableEntity<TKey> auditable)
                 {
-                    return ServiceResponse.Forbidden(
-                        "You do not have permission to edit this entity");
+                    var userId = await userProvider.GetUserId();
+                    var userRole = userProvider.GetUserRole();
+
+                    if (auditable.CreatedBy != userId && userRole != Settings.Roles.AdminRole)
+                    {
+                        return ServiceResponse.Forbidden(
+                            "You do not have permission to edit this entity");
+                    }
                 }
             }
 
@@ -60,39 +63,6 @@ public class Update
             if (request.Model is not ISkipMapper)
             {
                 mapper.Map(request.Model, entity);
-            }
-
-            // 5. Execute new unified handlers (validation + processing in one place)
-            foreach (var handler in handlers)
-            {
-                var result = await handler.HandleAsync(
-                    entity!,
-                    request.Model,
-                    cancellationToken);
-                    
-                if (result.IsFailure)
-                {
-                    return result.GetFailure();
-                }
-                
-                if (result.GetSuccess() is not null)
-                {
-                    entity = result.GetSuccess();
-                }
-            }
-            
-            // TODO maybe leave and rethink this part later - if handler returns null entity, it means that validation passed but no changes are needed, so we can return early without updating the database. But maybe it's better to always update to keep updated timestamps correct and trigger any side effects of update?
-            // if (entity == null)
-            // {
-            //     return ServiceResponse.Ok(
-            //         $"{typeof(TEntity).Name} updated", 
-            //         mapper.Map<TViewModel>(existingEntity));
-            // }
-            
-            if (entity == null)
-            {
-                return ServiceResponse.InternalError(
-                    "Entity mapping failed. Please check the mapping configuration.");
             }
             
             // 4. Check uniqueness
@@ -105,12 +75,26 @@ public class Update
                 }
             }
 
+            // 5. Execute new unified handlers (validation + processing in one place)
+            foreach (var handler in handlers)
+            {
+                var result = await handler.HandleAsync(
+                    entity,
+                    request.Model,
+                    cancellationToken);
+
+                if (result is { Success: false })
+                {
+                    return result;
+                }
+            }
+
             // 6. Save to database
             try
             {
                 await repository.UpdateAsync(entity, cancellationToken);
                 return ServiceResponse.Ok(
-                    $"{typeof(TEntity).Name} updated", 
+                    $"{typeof(TEntity).Name} updated",
                     mapper.Map<TViewModel>(entity));
             }
             catch (Exception exception)

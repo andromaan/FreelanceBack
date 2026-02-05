@@ -16,7 +16,7 @@ public class CreateProjectMilestoneHandler(
     IProjectMilestoneQueries milestoneQueries
 ) : ICreateHandler<ProjectMilestone, CreateProjectMilestoneVM>
 {
-    public async Task<Result<ProjectMilestone, ServiceResponse>> HandleAsync(ProjectMilestone? entity,
+    public async Task<ServiceResponse?> HandleAsync(ProjectMilestone? entity,
         CreateProjectMilestoneVM createModel, CancellationToken cancellationToken)
     {
         var userRole = userProvider.GetUserRole();
@@ -26,14 +26,12 @@ public class CreateProjectMilestoneHandler(
 
         if (existingProject is null)
         {
-            return Result<ProjectMilestone, ServiceResponse>.Failure(
-                ServiceResponse.NotFound($"Project with Id {createModel.ProjectId} not found"));
+            return ServiceResponse.NotFound($"Project with Id {createModel.ProjectId} not found");
         }
 
         if (existingProject.CreatedBy != userId && userRole != Settings.Roles.AdminRole)
         {
-            return Result<ProjectMilestone, ServiceResponse>.Failure(
-                ServiceResponse.Unauthorized("You are not authorized to create a milestone for this project"));
+            return ServiceResponse.Unauthorized("You are not authorized to create a milestone for this project");
         }
 
         var existingMilestones =
@@ -42,12 +40,12 @@ public class CreateProjectMilestoneHandler(
         var totalMilestoneAmount = existingMilestones.Sum(x => x.Amount) + createModel.Amount;
         if (totalMilestoneAmount > existingProject.Budget)
         {
-            return Result<ProjectMilestone, ServiceResponse>.Failure(ServiceResponse.GetResponse(
+            return ServiceResponse.GetResponse(
                 $"The total amount ({totalMilestoneAmount}) of milestones exceeds " +
                 $"the project's budged ({existingProject.Budget})",
-                false, null, HttpStatusCode.BadRequest));
+                false, null, HttpStatusCode.BadRequest);
         }
 
-        return Result<ProjectMilestone, ServiceResponse>.Success(null); // Валідація пройшла успішно
+        return ServiceResponse.Ok(); // Валідація пройшла успішно
     }
 }
