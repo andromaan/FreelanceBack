@@ -1,5 +1,6 @@
 using AutoMapper;
 using BLL.Common;
+using BLL.Common.Handlers;
 using BLL.Common.Interfaces;
 using BLL.Common.Processors;
 using BLL.Common.Validators;
@@ -24,8 +25,9 @@ public class Update
         TQueries queries,
         IMapper mapper,
         IUserProvider userProvider,
-        IEnumerable<IUpdateValidator<TEntity, TUpdateViewModel>> validators, // Додано validators
-        IEnumerable<IUpdateProcessor<TEntity, TUpdateViewModel>> processors) 
+        IEnumerable<IUpdateValidator<TEntity, TUpdateViewModel>> validators,
+        IEnumerable<IUpdateProcessor<TEntity, TUpdateViewModel>> processors,
+        IEnumerable<IUpdateHandler<TEntity, TUpdateViewModel>> handlers) 
         : IRequestHandler<Command<TUpdateViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TUpdateViewModel : class
@@ -36,7 +38,7 @@ public class Update
             Command<TUpdateViewModel, TKey> request,
             CancellationToken cancellationToken)
         {
-            // 1. Перевірка існування entity
+            // 1. Check entity existence
             var existingEntity = await queries.GetByIdAsync(request.Id, cancellationToken);
 
             if (existingEntity == null)
@@ -45,7 +47,7 @@ public class Update
                     $"{typeof(TEntity).Name} with ID {request.Id} not found");
             }
             
-            // 2. Перевірка прав доступу (auditable)
+            // 2. Check access rights (auditable)
             if (existingEntity is AuditableEntity<TKey> auditable)
             {
                 var userId = await userProvider.GetUserId();
@@ -58,7 +60,7 @@ public class Update
                 }
             }
 
-            // 3. ВИКОНАННЯ CUSTOM VALIDATORS (нова логіка)
+            // 3. Execute legacy validators (for backward compatibility)
             foreach (var validator in validators)
             {
                 var validationResult = await validator.ValidateAsync(
@@ -75,7 +77,7 @@ public class Update
             // 4. Mapping
             var entity = mapper.Map(request.Model, existingEntity);
 
-            // 5. Перевірка унікальності
+            // 5. Check uniqueness
             if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
             {
                 if (!await uniqueQuery.IsUniqueAsync(entity, cancellationToken))
@@ -85,7 +87,7 @@ public class Update
                 }
             }
             
-            // 6. ВИКОНАННЯ CUSTOM PROCESSORS
+            // 6. Execute legacy processors (for backward compatibility)
             foreach (var processor in processors)
             {
                 entity = await processor.ProcessAsync(
@@ -93,8 +95,25 @@ public class Update
                     request.Model,
                     cancellationToken);
             }
+            
+            // 7. Execute new unified handlers (validation + processing in one place)
+            foreach (var handler in handlers)
+            {
+                var result = await handler.HandleAsync(
+                    existingEntity,
+                    entity, 
+                    request.Model,
+                    cancellationToken);
+                    
+                if (result.IsFailure)
+                {
+                    return result.GetFailure();
+                }
+                
+                entity = result.GetSuccess();
+            }
 
-            // 7. Збереження
+            // 8. Save to database
             try
             {
                 await repository.UpdateAsync(entity, cancellationToken);

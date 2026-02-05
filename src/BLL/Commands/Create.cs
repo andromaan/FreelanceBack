@@ -1,5 +1,6 @@
 using AutoMapper;
 using BLL.Common;
+using BLL.Common.Handlers;
 using BLL.Common.Processors;
 using BLL.Common.Validators;
 using BLL.Services;
@@ -20,7 +21,8 @@ public class Create
         IMapper mapper,
         TQueries queries,
         IEnumerable<ICreateValidator<TCreateViewModel>> validators,
-        IEnumerable<ICreateProcessor<TEntity, TCreateViewModel>> processors)
+        IEnumerable<ICreateProcessor<TEntity, TCreateViewModel>> processors,
+        IEnumerable<ICreateHandler<TEntity, TCreateViewModel>> handlers)
         : IRequestHandler<Command<TCreateViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TCreateViewModel : class
@@ -30,6 +32,7 @@ public class Create
         public async Task<ServiceResponse> Handle(Command<TCreateViewModel> request,
             CancellationToken cancellationToken)
         {
+            // 1. Execute legacy validators (for backward compatibility)
             foreach (var validator in validators)
             {
                 var validationResult = await validator.ValidateAsync(
@@ -42,8 +45,10 @@ public class Create
                 }
             }
             
+            // 2. Map to entity
             var entity = mapper.Map<TEntity>(request.Model);
             
+            // 3. Check uniqueness
             if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
             {
                 if (!await uniqueQuery.IsUniqueAsync(entity, cancellationToken))
@@ -52,6 +57,7 @@ public class Create
                 }
             }
 
+            // 4. Execute legacy processors (for backward compatibility)
             foreach (var processor in processors)
             {
                 entity = await processor.ProcessAsync(
@@ -60,6 +66,23 @@ public class Create
                     cancellationToken);
             }
             
+            // 5. Execute new unified handlers (validation + processing in one place)
+            foreach (var handler in handlers)
+            {
+                var result = await handler.HandleAsync(
+                    entity, 
+                    request.Model,
+                    cancellationToken);
+                    
+                if (result.IsFailure)
+                {
+                    return result.GetFailure();
+                }
+                
+                entity = result.GetSuccess();
+            }
+            
+            // 6. Save to database
             try
             {
                 var createdEntity = await repository.CreateAsync(entity, cancellationToken);
