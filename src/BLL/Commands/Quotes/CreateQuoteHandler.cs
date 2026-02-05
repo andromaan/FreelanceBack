@@ -25,7 +25,7 @@ public class CreateQuoteHandler(
     {
         // Validation: Check if project exists
         var existingProject = await projectQueries.GetByIdAsync(createModel.ProjectId, cancellationToken);
-        
+
         if (existingProject is null)
         {
             return ServiceResponse.NotFound($"Project with Id {createModel.ProjectId} not found");
@@ -34,12 +34,18 @@ public class CreateQuoteHandler(
         // Processing: Set FreelancerId from current user
         var userId = await userProvider.GetUserId();
         var existingFreelancer = await freelancerQueries.GetByUserIdAsync(userId, cancellationToken);
-        
+
         if (existingFreelancer is null)
         {
             return ServiceResponse.NotFound("Freelancer not found for current user");
         }
-        
+
+        if (existingProject.Budget < createModel.Amount)
+        {
+            return ServiceResponse.BadRequest(
+                $"Quote amount {createModel.Amount} exceeds project budget {existingProject.Budget}");
+        }
+
         entity.FreelancerId = existingFreelancer.Id;
 
         // Return success with processed entity

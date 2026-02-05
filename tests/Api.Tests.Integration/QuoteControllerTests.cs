@@ -23,8 +23,8 @@ public class QuoteControllerTests(IntegrationTestWebFactory factory)
     public async Task ShouldCreateQuote()
     {
         // Arrange
-        var request = new CreateQuoteVM 
-        { 
+        var request = new CreateQuoteVM
+        {
             ProjectId = _project.Id,
             Amount = 2000m,
             Message = "My quote for this project"
@@ -46,43 +46,43 @@ public class QuoteControllerTests(IntegrationTestWebFactory factory)
         quoteFromDb.Amount.Should().Be(2000m);
         quoteFromDb.Message.Should().Be("My quote for this project");
     }
-    
+
     [Fact]
     public async Task ShouldUpdateQuote()
     {
         // Arrange
-        var request = new UpdateQuoteVM 
-        { 
+        var request = new UpdateQuoteVM
+        {
             Amount = 3000m,
             Message = "Updated quote message"
         };
 
         // Act
         var response = await Client.PutAsJsonAsync($"Quote/{_quote.Id}", request);
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
-        
+
         var quoteFromResponse = await JsonHelper.GetPayloadAsync<QuoteVM>(response);
-        
+
         var quoteFromDb = await Context.Set<Quote>().FirstOrDefaultAsync(x => x.Id == quoteFromResponse.Id);
-        
+
         quoteFromDb.Should().NotBeNull();
         quoteFromDb.Amount.Should().Be(3000m);
         quoteFromDb.Message.Should().Be("Updated quote message");
     }
-    
+
     [Fact]
     public async Task ShouldDeleteQuote()
     {
         // Act
         var response = await Client.DeleteAsync($"Quote/{_quote.Id}");
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
-        
+
         var quoteFromDb = await Context.Set<Quote>().FirstOrDefaultAsync(x => x.Id == _quote.Id);
-        
+
         quoteFromDb.Should().BeNull();
     }
 
@@ -91,12 +91,12 @@ public class QuoteControllerTests(IntegrationTestWebFactory factory)
     {
         // Act
         var response = await Client.GetAsync($"Quote/{_quote.Id}");
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
-        
+
         var quoteFromResponse = await JsonHelper.GetPayloadAsync<QuoteVM>(response);
-        
+
         quoteFromResponse.Should().NotBeNull();
         quoteFromResponse.Id.Should().Be(_quote.Id);
         quoteFromResponse.ProjectId.Should().Be(_project.Id);
@@ -107,12 +107,12 @@ public class QuoteControllerTests(IntegrationTestWebFactory factory)
     {
         // Act
         var response = await Client.GetAsync($"Quote/by-project/{_project.Id}");
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
-        
+
         var quotes = await JsonHelper.GetPayloadAsync<List<QuoteVM>>(response);
-        
+
         quotes.Should().NotBeEmpty();
         quotes.Should().Contain(q => q.Id == _quote.Id);
     }
@@ -121,61 +121,80 @@ public class QuoteControllerTests(IntegrationTestWebFactory factory)
     public async Task ShouldNotCreateQuoteBecauseProjectNotFound()
     {
         // Arrange
-        var request = new CreateQuoteVM 
-        { 
+        var request = new CreateQuoteVM
+        {
             ProjectId = Guid.NewGuid(),
             Amount = 2000m,
             Message = "Test"
         };
-        
+
         // Act
         var response = await Client.PostAsJsonAsync("Quote", request);
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeFalse();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
+    public async Task ShouldNotCreateQuoteBecauseAmountIsGreaterThanProjectBudget()
+    {
+        // Arrange
+        var request = new CreateQuoteVM
+        {
+            ProjectId = _project.Id,
+            Amount = 100000m, // Assuming this is greater than the project budget
+            Message = "Test"
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("Quote", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task ShouldNotUpdateBecauseNotFound()
     {
         // Arrange
-        var request = new UpdateQuoteVM 
-        { 
+        var request = new UpdateQuoteVM
+        {
             Amount = 1000m,
             Message = "Test"
         };
-        
+
         // Act
         var response = await Client.PutAsJsonAsync($"Quote/{Guid.NewGuid()}", request);
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeFalse();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
-    
+
     [Fact]
     public async Task ShouldNotDeleteBecauseNotFound()
     {
         // Act
         var response = await Client.DeleteAsync($"Quote/{Guid.NewGuid()}");
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeFalse();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
-    
+
     [Fact]
     public async Task ShouldNotGetByIdBecauseNotFound()
     {
         // Act
         var response = await Client.GetAsync($"Quote/{Guid.NewGuid()}");
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeFalse();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
-    
+
     [Fact]
     public async Task ShouldReturnEmptyListForProjectWithNoQuotes()
     {
@@ -186,12 +205,12 @@ public class QuoteControllerTests(IntegrationTestWebFactory factory)
 
         // Act
         var response = await Client.GetAsync($"Quote/by-project/{projectWithoutQuotes.Id}");
-        
+
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
-        
+
         var quotes = await JsonHelper.GetPayloadAsync<List<QuoteVM>>(response);
-        
+
         quotes.Should().BeEmpty();
     }
 

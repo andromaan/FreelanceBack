@@ -18,33 +18,37 @@ public class CreateBidHandler(
     IFreelancerQueries freelancerQueries)
     : ICreateHandler<Bid, CreateBidVM>
 {
-    public async Task<Result<Bid, ServiceResponse>> HandleAsync(
+    public async Task<ServiceResponse?> HandleAsync(
         Bid entity,
         CreateBidVM createModel,
         CancellationToken cancellationToken)
     {
         // Validation: Check if project exists
         var existingProject = await projectQueries.GetByIdAsync(createModel.ProjectId, cancellationToken);
-        
+
         if (existingProject is null)
         {
-            return Result<Bid, ServiceResponse>.Failure(
-                ServiceResponse.NotFound($"Project with Id {createModel.ProjectId} not found"));
+            return ServiceResponse.NotFound($"Project with Id {createModel.ProjectId} not found");
         }
 
         // Processing: Set FreelancerId from current user
         var userId = await userProvider.GetUserId();
         var existingFreelancer = await freelancerQueries.GetByUserIdAsync(userId, cancellationToken);
-        
+
         if (existingFreelancer is null)
         {
-            return Result<Bid, ServiceResponse>.Failure(
-                ServiceResponse.NotFound("Freelancer not found for current user"));
+            return ServiceResponse.NotFound("Freelancer not found for current user");
         }
-        
+
+        if (existingProject.Budget < createModel.Amount)
+        {
+            return ServiceResponse.BadRequest(
+                $"Bid amount {createModel.Amount} exceeds project budget {existingProject.Budget}");
+        }
+
         entity.FreelancerId = existingFreelancer.Id;
 
         // Return success with processed entity
-        return Result<Bid, ServiceResponse>.Success(entity);
+        return ServiceResponse.Ok();
     }
 }
