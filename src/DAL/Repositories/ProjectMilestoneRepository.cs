@@ -14,7 +14,9 @@ public class ProjectMilestoneRepository(AppDbContext context, IUserProvider prov
     public async Task<IEnumerable<ProjectMilestone>> GetByProjectIdAsync(Guid projectId,
         CancellationToken cancellationToken = default)
     {
-        return await _context.Set<ProjectMilestone>().Where(x => x.ProjectId == projectId)
+        return await _context.Set<ProjectMilestone>()
+            .AsNoTracking()
+            .Where(x => x.ProjectId == projectId)
             .ToListAsync(cancellationToken);
     }
 }

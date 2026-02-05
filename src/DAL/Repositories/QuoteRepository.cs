@@ -13,7 +13,9 @@ public class QuoteRepository(AppDbContext context, IUserProvider provider)
     
     public async Task<IEnumerable<Quote>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Quote>().Where(x => x.ProjectId == projectId)
+        return await _context.Set<Quote>()
+            .AsNoTracking()
+            .Where(x => x.ProjectId == projectId)
             .ToListAsync(cancellationToken);
     }
 }

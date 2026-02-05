@@ -15,6 +15,7 @@ public class ContractMilestoneRepository(AppDbContext context, IUserProvider pro
         CancellationToken cancellationToken = default)
     {
         return await _context.Set<ContractMilestone>().Where(x => x.ContractId == contractId)
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
 }

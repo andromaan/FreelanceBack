@@ -30,7 +30,7 @@ public class CreateMessageWithoutContractHandler(
                 ServiceResponse.BadRequest("Cannot send a message to yourself"));
         }
 
-        // entity.ReceiverId = receiver.Id;
+        entity.ReceiverId = receiver.Id;
 
         return Result<Message, ServiceResponse>.Success(null); // Validation passed
     }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
@@ -9,23 +10,25 @@ namespace BLL.Commands.ProjectMilestones.Handlers;
 
 public class UpdateProjectMilestoneHandler(
     IProjectQueries projectQueries,
-    IProjectMilestoneQueries milestoneQueries
+    IProjectMilestoneQueries milestoneQueries,
+    IMapper mapper
     ) : IUpdateHandler<ProjectMilestone, UpdateProjectMilestoneVM>
 {
-    public async Task<Result<ProjectMilestone, ServiceResponse>> HandleAsync(ProjectMilestone existingEntity,
-        ProjectMilestone? mappedEntity,
+    public async Task<Result<ProjectMilestone, ServiceResponse>> HandleAsync(
+        ProjectMilestone existingEntity,
         UpdateProjectMilestoneVM updateModel, CancellationToken cancellationToken)
     {
         // Перевірка чи змінився amount
         if (existingEntity.Amount == updateModel.Amount)
         {
-            return Result<ProjectMilestone, ServiceResponse>.Success(null); // Якщо amount не змінився, валідація не потрібна і змінна сутності теж
+            return Result<ProjectMilestone, ServiceResponse>.Success(null); // Якщо amount не змінився, повертаємо null - це означає використовувати entity після маппінгу в Update.cs
         }
 
-        // Отримай контракт
+        // Отримай проєкт
         var project = await projectQueries.GetByIdAsync(
             existingEntity.ProjectId, 
-            cancellationToken);
+            cancellationToken,
+            asNoTracking: true);
             
         if (project == null)
         {
@@ -33,7 +36,7 @@ public class UpdateProjectMilestoneHandler(
                 $"Project with ID {existingEntity.ProjectId} not found"));
         }
 
-        // Отримай всі milestone для контракту
+        // Отримай всі milestone для проєкту
         var allMilestones = await milestoneQueries.GetByProjectIdAsync(
             existingEntity.ProjectId, 
             cancellationToken);
@@ -50,7 +53,10 @@ public class UpdateProjectMilestoneHandler(
                 $"The total amount ({totalAmount}) of milestones exceeds " +
                 $"the project's budged ({project.Budget})"));
         }
+        
+        mapper.Map(updateModel, existingEntity);
 
-        return Result<ProjectMilestone, ServiceResponse>.Success(null);  // Валідація пройшла успішно
+        // Валідація пройшла успішно, повертаємо null щоб використати entity після маппінгу в Update.cs
+        return Result<ProjectMilestone, ServiceResponse>.Success(null);
     }
 }

@@ -9,7 +9,7 @@ using Domain.Models.Freelance;
 
 namespace BLL.Commands.ContractMilestones.Handlers;
 
-public class CreateContractMilestoneBudgetHandler(
+public class CreateContractMilestoneHandler(
     IUserProvider userProvider,
     IContractQueries contractQueries,
     IContractMilestoneQueries milestoneQueries

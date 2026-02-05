@@ -1,4 +1,5 @@
 using System.Net;
+using AutoMapper;
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Freelancers;
@@ -19,13 +20,13 @@ public class UpdateContractMilestoneStatusHandler(
     IUserWalletRepository userWalletRepository,
     IWalletTransactionRepository walletTransactionRepository,
     IContractQueries contractQueries,
-    IFreelancerQueries freelancerQueries
+    IFreelancerQueries freelancerQueries,
+    IMapper mapper
 )
     : IUpdateHandler<ContractMilestone, UpdContractMilestoneStatusEmployerVM>
 {
     public async Task<Result<ContractMilestone, ServiceResponse>> HandleAsync(
         ContractMilestone existingEntity,
-        ContractMilestone mappedEntity,
         UpdContractMilestoneStatusEmployerVM updateModel,
         CancellationToken cancellationToken)
     {
@@ -77,10 +78,10 @@ public class UpdateContractMilestoneStatusHandler(
                 WalletId =  freelancerWallet!.Id,
             }, cancellationToken);
         }
-
-        mappedEntity.Status = (ContractMilestoneStatus)updateModel.Status;
+        
+        mapper.Map(updateModel, existingEntity);
         
         // Processing: No additional processing needed, return mapped entity
-        return Result<ContractMilestone, ServiceResponse>.Success(mappedEntity);
+        return Result<ContractMilestone, ServiceResponse>.Success(null);
     }
 }

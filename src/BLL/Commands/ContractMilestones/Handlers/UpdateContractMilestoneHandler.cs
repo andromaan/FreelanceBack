@@ -1,3 +1,4 @@
+using AutoMapper;
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.Contracts;
@@ -7,13 +8,14 @@ using Domain.Models.Freelance;
 
 namespace BLL.Commands.ContractMilestones.Handlers;
 
-public class UpdateContractMilestoneBudgeHandler(
+public class UpdateContractMilestoneHandler(
     IContractQueries contractQueries,
-    IContractMilestoneQueries milestoneQueries
+    IContractMilestoneQueries milestoneQueries,
+    IMapper mapper
     ) : IUpdateHandler<ContractMilestone, UpdateContractMilestoneVM>
 {
-    public async Task<Result<ContractMilestone, ServiceResponse>> HandleAsync(ContractMilestone existingEntity,
-        ContractMilestone? mappedEntity,
+    public async Task<Result<ContractMilestone, ServiceResponse>> HandleAsync(
+        ContractMilestone existingEntity,
         UpdateContractMilestoneVM updateModel, CancellationToken cancellationToken)
     {
         // Перевірка чи змінився amount
@@ -25,7 +27,7 @@ public class UpdateContractMilestoneBudgeHandler(
         // Отримай контракт
         var contract = await contractQueries.GetByIdAsync(
             existingEntity.ContractId, 
-            cancellationToken);
+            cancellationToken, asNoTracking: true);
             
         if (contract == null)
         {
@@ -50,6 +52,8 @@ public class UpdateContractMilestoneBudgeHandler(
                 $"The total amount ({totalAmount}) of milestones exceeds " +
                 $"the contract's agreed rate ({contract.AgreedRate})"));
         }
+        
+        mapper.Map(updateModel, existingEntity);
 
         return Result<ContractMilestone, ServiceResponse>.Success(null);  // Валідація пройшла успішно
     }

@@ -24,7 +24,6 @@ public interface IUpdateHandler<TEntity, TUpdateViewModel>
     /// </returns>
     Task<Result<TEntity, ServiceResponse>> HandleAsync(
         TEntity existingEntity,
-        TEntity mappedEntity,
         TUpdateViewModel updateModel,
         CancellationToken cancellationToken);
 }

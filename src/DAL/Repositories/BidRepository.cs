@@ -13,7 +13,9 @@ public class BidRepository(AppDbContext context, IUserProvider provider)
     
     public async Task<IEnumerable<Bid>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Bid>().Where(x => x.ProjectId == projectId)
+        return await _context.Set<Bid>()
+            .AsNoTracking()
+            .Where(x => x.ProjectId == projectId)
             .ToListAsync(cancellationToken);
     }
 }

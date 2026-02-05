@@ -1,8 +1,9 @@
+using BLL.Common.Interfaces;
 using Domain.Models.Freelance;
 
 namespace BLL.ViewModels.ContractMilestone;
 
-public class UpdContractMilestoneStatusEmployerVM
+public class UpdContractMilestoneStatusEmployerVM : ISkipMapper
 {
     public ContractMilestoneEmployerStatus Status { get; set; }
 }
