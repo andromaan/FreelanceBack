@@ -46,7 +46,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
             ModifiedBy = _freelancerUser.Id,
             ModifiedAt = DateTime.UtcNow
         };
-        
+
         var milestone = new ContractMilestone
         {
             Id = Guid.NewGuid(),
@@ -97,6 +97,62 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
     }
 
     [Fact]
+    public async Task ShouldUpdateContractStatusToCompleted_WhenAllMilestonesApprovedOrRejected()
+    {
+        // Arrange
+        var contract =
+            ContractData.CreateContract(projectId: _project.Id, freelancerId: _freelancer.Id, agreedRate: 1000m,
+                createdById: UserId);
+        await Context.AddAsync(contract);
+        var milestone1 = new ContractMilestone
+        {
+            Id = Guid.NewGuid(), ContractId = contract.Id, Description = "M1", Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(1), Status = ContractMilestoneStatus.Pending, CreatedBy = UserId
+        };
+        var milestone2 = new ContractMilestone
+        {
+            Id = Guid.NewGuid(), ContractId = contract.Id, Description = "M2", Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(2), Status = ContractMilestoneStatus.Pending, CreatedBy = UserId
+        };
+        var employerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 10000m,
+            Currency = "USD",
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        var freelancerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 0m,
+            Currency = "USD",
+            CreatedBy = _freelancerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _freelancerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        
+        await Context.AddAsync(milestone1);
+        await Context.AddAsync(milestone2);
+        await Context.AddAsync(employerWallet);
+        await Context.AddAsync(freelancerWallet);
+        await SaveChangesAsync();
+
+        // Act: Approve both milestones
+        var approveVm = new UpdContractMilestoneStatusEmployerVM { Status = ContractMilestoneEmployerStatus.Approved };
+        await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone1.Id}/employer", approveVm);
+        await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone2.Id}/employer", approveVm);
+
+        // Assert
+        var contractFromDb = await Context.Set<Contract>().FirstOrDefaultAsync(x => x.Id == contract.Id);
+        contractFromDb.Should().NotBeNull();
+        contractFromDb.Status.Should().Be(ContractStatus.Completed);
+    }
+
+    [Fact]
     public async Task ShouldNotApproveContractMilestone_WhenEmployerHasInsufficientFunds()
     {
         // Arrange
@@ -110,7 +166,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
             ModifiedBy = _employerUser.Id,
             ModifiedAt = DateTime.UtcNow
         };
-        
+
         var milestone = new ContractMilestone
         {
             Id = Guid.NewGuid(),
@@ -167,7 +223,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
             ModifiedBy = _employerUser.Id,
             ModifiedAt = DateTime.UtcNow
         };
-        
+
         var milestone = new ContractMilestone
         {
             Id = Guid.NewGuid(),
@@ -229,7 +285,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
             ModifiedBy = _freelancerUser.Id,
             ModifiedAt = DateTime.UtcNow
         };
-        
+
         var milestone = new ContractMilestone
         {
             Id = Guid.NewGuid(),
@@ -300,7 +356,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
             ModifiedBy = _freelancerUser.Id,
             ModifiedAt = DateTime.UtcNow
         };
-        
+
         var milestone = new ContractMilestone
         {
             Id = Guid.NewGuid(),

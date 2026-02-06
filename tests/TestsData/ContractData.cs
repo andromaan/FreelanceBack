@@ -5,7 +5,7 @@ namespace TestsData;
 public class ContractData
 {
     public static Contract CreateContract(Guid? id = null, Guid? projectId = null, Guid? freelancerId = null,
-        decimal? agreedRate = null, Guid? userId = null)
+        decimal? agreedRate = null, Guid? createdById = null)
     {
         return new Contract
         {
@@ -15,7 +15,7 @@ public class ContractData
             AgreedRate = agreedRate ?? 1000m,
             Status = ContractStatus.Pending,
             StartDate = DateTime.UtcNow,
-            CreatedBy = userId ?? Guid.NewGuid()
+            CreatedBy = createdById ?? Guid.NewGuid()
         };
     }
 }

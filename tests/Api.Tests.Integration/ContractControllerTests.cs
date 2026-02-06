@@ -302,6 +302,28 @@ public class ContractControllerTests(IntegrationTestWebFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+    [Fact]
+    public async Task ShouldUpdateProjectStatusToInProgress_WhenContractCreated()
+    {
+        // Arrange
+        var project = ProjectData.CreateProject();
+        await Context.AddAsync(project);
+        var freelancer = FreelancerData.CreateFreelancer();
+        await Context.AddAsync(freelancer);
+        var quote = QuoteData.CreateQuote(projectId: project.Id, freelancerId: freelancer.Id, amount: 1000m);
+        await Context.AddAsync(quote);
+        await SaveChangesAsync();
+
+        // Act
+        var response = await Client.PostAsJsonAsync($"Contract/{quote.Id}", new { });
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        // Assert
+        var projectFromDb = await Context.Set<Project>().FirstOrDefaultAsync(x => x.Id == project.Id);
+        projectFromDb.Should().NotBeNull();
+        projectFromDb.Status.Should().Be(ProjectStatus.InProgress);
+    }
+
     public async Task InitializeAsync()
     {
         _employerUser = UserData.CreateTestUser(UserId, "employer@test.com");
@@ -318,7 +340,7 @@ public class ContractControllerTests(IntegrationTestWebFactory factory)
             projectId: _project.Id,
             freelancerId: _freelancer.Id,
             agreedRate: 2000m,
-            userId: _employerUser.Id
+            createdById: _employerUser.Id
         );
         _projectMilestone = new ProjectMilestone
         {
