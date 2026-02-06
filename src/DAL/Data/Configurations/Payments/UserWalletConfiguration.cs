@@ -1,9 +1,9 @@
 using DAL.Extensions;
-using Domain.Models.Users;
+using Domain.Models.Payments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DAL.Data.Configurations.Users;
+namespace DAL.Data.Configurations.Payments;
 
 public class UserWalletConfiguration : IEntityTypeConfiguration<UserWallet>
 {

@@ -1,7 +1,7 @@
 using BLL.Common.Interfaces.Repositories.UserWallets;
 using DAL.Data;
 using DAL.Extensions;
-using Domain.Models.Users;
+using Domain.Models.Payments;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;

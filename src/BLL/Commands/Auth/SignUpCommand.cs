@@ -10,6 +10,7 @@ using BLL.ViewModels.Auth;
 using Domain;
 using Domain.Models.Employers;
 using Domain.Models.Freelance;
+using Domain.Models.Payments;
 using Domain.Models.Users;
 using MediatR;
 

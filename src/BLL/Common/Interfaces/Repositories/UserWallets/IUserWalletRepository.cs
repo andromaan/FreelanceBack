@@ -1,4 +1,4 @@
-using Domain.Models.Users;
+using Domain.Models.Payments;
 
 namespace BLL.Common.Interfaces.Repositories.UserWallets;
 

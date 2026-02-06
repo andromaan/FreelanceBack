@@ -1,6 +1,6 @@
 using Domain.Common.Abstractions;
 
-namespace Domain.Models.Users;
+namespace Domain.Models.Payments;
 
 public class WalletTransaction : Entity<Guid>
 {

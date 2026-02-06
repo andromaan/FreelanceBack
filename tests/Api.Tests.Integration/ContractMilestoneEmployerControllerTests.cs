@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using BLL.ViewModels.ContractMilestone;
 using Domain;
 using Domain.Models.Freelance;
+using Domain.Models.Payments;
 using Domain.Models.Projects;
 using Domain.Models.Users;
 using FluentAssertions;

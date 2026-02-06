@@ -12,6 +12,7 @@ using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.RefreshTokens;
+using BLL.Common.Interfaces.Repositories.Reviews;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserWallets;
@@ -122,5 +123,9 @@ public static class ConfigureDataAccess
         services.AddScoped<MessageRepository>();
         services.AddScoped<IMessageRepository>(provider => provider.GetRequiredService<MessageRepository>());
         services.AddScoped<IMessageQueries>(provider => provider.GetRequiredService<MessageRepository>());
+        
+        services.AddScoped<ReviewRepository>();
+        services.AddScoped<IReviewRepository>(provider => provider.GetRequiredService<ReviewRepository>());
+        services.AddScoped<IReviewQueries>(provider => provider.GetRequiredService<ReviewRepository>());
     }
 }

@@ -9,7 +9,7 @@ using BLL.Common.Interfaces.Repositories.WalletTransactions;
 using BLL.Services;
 using BLL.ViewModels.ContractMilestone;
 using Domain.Models.Freelance;
-using Domain.Models.Users;
+using Domain.Models.Payments;
 
 namespace BLL.Commands.ContractMilestones.Handlers;
 
