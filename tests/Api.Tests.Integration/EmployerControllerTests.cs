@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using BLL.ViewModels.Employer;
-using Domain.Models.Auth.Users;
 using Domain.Models.Employers;
+using Domain.Models.Users;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Tests.Common;

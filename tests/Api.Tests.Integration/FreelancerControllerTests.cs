@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using BLL.ViewModels.Freelancer;
-using Domain.Models.Auth.Users;
 using Domain.Models.Countries;
 using Domain.Models.Freelance;
 using Domain.Models.Languages;
+using Domain.Models.Users;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Tests.Common;

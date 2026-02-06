@@ -1,9 +1,9 @@
-using Domain.Models.Auth.Users;
+using DAL.Extensions;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DAL.Extensions;
 
-namespace DAL.Data.Configurations.Auth.Users;
+namespace DAL.Data.Configurations.Users;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {

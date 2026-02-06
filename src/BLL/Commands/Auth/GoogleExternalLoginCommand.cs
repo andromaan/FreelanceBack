@@ -4,7 +4,7 @@ using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using BLL.ViewModels.Auth;
 using Domain;
-using Domain.Models.Auth.Users;
+using Domain.Models.Users;
 using Google.Apis.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

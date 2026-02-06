@@ -1,7 +1,7 @@
 using BLL.Common.Interfaces.Repositories.UserWallets;
 using DAL.Data;
 using DAL.Extensions;
-using Domain.Models.Auth.Users;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;

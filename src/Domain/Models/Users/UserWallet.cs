@@ -1,6 +1,6 @@
 using Domain.Common.Abstractions;
 
-namespace Domain.Models.Auth.Users;
+namespace Domain.Models.Users;
 
 public class UserWallet : AuditableEntity<Guid>
 {

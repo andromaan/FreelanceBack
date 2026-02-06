@@ -8,8 +8,8 @@ using BLL.Common.Interfaces.Repositories.UserWallets;
 using BLL.Common.Interfaces.Repositories.WalletTransactions;
 using BLL.Services;
 using BLL.ViewModels.ContractMilestone;
-using Domain.Models.Auth.Users;
 using Domain.Models.Freelance;
+using Domain.Models.Users;
 
 namespace BLL.Commands.ContractMilestones.Handlers;
 

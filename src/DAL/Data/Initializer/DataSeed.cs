@@ -2,9 +2,9 @@ using System.Text.Json;
 using BLL.Services.PasswordHasher;
 using Domain;
 using Domain.Models.Auth;
-using Domain.Models.Auth.Users;
 using Domain.Models.Countries;
 using Domain.Models.Languages;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Data.Initializer;

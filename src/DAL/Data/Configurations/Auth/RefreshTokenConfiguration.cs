@@ -1,6 +1,6 @@
 using DAL.Converters;
 using Domain.Models.Auth;
-using Domain.Models.Auth.Users;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

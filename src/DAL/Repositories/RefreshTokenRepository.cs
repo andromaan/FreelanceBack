@@ -1,5 +1,6 @@
 using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces.Repositories.RefreshTokens;
 using DAL.Data;
 using Domain.Models.Auth;
 using Microsoft.EntityFrameworkCore;

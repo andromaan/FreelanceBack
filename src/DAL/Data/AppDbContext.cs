@@ -1,9 +1,9 @@
 using System.Reflection;
 using DAL.Data.Initializer;
 using Domain.Models.Auth;
-using Domain.Models.Auth.Users;
 using Domain.Models.Employers;
 using Domain.Models.Freelance;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Data;

@@ -1,6 +1,6 @@
 using Domain.Common.Abstractions;
-using Domain.Models.Auth.Users;
 using Domain.Models.Freelance;
+using Domain.Models.Users;
 
 namespace Domain.Models.Messaging;
 

@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using BLL.ViewModels.Bid;
-using Domain.Models.Auth.Users;
 using Domain.Models.Freelance;
 using Domain.Models.Projects;
+using Domain.Models.Users;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Tests.Common;

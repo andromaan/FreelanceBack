@@ -1,9 +1,9 @@
 using DAL.Converters;
-using Domain.Models.Auth.Users;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DAL.Data.Configurations.Auth.Users;
+namespace DAL.Data.Configurations.Users;
 
 public class WalletTransactionConfiguration : IEntityTypeConfiguration<WalletTransaction>
 {

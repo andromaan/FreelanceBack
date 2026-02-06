@@ -1,4 +1,4 @@
-using Domain.Models.Auth.Users;
+using Domain.Models.Users;
 
 namespace TestsData;
 

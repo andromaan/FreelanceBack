@@ -1,6 +1,7 @@
 using Domain.Common.Abstractions;
+using Domain.Models.Auth;
 
-namespace Domain.Models.Auth.Users;
+namespace Domain.Models.Users;
 
 public class User : AuditableEntity<Guid>
 {

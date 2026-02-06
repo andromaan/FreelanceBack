@@ -1,4 +1,4 @@
-using Domain.Models.Auth.Users;
+using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Common.Interfaces.Repositories.Users;

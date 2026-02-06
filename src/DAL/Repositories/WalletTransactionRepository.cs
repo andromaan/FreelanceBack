@@ -1,7 +1,7 @@
 using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.WalletTransactions;
 using DAL.Data;
-using Domain.Models.Auth.Users;
+using Domain.Models.Users;
 
 namespace DAL.Repositories;
 

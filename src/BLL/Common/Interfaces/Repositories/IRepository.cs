@@ -1,6 +1,6 @@
 using Domain.Common.Abstractions;
 
-namespace BLL.Common;
+namespace BLL.Common.Interfaces.Repositories;
 
 public interface IRepository<TEntity, in TKey>
     where TEntity : Entity<TKey>
