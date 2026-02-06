@@ -42,8 +42,9 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
 
         projectFromDb.Should().NotBeNull();
         projectFromDb.Title.Should().Be(projectTitle);
-        projectFromDb.Description.Should().Be("New Test Project Description");
-        projectFromDb.Budget.Should().Be(10000m);
+        projectFromDb.Description.Should().Be(request.Description);
+        projectFromDb.Budget.Should().Be(request.Budget);
+        projectFromDb.Status.Should().Be(ProjectStatus.Open);
     }
     
     [Fact]
@@ -176,13 +177,15 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
     public async Task ShouldUpdateProjectCategories()
     {
         // Arrange
-        var category = new Category { Id = 0, Name = "TestCategory" };
-        await Context.AddAsync(category);
+        var category1 = new Category { Id = 0, Name = "TestCategory1" };
+        var category2 = new Category { Id = -1, Name = "TestCategory2" };
+        await Context.AddAsync(category1);
+        await Context.AddAsync(category2);
         await SaveChangesAsync();
 
         var request = new UpdateProjectCategoriesVM 
         { 
-            CategoryIds = new List<int> { category.Id } 
+            CategoryIds = new List<int> { category1.Id, category2.Id }
         };
 
         // Act
@@ -191,6 +194,14 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
         
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
+        
+        var projectFromDb = await Context.Set<Project>()
+            .Include(p => p.Categories)
+            .FirstOrDefaultAsync(x => x.Id == _project.Id);
+        
+        projectFromDb!.Categories.Should().HaveCount(2);
+        projectFromDb.Categories.Should().Contain(c => c.Id == category1.Id);
+        projectFromDb.Categories.Should().Contain(c => c.Id == category2.Id);
     }
 
     public async Task InitializeAsync()

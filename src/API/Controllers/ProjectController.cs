@@ -1,4 +1,5 @@
 using API.Controllers.Common;
+using BLL.Commands;
 using BLL.Commands.Projects;
 using BLL.ViewModels.Project;
 using Domain;
@@ -16,21 +17,14 @@ namespace API.Controllers;
 public class ProjectController(ISender sender)
     : GenericCrudController<Guid, ProjectVM, CreateProjectVM, UpdateProjectVM>(sender)
 {
-    public override async Task<IActionResult> Create(CreateProjectVM vm, CancellationToken ct)
-    {
-        var command = new CreateProjectCommand(vm);
-        var result = await Sender.Send(command, ct);
-        return GetResult(result);
-    }
-
     [HttpPatch("categories/{projectId}")]
     public async Task<IActionResult> UpdateProjectCategories(Guid projectId, [FromBody] UpdateProjectCategoriesVM vm,
         CancellationToken ct)
     {
-        var command = new UpdateProjectCategoryCommand
+        var command = new Update.Command<UpdateProjectCategoriesVM, Guid>
         {
-            ProjectId = projectId,
-            Vm = vm
+            Id = projectId,
+            Model = vm
         };
         var result = await Sender.Send(command, ct);
         return GetResult(result);

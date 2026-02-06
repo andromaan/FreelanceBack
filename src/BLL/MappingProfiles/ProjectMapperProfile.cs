@@ -11,5 +11,9 @@ public class ProjectMapperProfile : Profile
         CreateMap<Project, ProjectVM>().ReverseMap();
         CreateMap<Project, CreateProjectVM>().ReverseMap();
         CreateMap<Project, UpdateProjectVM>().ReverseMap();
+        
+        CreateMap<CreateProjectVM, Project>()
+            .ForMember(dest => dest.Status, 
+                opt => opt.MapFrom(src => ProjectStatus.Open));
     }
 }

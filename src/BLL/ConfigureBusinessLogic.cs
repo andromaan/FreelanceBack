@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text;
-using BLL.Commands;
 using BLL.Common.Behaviours;
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces.Repositories.Bids;
@@ -15,7 +14,6 @@ using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Extensions;
-using BLL.Services;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
@@ -137,6 +135,11 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateProjectVM),
                 UpdateViewModelType = typeof(UpdateProjectVM)
             });
+        
+        services.AddUpdateCommandHandler<Project, 
+            Guid, ProjectVM, 
+            UpdateProjectCategoriesVM,
+            IProjectQueries>();
 
         // registrations for ProjectMilestone
         services.RegisterCrudHandlers(
@@ -155,17 +158,16 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateContractMilestoneVM),
                 UpdateViewModelType = typeof(UpdateContractMilestoneVM)
             });
-
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdContractMilestoneStatusEmployerVM, Guid>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdContractMilestoneStatusEmployerVM, ContractMilestoneVM, ContractMilestone,
-                Guid, IContractMilestoneQueries>)
-        );
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdContractMilestoneStatusFreelancerVM, Guid>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdContractMilestoneStatusFreelancerVM, ContractMilestoneVM, ContractMilestone,
-                Guid, IContractMilestoneQueries>)
-        );
+        
+        services.AddUpdateCommandHandler<ContractMilestone, 
+                Guid, ContractMilestoneVM, 
+                UpdContractMilestoneStatusEmployerVM,
+                IContractMilestoneQueries>();
+        
+        services.AddUpdateCommandHandler<ContractMilestone, 
+            Guid, ContractMilestoneVM, 
+            UpdContractMilestoneStatusFreelancerVM,
+            IContractMilestoneQueries>();
 
         // registrations for Bids
         services.RegisterCrudHandlers(
@@ -193,22 +195,22 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateMessageVM),
                 UpdateViewModelType = typeof(UpdateMessageVM)
             });
-
-        services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateMessageWithoutContractVM>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateMessageWithoutContractVM, MessageVM, Message, Guid, IMessageQueries>)
-        );
+        
+        services.AddCreateCommandHandler<Message, 
+            Guid, MessageVM, 
+            CreateMessageWithoutContractVM,
+            IMessageQueries>();
 
         // registrations for Contracts
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateContractVM, Guid>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateContractVM, ContractVM, Contract, Guid, IContractQueries>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateContractStatusVM, Guid>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateContractStatusVM, ContractVM, Contract, Guid, IContractQueries>)
-        );
+        services.AddUpdateCommandHandler<Contract, 
+            Guid, ContractVM, 
+            UpdateContractVM,
+            IContractQueries>();
+        
+        services.AddUpdateCommandHandler<Contract, 
+            Guid, ContractVM, 
+            UpdateContractStatusVM,
+            IContractQueries>();
     }
 
     private static void AddServices(this IServiceCollection services)
