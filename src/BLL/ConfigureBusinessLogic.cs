@@ -134,12 +134,7 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(ProjectVM),
                 CreateViewModelType = typeof(CreateProjectVM),
                 UpdateViewModelType = typeof(UpdateProjectVM)
-            });
-        
-        services.AddUpdateCommandHandler<Project, 
-            Guid, ProjectVM, 
-            UpdateProjectCategoriesVM,
-            IProjectQueries>();
+            }, updateVMs: [typeof(UpdateProjectCategoriesVM)]);
 
         // registrations for ProjectMilestone
         services.RegisterCrudHandlers(
@@ -157,17 +152,8 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(ContractMilestoneVM),
                 CreateViewModelType = typeof(CreateContractMilestoneVM),
                 UpdateViewModelType = typeof(UpdateContractMilestoneVM)
-            });
-        
-        services.AddUpdateCommandHandler<ContractMilestone, 
-                Guid, ContractMilestoneVM, 
-                UpdContractMilestoneStatusEmployerVM,
-                IContractMilestoneQueries>();
-        
-        services.AddUpdateCommandHandler<ContractMilestone, 
-            Guid, ContractMilestoneVM, 
-            UpdContractMilestoneStatusFreelancerVM,
-            IContractMilestoneQueries>();
+            },
+            updateVMs: [typeof(UpdContractMilestoneStatusEmployerVM), typeof(UpdContractMilestoneStatusFreelancerVM)]);
 
         // registrations for Bids
         services.RegisterCrudHandlers(
@@ -194,21 +180,17 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(MessageVM),
                 CreateViewModelType = typeof(CreateMessageVM),
                 UpdateViewModelType = typeof(UpdateMessageVM)
-            });
-        
-        services.AddCreateCommandHandler<Message, 
-            Guid, MessageVM, 
-            CreateMessageWithoutContractVM,
-            IMessageQueries>();
+            },
+            createVMs: [typeof(CreateMessageWithoutContractVM)]);
 
         // registrations for Contracts
-        services.AddUpdateCommandHandler<Contract, 
-            Guid, ContractVM, 
+        services.AddUpdateCommandHandler<Contract,
+            Guid, ContractVM,
             UpdateContractVM,
             IContractQueries>();
-        
-        services.AddUpdateCommandHandler<Contract, 
-            Guid, ContractVM, 
+
+        services.AddUpdateCommandHandler<Contract,
+            Guid, ContractVM,
             UpdateContractStatusVM,
             IContractQueries>();
     }

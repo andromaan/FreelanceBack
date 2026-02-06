@@ -10,7 +10,9 @@ namespace BLL.Extensions;
 public static class CrudRegistrationExtensions
 {
     public static void RegisterCrudHandlers<TEntity, TKey, TQueries>(
-        this IServiceCollection services, CrudRegistration<TEntity, TKey, TQueries> reg)
+        this IServiceCollection services, CrudRegistration<TEntity, TKey, TQueries> reg,
+        Type[]? createVMs = null,
+        Type[]? updateVMs = null)
         where TEntity : Entity<TKey>
         where TQueries : IQueries<TEntity, TKey>
     {
@@ -72,6 +74,46 @@ public static class CrudRegistrationExtensions
         foreach (var handler in handlers)
         {
             RegisterHandler(services, handler);
+        }
+        
+        // Register additional create handlers
+        if (createVMs != null)
+        {
+            foreach (var createVm in createVMs)
+            {
+                var createHandler = new HandlerDescriptor(
+                    typeof(Create.Command<>),
+                    typeof(Create.CommandHandler<,,,,>),
+                    [createVm],
+                    [
+                        createVm,
+                        reg.ViewModelType,
+                        reg.EntityType,
+                        reg.KeyType,
+                        reg.QueriesInterfaceType
+                    ]);
+                RegisterHandler(services, createHandler);
+            }
+        }
+
+        // Register additional update handlers
+        if (updateVMs != null)
+        {
+            foreach (var updateVm in updateVMs)
+            {
+                var updateHandler = new HandlerDescriptor(
+                    typeof(Update.Command<,>),
+                    typeof(Update.CommandHandler<,,,,>),
+                    [updateVm, reg.KeyType],
+                    [
+                        updateVm,
+                        reg.ViewModelType,
+                        reg.EntityType,
+                        reg.KeyType,
+                        reg.QueriesInterfaceType
+                    ]);
+                RegisterHandler(services, updateHandler);
+            }
         }
     }
 
