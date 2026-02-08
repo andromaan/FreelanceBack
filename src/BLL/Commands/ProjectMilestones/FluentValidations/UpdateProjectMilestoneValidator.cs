@@ -1,7 +1,7 @@
 using BLL.ViewModels.ProjectMilestone;
 using FluentValidation;
 
-namespace BLL.Commands.ProjectMilestones.FluentValidatons;
+namespace BLL.Commands.ProjectMilestones.FluentValidations;
 
 public class UpdateProjectMilestoneValidator : AbstractValidator<Update.Command<UpdateProjectMilestoneVM, Guid>>
 {

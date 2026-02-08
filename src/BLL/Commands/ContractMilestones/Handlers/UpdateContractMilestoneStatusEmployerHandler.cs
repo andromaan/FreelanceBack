@@ -41,6 +41,13 @@ public class UpdateContractMilestoneStatusEmployerHandler(
                 false, null, HttpStatusCode.BadRequest);
         }
 
+        if (existingEntity.Status != ContractMilestoneStatus.Submitted)
+        {
+            return ServiceResponse.GetResponse(
+                "Only milestones with 'Submitted' status can be updated by the employer.",
+                false, null, HttpStatusCode.BadRequest);
+        }
+
         var contract = await contractQueries.GetByIdAsync(existingEntity.ContractId, cancellationToken);
 
         // Validation: Check wallet balance if approving

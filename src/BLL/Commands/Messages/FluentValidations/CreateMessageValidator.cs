@@ -1,7 +1,7 @@
 using BLL.ViewModels.Message;
 using FluentValidation;
 
-namespace BLL.Commands.Messages.FluentValidators;
+namespace BLL.Commands.Messages.FluentValidations;
 
 public class CreateMessageValidator : AbstractValidator<Create.Command<CreateMessageVM>>
 {

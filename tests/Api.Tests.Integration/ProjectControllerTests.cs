@@ -71,7 +71,8 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
         
         projectFromDb.Should().NotBeNull();
         projectFromDb.Title.Should().Be(projectTitle);
-        projectFromDb.Description.Should().Be("Updated Description");
+        projectFromDb.Description.Should().Be(request.Description);
+        projectFromDb.Budget.Should().Be(request.Budget);
     }
     
     [Fact]

@@ -108,12 +108,12 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
         var milestone1 = new ContractMilestone
         {
             Id = Guid.NewGuid(), ContractId = contract.Id, Description = "M1", Amount = 500m,
-            DueDate = DateTime.UtcNow.AddDays(1), Status = ContractMilestoneStatus.Pending, CreatedBy = UserId
+            DueDate = DateTime.UtcNow.AddDays(1), Status = ContractMilestoneStatus.Submitted, CreatedBy = UserId
         };
         var milestone2 = new ContractMilestone
         {
             Id = Guid.NewGuid(), ContractId = contract.Id, Description = "M2", Amount = 500m,
-            DueDate = DateTime.UtcNow.AddDays(2), Status = ContractMilestoneStatus.Pending, CreatedBy = UserId
+            DueDate = DateTime.UtcNow.AddDays(2), Status = ContractMilestoneStatus.Submitted, CreatedBy = UserId
         };
         var employerWallet = new UserWallet
         {
@@ -260,6 +260,59 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
             .FirstOrDefaultAsync(x => x.Id == milestone.Id);
         unchangedMilestone.Should().NotBeNull();
         unchangedMilestone.Status.Should().Be(ContractMilestoneStatus.Approved);
+    }
+    
+    [Fact]
+    public async Task ShouldNotChangeStatus_WhenMilestoneIsNotInSubmittedStatus()
+    {
+        // Arrange
+        var employerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 10000m,
+            Currency = "USD",
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        var milestoneStatus = ContractMilestoneStatus.Pending;
+        var milestone = new ContractMilestone
+        {
+            Id = Guid.NewGuid(),
+            ContractId = _contract.Id,
+            Description = "Milestone not in submitted status",
+            Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(10),
+            Status = milestoneStatus, // Not in Submitted status
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        await Context.AddAsync(employerWallet);
+        await Context.AddAsync(milestone);
+        await SaveChangesAsync();
+
+        var request = new UpdContractMilestoneStatusEmployerVM
+        {
+            Status = ContractMilestoneEmployerStatus.Approved
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone.Id}/employer", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        // Verify milestone status remains unchanged
+        var unchangedMilestone = await Context.Set<ContractMilestone>()
+            .FirstOrDefaultAsync(x => x.Id == milestone.Id);
+        unchangedMilestone.Should().NotBeNull();
+        unchangedMilestone.Status.Should().Be(milestoneStatus);
     }
 
     [Fact]

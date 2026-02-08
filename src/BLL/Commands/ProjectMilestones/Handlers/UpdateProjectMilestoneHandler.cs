@@ -53,7 +53,7 @@ public class UpdateProjectMilestoneHandler(
                 $"The total amount ({totalAmount}) of milestones exceeds " +
                 $"the project's budged ({project.Budget})");
         }
-        
+
         mapper.Map(updateModel, existingEntity);
 
         // Валідація пройшла успішно, повертаємо null щоб використати entity після маппінгу в Update.cs

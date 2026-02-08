@@ -11,13 +11,24 @@ public class ReviewRepository(AppDbContext context, IUserProvider userProvider)
 {
     private readonly AppDbContext _context = context;
 
-    public async Task<IEnumerable<Review>> GetByReviewedUser(Guid reviewedId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Review>> GetReviewsByReviewedUser(Guid reviewedUserId,
+        CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Review>().Where(r => r.ReviewedUserId == reviewedId).ToListAsync(cancellationToken);
+        return await _context.Set<Review>().Where(r => r.ReviewedUserId == reviewedUserId)
+            .ToListAsync(cancellationToken);
     }
-    
-    public async Task<IEnumerable<Review>> GetByReviewerUser(Guid reviewerId, CancellationToken cancellationToken = default)
+
+    public async Task<IEnumerable<Review>> GetReviewsByReviewerUser(Guid reviewerId,
+        CancellationToken cancellationToken = default)
     {
         return await _context.Set<Review>().Where(r => r.CreatedBy == reviewerId).ToListAsync(cancellationToken);
+    }
+
+    public async Task<Review?> GetByReviewerAndReviewedUser(Guid reviewerId, Guid reviewedUserId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<Review>()
+            .FirstOrDefaultAsync(r => r.CreatedBy == reviewerId && r.ReviewedUserId == reviewedUserId,
+                cancellationToken);
     }
 }

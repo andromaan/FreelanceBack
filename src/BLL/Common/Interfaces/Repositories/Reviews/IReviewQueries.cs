@@ -4,6 +4,7 @@ namespace BLL.Common.Interfaces.Repositories.Reviews;
 
 public interface IReviewQueries : IQueries<Review, Guid>
 {
-    Task<IEnumerable<Review>> GetByReviewedUser(Guid reviewedId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Review>> GetByReviewerUser(Guid reviewerId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Review>> GetReviewsByReviewedUser(Guid reviewedUserId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Review>> GetReviewsByReviewerUser(Guid reviewerId, CancellationToken cancellationToken = default);
+    Task<Review?> GetByReviewerAndReviewedUser(Guid reviewerId, Guid reviewedUserId, CancellationToken cancellationToken = default);
 }

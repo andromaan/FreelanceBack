@@ -38,7 +38,5 @@ public class ProjectMilestoneController(ISender sender)
 
     [ApiExplorerSettings(IgnoreApi = true)]
     public override Task<IActionResult> GetAll(CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
+        => Task.FromResult<IActionResult>(NotFound());
 }

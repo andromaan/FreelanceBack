@@ -12,6 +12,7 @@ using BLL.Common.Interfaces.Repositories.Messages;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
+using BLL.Common.Interfaces.Repositories.Reviews;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Extensions;
 using BLL.Services.ImageService;
@@ -27,6 +28,7 @@ using BLL.ViewModels.Message;
 using BLL.ViewModels.Project;
 using BLL.ViewModels.ProjectMilestone;
 using BLL.ViewModels.Quote;
+using BLL.ViewModels.Reviews;
 using BLL.ViewModels.Skill;
 using Domain;
 using Domain.Models.Countries;
@@ -34,6 +36,7 @@ using Domain.Models.Freelance;
 using Domain.Models.Languages;
 using Domain.Models.Messaging;
 using Domain.Models.Projects;
+using Domain.Models.Reviews;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -193,6 +196,15 @@ public static class ConfigureBusinessLogic
             Guid, ContractVM,
             UpdateContractStatusVM,
             IContractQueries>();
+        
+        // registrations for Reviews
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Review, Guid, IReviewQueries>
+            {
+                ViewModelType = typeof(ReviewVM),
+                CreateViewModelType = typeof(CreateReviewVM),
+                UpdateViewModelType = typeof(UpdateReviewVM)
+            });
     }
 
     private static void AddServices(this IServiceCollection services)
