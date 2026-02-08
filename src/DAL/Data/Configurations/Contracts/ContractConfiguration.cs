@@ -1,10 +1,10 @@
 using DAL.Converters;
 using DAL.Extensions;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DAL.Data.Configurations.Freelance;
+namespace DAL.Data.Configurations.Contracts;
 
 public class ContractConfiguration : IEntityTypeConfiguration<Contract>
 {

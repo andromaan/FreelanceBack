@@ -1,4 +1,4 @@
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 
 namespace TestsData;
 

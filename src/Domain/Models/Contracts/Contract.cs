@@ -1,7 +1,8 @@
 using Domain.Common.Abstractions;
+using Domain.Models.Freelance;
 using Domain.Models.Projects;
 
-namespace Domain.Models.Freelance;
+namespace Domain.Models.Contracts;
 
 public class Contract : AuditableEntity<Guid>
 {

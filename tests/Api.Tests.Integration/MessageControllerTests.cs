@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using BLL.ViewModels.Message;
+using Domain.Models.Contracts;
 using Domain.Models.Freelance;
 using Domain.Models.Messaging;
 using Domain.Models.Projects;

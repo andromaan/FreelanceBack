@@ -1,5 +1,5 @@
 using BLL.Common.Interfaces;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 
 namespace BLL.ViewModels.ContractMilestone;
 

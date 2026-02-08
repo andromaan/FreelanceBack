@@ -1,3 +1,4 @@
+using System.Net;
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.Contracts;
@@ -6,7 +7,7 @@ using BLL.Common.Interfaces.Repositories.Reviews;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Services;
 using BLL.ViewModels.Reviews;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 using Domain.Models.Reviews;
 
 namespace BLL.Commands.Reviews.Handlers;
@@ -32,7 +33,7 @@ public class CreateReviewHandler(
         {
             return ServiceResponse.GetResponse(
                 "You can only review a contract that has been completed",
-                false, null, System.Net.HttpStatusCode.BadRequest);
+                false, null, HttpStatusCode.BadRequest);
         }
 
         var reviewerId = await userProvider.GetUserId();
@@ -69,7 +70,7 @@ public class CreateReviewHandler(
         {
             return ServiceResponse.GetResponse(
                 "You have already reviewed this user",
-                false, null, System.Net.HttpStatusCode.BadRequest);
+                false, null, HttpStatusCode.BadRequest);
         }
 
         entity.ReviewerRoleId = reviewerRole;

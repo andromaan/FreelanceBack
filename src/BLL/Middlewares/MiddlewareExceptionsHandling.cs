@@ -1,3 +1,4 @@
+using System.Net;
 using BLL.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +17,7 @@ public class MiddlewareExceptionsHandling(RequestDelegate next)
         catch (SecurityTokenException ex)
         {
             await context.Response.WriteJsonResponseAsync(StatusCodes.Status426UpgradeRequired,
-                ServiceResponse.GetResponse(ex.Message, false, null, System.Net.HttpStatusCode.UpgradeRequired));
+                ServiceResponse.GetResponse(ex.Message, false, null, HttpStatusCode.UpgradeRequired));
         }
         catch (ValidationException ex)
         {

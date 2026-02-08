@@ -4,7 +4,7 @@ using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Services;
 using BLL.ViewModels.ContractMilestone;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 
 namespace BLL.Commands.ContractMilestones.Handlers;
 
@@ -18,6 +18,12 @@ public class UpdateContractMilestoneHandler(
         ContractMilestone existingEntity,
         UpdateContractMilestoneVM updateModel, CancellationToken cancellationToken)
     {
+        if (existingEntity is not { Status: ContractMilestoneStatus.Pending })
+        {
+            return ServiceResponse.BadRequest(
+                "Only milestones with 'Pending' status can be updated");
+        }
+        
         // Перевірка чи змінився amount
         if (existingEntity.Amount == updateModel.Amount)
         {

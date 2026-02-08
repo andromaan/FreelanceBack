@@ -6,7 +6,7 @@ using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Services;
 using BLL.ViewModels.Contract;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 using Domain.Models.Projects;
 using MediatR;
 

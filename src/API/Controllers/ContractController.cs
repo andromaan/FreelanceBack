@@ -3,7 +3,7 @@ using BLL.Commands;
 using BLL.Commands.Contracts;
 using BLL.ViewModels.Contract;
 using Domain;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +24,7 @@ public class ContractController(ISender sender) : BaseController
         var result = await sender.Send(command, ct);
         return GetResult(result);
     }
-    
+
     [HttpGet("status-enums")]
     public IActionResult GetPlatformsAsync()
     {
@@ -53,7 +53,7 @@ public class ContractController(ISender sender) : BaseController
         var result = await sender.Send(command, ct);
         return GetResult(result);
     }
-    
+
     [HttpGet("by-user")]
     public async Task<IActionResult> GetProjectsByEmployer(CancellationToken ct)
     {

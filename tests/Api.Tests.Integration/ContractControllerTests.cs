@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BLL.ViewModels.Contract;
 using Domain;
+using Domain.Models.Contracts;
 using Domain.Models.Freelance;
 using Domain.Models.Projects;
 using Domain.Models.Users;

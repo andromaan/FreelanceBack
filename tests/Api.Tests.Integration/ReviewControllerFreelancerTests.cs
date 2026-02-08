@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using BLL.ViewModels.Reviews;
 using Domain;
+using Domain.Models.Contracts;
 using Domain.Models.Freelance;
 using Domain.Models.Projects;
 using Domain.Models.Reviews;

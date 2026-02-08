@@ -1,3 +1,4 @@
+using System.Net;
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
@@ -5,7 +6,7 @@ using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Services;
 using BLL.ViewModels.ContractMilestone;
 using Domain;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 
 namespace BLL.Commands.ContractMilestones.Handlers;
 
@@ -42,7 +43,7 @@ public class CreateContractMilestoneHandler(
             return ServiceResponse.GetResponse(
                 $"The total amount ({totalMilestoneAmount}) of milestones exceeds " +
                 $"the contract's agreed rate ({existingContract.AgreedRate})",
-                false, null, System.Net.HttpStatusCode.BadRequest);
+                false, null, HttpStatusCode.BadRequest);
         }
 
         return ServiceResponse.Ok(); // Валідація пройшла успішно

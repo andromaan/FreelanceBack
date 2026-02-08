@@ -1,5 +1,5 @@
 using Domain.Common.Abstractions;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 
 namespace Domain.Models.Payments;
 

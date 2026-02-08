@@ -1,6 +1,6 @@
 using AutoMapper;
 using BLL.ViewModels.Contract;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 
 namespace BLL.MappingProfiles;
 

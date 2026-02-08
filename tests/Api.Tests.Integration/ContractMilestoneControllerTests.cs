@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BLL.ViewModels.ContractMilestone;
 using Domain;
+using Domain.Models.Contracts;
 using Domain.Models.Freelance;
 using Domain.Models.Payments;
 using Domain.Models.Projects;
@@ -78,6 +79,29 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         milestoneFromDb.Should().NotBeNull();
         milestoneFromDb.Description.Should().Be("Updated contract milestone");
         milestoneFromDb.Amount.Should().Be(800m);
+    }
+    
+    [Fact]
+    public async Task ShouldNotUpdateContractMilestone_WhenStatusIsNotPending()
+    {
+        // Arrange
+        _contractMilestone.Status = ContractMilestoneStatus.Approved;
+        Context.Update(_contractMilestone);
+        await SaveChangesAsync();
+
+        var request = new UpdateContractMilestoneVM
+        {
+            Description = "Attempt to update non-pending milestone",
+            Amount = 800m,
+            DueDate = DateTime.UtcNow.AddDays(45)
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/{_contractMilestone.Id}", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

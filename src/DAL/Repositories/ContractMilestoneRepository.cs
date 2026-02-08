@@ -1,7 +1,7 @@
 using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using DAL.Data;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
