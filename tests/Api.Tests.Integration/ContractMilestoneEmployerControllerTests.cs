@@ -25,13 +25,14 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
     private User _employerUser = null!;
 
     [Fact]
-    public async Task ShouldApproveContractMilestone_AndCreateWalletTransactions()
+    public async Task ShouldApproveContractMilestone_AndCreateWalletTransactionsAndContractPayment()
     {
         // Arrange
+        var userEmployerWalletAmountBefore = 10000m;
         var employerWallet = new UserWallet
         {
             Id = Guid.NewGuid(),
-            Balance = 10000m,
+            Balance = userEmployerWalletAmountBefore,
             Currency = "USD",
             CreatedBy = _employerUser.Id,
             CreatedAt = DateTime.UtcNow,
@@ -89,13 +90,31 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
         var updatedEmployerWallet = await Context.Set<UserWallet>()
             .FirstOrDefaultAsync(w => w.CreatedBy == _employerUser.Id);
         updatedEmployerWallet.Should().NotBeNull();
-        updatedEmployerWallet.Balance.Should().Be(9500m); // 10000 - 500
+        updatedEmployerWallet.Balance.Should().Be(userEmployerWalletAmountBefore - milestone.Amount); // 10000 - 500
 
         // Verify freelancer wallet was credited
         var updatedFreelancerWallet = await Context.Set<UserWallet>()
             .FirstOrDefaultAsync(w => w.CreatedBy == _freelancerUser.Id);
         updatedFreelancerWallet.Should().NotBeNull();
-        updatedFreelancerWallet.Balance.Should().Be(500m); // 0 + 500
+        updatedFreelancerWallet.Balance.Should().Be(milestone.Amount); // 0 + 500
+
+        // Verify wallet transactions were created
+        var employerTransaction = await Context.Set<WalletTransaction>()
+            .FirstOrDefaultAsync(t => t.WalletId == updatedEmployerWallet.Id && t.Amount == -milestone.Amount);
+        employerTransaction.Should().NotBeNull();
+        employerTransaction.Amount.Should().Be(-milestone.Amount);
+
+        var freelancerTransaction = await Context.Set<WalletTransaction>()
+            .FirstOrDefaultAsync(t => t.WalletId == updatedFreelancerWallet.Id && t.Amount == milestone.Amount);
+        freelancerTransaction.Should().NotBeNull();
+        freelancerTransaction.Amount.Should().Be(milestone.Amount);
+
+        // Verify contract payment was created
+        var contractPayment = await Context.Set<ContractPayment>()
+            .FirstOrDefaultAsync(p => p.ContractId == _contract.Id && p.Amount == milestone.Amount);
+        contractPayment.Should().NotBeNull();
+        contractPayment.Amount.Should().Be(milestone.Amount);
+        contractPayment.MilestoneId.Should().Be(milestone.Id);
     }
 
     [Fact]
@@ -136,7 +155,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
             ModifiedBy = _freelancerUser.Id,
             ModifiedAt = DateTime.UtcNow
         };
-        
+
         await Context.AddAsync(milestone1);
         await Context.AddAsync(milestone2);
         await Context.AddAsync(employerWallet);
@@ -262,7 +281,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
         unchangedMilestone.Should().NotBeNull();
         unchangedMilestone.Status.Should().Be(ContractMilestoneStatus.Approved);
     }
-    
+
     [Fact]
     public async Task ShouldNotChangeStatus_WhenMilestoneIsNotInSubmittedStatus()
     {

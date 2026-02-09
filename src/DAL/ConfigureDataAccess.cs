@@ -2,6 +2,7 @@ using BLL.Common.Interfaces.Repositories;
 using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
+using BLL.Common.Interfaces.Repositories.ContractPayments;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.Employers;
@@ -127,5 +128,9 @@ public static class ConfigureDataAccess
         services.AddScoped<ReviewRepository>();
         services.AddScoped<IReviewRepository>(provider => provider.GetRequiredService<ReviewRepository>());
         services.AddScoped<IReviewQueries>(provider => provider.GetRequiredService<ReviewRepository>());
+        
+        services.AddScoped<ContractPaymentRepository>();
+        services.AddScoped<IContractPaymentRepository>(provider => provider.GetRequiredService<ContractPaymentRepository>());
+        services.AddScoped<IContractPaymentQueries>(provider => provider.GetRequiredService<ContractPaymentRepository>());
     }
 }

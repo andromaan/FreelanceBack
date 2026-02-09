@@ -2,6 +2,7 @@ using System.Net;
 using AutoMapper;
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
+using BLL.Common.Interfaces.Repositories.ContractPayments;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.UserWallets;
@@ -24,7 +25,8 @@ public class UpdateContractMilestoneStatusEmployerHandler(
     IContractRepository contractRepository,
     IFreelancerQueries freelancerQueries,
     IContractMilestoneQueries contractMilestoneQueries,
-    IMapper mapper
+    IMapper mapper,
+    IContractPaymentRepository contractPaymentRepository
 )
     : IUpdateHandler<ContractMilestone, UpdContractMilestoneStatusEmployerVM>
 {
@@ -136,6 +138,16 @@ public class UpdateContractMilestoneStatusEmployerHandler(
             TransactionDate = DateTime.UtcNow,
             TransactionType = "Received payment for milestone",
             WalletId = freelancerWallet!.Id,
+        }, cancellationToken);
+        
+        await contractPaymentRepository.CreateAsync(new ContractPayment
+        {
+            Id = Guid.NewGuid(),
+            ContractId = contract.Id,
+            MilestoneId = existingEntity.Id,
+            Amount = existingEntity.Amount,
+            PaymentDate = DateTime.UtcNow,
+            PaymentMethod = "Wallet"
         }, cancellationToken);
 
         return null;

@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DAL.Data.Configurations.Payments;
 
-public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
+public class ContractPaymentConfiguration : IEntityTypeConfiguration<ContractPayment>
 {
-    public void Configure(EntityTypeBuilder<Payment> builder)
+    public void Configure(EntityTypeBuilder<ContractPayment> builder)
     {
-        builder.ToTable("payments");
+        builder.ToTable("contract_payments");
 
         builder.HasKey(p => p.Id);
 
@@ -22,6 +22,11 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.HasOne(p => p.Contract)
             .WithMany()
             .HasForeignKey(p => p.ContractId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.HasOne(p => p.Milestone)
+            .WithMany()
+            .HasForeignKey(p => p.MilestoneId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
