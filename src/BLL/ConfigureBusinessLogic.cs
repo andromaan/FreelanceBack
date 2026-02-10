@@ -7,6 +7,7 @@ using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
+using BLL.Common.Interfaces.Repositories.Disputes;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
@@ -23,6 +24,7 @@ using BLL.ViewModels.Category;
 using BLL.ViewModels.Contract;
 using BLL.ViewModels.ContractMilestone;
 using BLL.ViewModels.Country;
+using BLL.ViewModels.Dispute;
 using BLL.ViewModels.Language;
 using BLL.ViewModels.Message;
 using BLL.ViewModels.Project;
@@ -33,6 +35,7 @@ using BLL.ViewModels.Skill;
 using Domain;
 using Domain.Models.Contracts;
 using Domain.Models.Countries;
+using Domain.Models.Disputes;
 using Domain.Models.Languages;
 using Domain.Models.Messaging;
 using Domain.Models.Projects;
@@ -63,7 +66,10 @@ public static class ConfigureBusinessLogic
         {
             options.AddPolicy(Settings.Roles.AnyAuthenticated,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole,
-                    Settings.Roles.FreelancerRole));
+                    Settings.Roles.FreelancerRole, Settings.Roles.ModeratorRole));
+
+            options.AddPolicy(Settings.Roles.AdminOrModerator,
+                policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.ModeratorRole));
 
             options.AddPolicy(Settings.Roles.AdminOrEmployer,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole));
@@ -205,6 +211,14 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateReviewVM),
                 UpdateViewModelType = typeof(UpdateReviewVM)
             });
+        
+        // registrations for Disputes
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Dispute, Guid, IDisputeQueries>
+            {
+                ViewModelType = typeof(DisputeVM),
+                CreateViewModelType = typeof(CreateDisputeVM)
+            }, updateVMs: [typeof(UpdateDisputeStatusForModeratorVM)]);
     }
 
     private static void AddServices(this IServiceCollection services)

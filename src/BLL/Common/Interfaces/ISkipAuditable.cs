@@ -1,3 +1,3 @@
 namespace BLL.Common.Interfaces;
 
-public class ISkipAuditable;
+public interface ISkipAuditable;

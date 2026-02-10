@@ -72,7 +72,7 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
     public async Task ShouldUpdateFreelancerLanguages()
     {
         // Arrange
-        var request = new UpdateFrInfoLangVM 
+        var request = new UpdateFreelancerLanguagesVM 
         { 
             LanguageIds = new List<int> { _language1.Id, _language2.Id }
         };
@@ -117,7 +117,7 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
     public async Task ShouldUpdateFreelancerLanguagesWithEmptyList()
     {
         // Arrange
-        var request = new UpdateFrInfoLangVM 
+        var request = new UpdateFreelancerLanguagesVM 
         { 
             LanguageIds = new List<int>()
         };
@@ -140,7 +140,7 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
     public async Task ShouldNotUpdateFreelancerLanguagesBecauseLanguageNotFound()
     {
         // Arrange
-        var request = new UpdateFrInfoLangVM 
+        var request = new UpdateFreelancerLanguagesVM 
         { 
             LanguageIds = new List<int> { int.MaxValue }
         };

@@ -16,20 +16,8 @@ public static class CrudRegistrationExtensions
         where TEntity : Entity<TKey>
         where TQueries : IQueries<TEntity, TKey>
     {
-        var handlers = new[]
+        var handlers = new List<HandlerDescriptor>
         {
-            new HandlerDescriptor(
-                typeof(Create.Command<>),
-                typeof(Create.CommandHandler<,,,,>),
-                [reg.CreateViewModelType],
-                [
-                    reg.CreateViewModelType,
-                    reg.ViewModelType,
-                    reg.EntityType,
-                    reg.KeyType,
-                    reg.QueriesInterfaceType
-                ]),
-
             new HandlerDescriptor(
                 typeof(GetAll.Query<>),
                 typeof(GetAll.QueryHandler<,,,>),
@@ -53,6 +41,30 @@ public static class CrudRegistrationExtensions
                 ]),
 
             new HandlerDescriptor(
+                typeof(Delete.Command<,>),
+                typeof(Delete.CommandHandler<,,>),
+                [reg.ViewModelType, reg.KeyType],
+                [reg.ViewModelType, reg.EntityType, reg.KeyType])
+        };
+
+        if (reg.CreateViewModelType != null)
+        {
+            handlers.Add(new HandlerDescriptor(
+                typeof(Create.Command<>),
+                typeof(Create.CommandHandler<,,,,>),
+                [reg.CreateViewModelType],
+                [
+                    reg.CreateViewModelType,
+                    reg.ViewModelType,
+                    reg.EntityType,
+                    reg.KeyType,
+                    reg.QueriesInterfaceType
+                ]));
+        }
+
+        if (reg.UpdateViewModelType != null)
+        {
+            handlers.Add(new HandlerDescriptor(
                 typeof(Update.Command<,>),
                 typeof(Update.CommandHandler<,,,,>),
                 [reg.UpdateViewModelType, reg.KeyType],
@@ -62,20 +74,14 @@ public static class CrudRegistrationExtensions
                     reg.EntityType,
                     reg.KeyType,
                     reg.QueriesInterfaceType
-                ]),
-
-            new HandlerDescriptor(
-                typeof(Delete.Command<,>),
-                typeof(Delete.CommandHandler<,,>),
-                [reg.ViewModelType, reg.KeyType],
-                [reg.ViewModelType, reg.EntityType, reg.KeyType])
-        };
+                ]));
+        }
 
         foreach (var handler in handlers)
         {
             RegisterHandler(services, handler);
         }
-        
+
         // Register additional create handlers
         if (createVMs != null)
         {
@@ -142,6 +148,6 @@ public class CrudRegistration<TEntity, TKey, TQueries>
     public Type QueriesInterfaceType => typeof(TQueries);
 
     public required Type ViewModelType { get; init; }
-    public required Type CreateViewModelType { get; init; }
-    public required Type UpdateViewModelType { get; init; }
+    public Type? CreateViewModelType { get; init; }
+    public Type? UpdateViewModelType { get; init; }
 }

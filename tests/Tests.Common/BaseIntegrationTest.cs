@@ -19,7 +19,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
     private const string JwtSecretKey = "1fd8bcc13347efbdebb5d7660e22ffb346f8104eeb925ef0eca6b85ddbd4edbf";
     protected readonly AppDbContext Context;
     protected readonly HttpClient Client;
-    protected readonly Guid UserId = Guid.NewGuid();
+    protected Guid UserId { get; private set; } = Guid.NewGuid();
 
     protected BaseIntegrationTest(IntegrationTestWebFactory factory, bool useJwtToken = true, string? customRole = null)
     {
@@ -40,6 +40,17 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
 
         if (useJwtToken)
             SetAuthorizationHeader(customRole);
+    }
+    
+    // Новий метод для зміни ролі та userId
+    protected void SwitchUser(string role, Guid? userId = null)
+    {
+        if (userId.HasValue)
+        {
+            UserId = userId.Value;
+        }
+        
+        SetAuthorizationHeader(role);
     }
 
     private void SetAuthorizationHeader(string? customRole = null)

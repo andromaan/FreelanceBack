@@ -1,6 +1,6 @@
 namespace BLL.ViewModels.Freelancer;
 
-public class UpdateFrInfoLangVM
+public class UpdateFreelancerLanguagesVM
 {
     public List<int> LanguageIds { get; set; } = [];
 }

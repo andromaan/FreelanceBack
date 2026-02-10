@@ -1,3 +1,3 @@
 namespace BLL.Common.Interfaces;
 
-public class ISkipMapper;
+public interface ISkipMapper;

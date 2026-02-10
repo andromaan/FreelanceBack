@@ -1,6 +1,7 @@
 using System.Reflection;
 using DAL.Data.Initializer;
 using Domain.Models.Auth;
+using Domain.Models.Disputes;
 using Domain.Models.Employers;
 using Domain.Models.Freelance;
 using Domain.Models.Users;
@@ -15,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Freelancer> Freelancers { get; set; }
     public DbSet<Employer> Employers { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Dispute> Disputes { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

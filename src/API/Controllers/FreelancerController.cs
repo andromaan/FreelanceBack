@@ -24,6 +24,6 @@ public class FreelancerController(ISender sender) : BaseController
         => GetResult(await sender.Send(new UpdateFreelancerCommand(vm), ct));
     
     [HttpPut("languages")]
-    public virtual async Task<IActionResult> UpdateLanguages(UpdateFrInfoLangVM vm, CancellationToken ct)
+    public virtual async Task<IActionResult> UpdateLanguages(UpdateFreelancerLanguagesVM vm, CancellationToken ct)
         => GetResult(await sender.Send(new UpdateFrInfoLangCommand(vm), ct));
 }

@@ -5,6 +5,8 @@ using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.ContractPayments;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
+using BLL.Common.Interfaces.Repositories.DisputeResolutions;
+using BLL.Common.Interfaces.Repositories.Disputes;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
@@ -26,6 +28,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using DAL.Extensions;
 
 namespace DAL;
 
@@ -57,80 +60,25 @@ public static class ConfigureDataAccess
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped(typeof(IQueries<,>), typeof(Repository<,>));
 
-        services.AddScoped<ProjectRepository>();
-        services.AddScoped<IProjectRepository>(provider => provider.GetRequiredService<ProjectRepository>());
-        services.AddScoped<IProjectQueries>(provider => provider.GetRequiredService<ProjectRepository>());
-
-        services.AddScoped<CountryRepository>();
-        services.AddScoped<ICountryRepository>(provider => provider.GetRequiredService<CountryRepository>());
-        services.AddScoped<ICountryQueries>(provider => provider.GetRequiredService<CountryRepository>());
-
-        services.AddScoped<UserRepository>();
-        services.AddScoped<IUserRepository>(provider => provider.GetRequiredService<UserRepository>());
-        services.AddScoped<IUserQueries>(provider => provider.GetRequiredService<UserRepository>());
-
-        services.AddScoped<FreelancerRepository>();
-        services.AddScoped<IFreelancerRepository>(provider => provider.GetRequiredService<FreelancerRepository>());
-        services.AddScoped<IFreelancerQueries>(provider => provider.GetRequiredService<FreelancerRepository>());
-
-        services.AddScoped<ContractRepository>();
-        services.AddScoped<IContractRepository>(provider => provider.GetRequiredService<ContractRepository>());
-        services.AddScoped<IContractQueries>(provider => provider.GetRequiredService<ContractRepository>());
-
-        services.AddScoped<SkillRepository>();
-        services.AddScoped<ISkillRepository>(provider => provider.GetRequiredService<SkillRepository>());
-        services.AddScoped<ISkillQueries>(provider => provider.GetRequiredService<SkillRepository>());
-
-        services.AddScoped<LanguageRepository>();
-        services.AddScoped<ILanguageRepository>(provider => provider.GetRequiredService<LanguageRepository>());
-        services.AddScoped<ILanguageQueries>(provider => provider.GetRequiredService<LanguageRepository>());
-        
-        services.AddScoped<EmployerRepository>();
-        services.AddScoped<IEmployerRepository>(provider => provider.GetRequiredService<EmployerRepository>());
-        services.AddScoped<IEmployerQueries>(provider => provider.GetRequiredService<EmployerRepository>());
-        
-        services.AddScoped<EmployerRepository>();
-        services.AddScoped<IEmployerRepository>(provider => provider.GetRequiredService<EmployerRepository>());
-        services.AddScoped<IEmployerQueries>(provider => provider.GetRequiredService<EmployerRepository>());
-        
-        services.AddScoped<CategoryRepository>();
-        services.AddScoped<ICategoryRepository>(provider => provider.GetRequiredService<CategoryRepository>());
-        services.AddScoped<ICategoryQueries>(provider => provider.GetRequiredService<CategoryRepository>());
-        
-        services.AddScoped<ProjectMilestoneRepository>();
-        services.AddScoped<IProjectMilestoneRepository>(provider => provider.GetRequiredService<ProjectMilestoneRepository>());
-        services.AddScoped<IProjectMilestoneQueries>(provider => provider.GetRequiredService<ProjectMilestoneRepository>());
-        
-        services.AddScoped<ContractMilestoneRepository>();
-        services.AddScoped<IContractMilestoneRepository>(provider => provider.GetRequiredService<ContractMilestoneRepository>());
-        services.AddScoped<IContractMilestoneQueries>(provider => provider.GetRequiredService<ContractMilestoneRepository>());
-        
-        services.AddScoped<BidRepository>();
-        services.AddScoped<IBidRepository>(provider => provider.GetRequiredService<BidRepository>());
-        services.AddScoped<IBidQueries>(provider => provider.GetRequiredService<BidRepository>());
-        
-        services.AddScoped<QuoteRepository>();
-        services.AddScoped<IQuoteRepository>(provider => provider.GetRequiredService<QuoteRepository>());
-        services.AddScoped<IQuoteQueries>(provider => provider.GetRequiredService<QuoteRepository>());
-        
-        services.AddScoped<UserWalletRepository>();
-        services.AddScoped<IUserWalletRepository>(provider => provider.GetRequiredService<UserWalletRepository>());
-        services.AddScoped<IUserWalletQueries>(provider => provider.GetRequiredService<UserWalletRepository>());
-        
-        services.AddScoped<WalletTransactionRepository>();
-        services.AddScoped<IWalletTransactionRepository>(provider => provider.GetRequiredService<WalletTransactionRepository>());
-        services.AddScoped<IWalletTransactionQueries>(provider => provider.GetRequiredService<WalletTransactionRepository>());
-        
-        services.AddScoped<MessageRepository>();
-        services.AddScoped<IMessageRepository>(provider => provider.GetRequiredService<MessageRepository>());
-        services.AddScoped<IMessageQueries>(provider => provider.GetRequiredService<MessageRepository>());
-        
-        services.AddScoped<ReviewRepository>();
-        services.AddScoped<IReviewRepository>(provider => provider.GetRequiredService<ReviewRepository>());
-        services.AddScoped<IReviewQueries>(provider => provider.GetRequiredService<ReviewRepository>());
-        
-        services.AddScoped<ContractPaymentRepository>();
-        services.AddScoped<IContractPaymentRepository>(provider => provider.GetRequiredService<ContractPaymentRepository>());
-        services.AddScoped<IContractPaymentQueries>(provider => provider.GetRequiredService<ContractPaymentRepository>());
+        services.AddRepository<ProjectRepository, IProjectRepository, IProjectQueries>();
+        services.AddRepository<CountryRepository, ICountryRepository, ICountryQueries>();
+        services.AddRepository<UserRepository, IUserRepository, IUserQueries>();
+        services.AddRepository<FreelancerRepository, IFreelancerRepository, IFreelancerQueries>();
+        services.AddRepository<ContractRepository, IContractRepository, IContractQueries>();
+        services.AddRepository<SkillRepository, ISkillRepository, ISkillQueries>();
+        services.AddRepository<LanguageRepository, ILanguageRepository, ILanguageQueries>();
+        services.AddRepository<EmployerRepository, IEmployerRepository, IEmployerQueries>();
+        services.AddRepository<CategoryRepository, ICategoryRepository, ICategoryQueries>();
+        services.AddRepository<ProjectMilestoneRepository, IProjectMilestoneRepository, IProjectMilestoneQueries>();
+        services.AddRepository<ContractMilestoneRepository, IContractMilestoneRepository, IContractMilestoneQueries>();
+        services.AddRepository<BidRepository, IBidRepository, IBidQueries>();
+        services.AddRepository<QuoteRepository, IQuoteRepository, IQuoteQueries>();
+        services.AddRepository<UserWalletRepository, IUserWalletRepository, IUserWalletQueries>();
+        services.AddRepository<WalletTransactionRepository, IWalletTransactionRepository, IWalletTransactionQueries>();
+        services.AddRepository<MessageRepository, IMessageRepository, IMessageQueries>();
+        services.AddRepository<ReviewRepository, IReviewRepository, IReviewQueries>();
+        services.AddRepository<ContractPaymentRepository, IContractPaymentRepository, IContractPaymentQueries>();
+        services.AddRepository<DisputeRepository, IDisputeRepository, IDisputeQueries>();
+        services.AddRepository<DisputeResolutionRepository, IDisputeResolutionRepository, IDisputeResolutionQueries>();
     }
 }
