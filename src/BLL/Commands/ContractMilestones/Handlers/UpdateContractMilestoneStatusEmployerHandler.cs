@@ -43,6 +43,16 @@ public class UpdateContractMilestoneStatusEmployerHandler(
                 false, null, HttpStatusCode.BadRequest);
         }
 
+        // Validation: Milestone can only be set to 'InProgress' if it is currently 'Submitted'
+        if (updateModel.Status == ContractMilestoneEmployerStatus.InProgress &&
+            existingEntity.Status != ContractMilestoneStatus.Submitted)
+        {
+            return ServiceResponse.GetResponse(
+                "Milestone status can only be set to 'InProgress' if it is currently 'Submitted'.",
+                false, null, HttpStatusCode.BadRequest);
+        }
+
+        // Validation: Only milestones with 'Submitted' status can be updated by the employer
         if (existingEntity.Status != ContractMilestoneStatus.Submitted)
         {
             return ServiceResponse.GetResponse(
@@ -83,7 +93,7 @@ public class UpdateContractMilestoneStatusEmployerHandler(
         var isAllMilestonesCompleted = contractMilestonesByContract.Where(m => m.Id != existingEntity.Id)
             .All(m => m is { Status: ContractMilestoneStatus.Approved or ContractMilestoneStatus.Rejected });
         var isUpdatedModelCompleted = updateModel is
-            { Status: ContractMilestoneEmployerStatus.Approved or ContractMilestoneEmployerStatus.Rejected };
+            { Status: ContractMilestoneEmployerStatus.Approved };
 
         if (isAllMilestonesCompleted && isUpdatedModelCompleted)
         {
@@ -139,7 +149,7 @@ public class UpdateContractMilestoneStatusEmployerHandler(
             TransactionType = "Received payment for milestone",
             WalletId = freelancerWallet!.Id,
         }, cancellationToken);
-        
+
         await contractPaymentRepository.CreateAsync(new ContractPayment
         {
             Id = Guid.NewGuid(),

@@ -4,7 +4,7 @@ namespace Domain.Models.Disputes;
 
 public class DisputeResolution : AuditableEntity<Guid>
 {
-    public Guid ResolutionId { get; set; }
+    public Guid DisputeId { get; set; }
     public string ResolutionDetails { get; set; } = string.Empty;
     
 }

@@ -3,6 +3,7 @@ using System;
 using DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260210171359_AddedDisputeResolutions")]
+    partial class AddedDisputeResolutions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2365,13 +2368,13 @@ namespace DAL.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 2, 10, 18, 41, 51, 186, DateTimeKind.Utc).AddTicks(2046),
+                            CreatedAt = new DateTime(2026, 2, 10, 17, 13, 58, 758, DateTimeKind.Utc).AddTicks(1949),
                             CreatedBy = new Guid("11111111-1111-1111-1111-111111111111"),
                             DisplayName = "Admin",
                             Email = "admin@mail.com",
-                            ModifiedAt = new DateTime(2026, 2, 10, 18, 41, 51, 186, DateTimeKind.Utc).AddTicks(2054),
+                            ModifiedAt = new DateTime(2026, 2, 10, 17, 13, 58, 758, DateTimeKind.Utc).AddTicks(1955),
                             ModifiedBy = new Guid("11111111-1111-1111-1111-111111111111"),
-                            PasswordHash = "1768195AA75D2F4FA164A00BFD0F4407AC66321BD14851E3C6CB48B7019C926F-2030E9A7D90CD32DEF4AC91591A61469",
+                            PasswordHash = "3E740215BAB6EEA9D1BC3DA77B3051B1B1BE74FFBF15627E18247A287C467236-B6F1027CE9E418B27965B1A49C1D0544",
                             RoleId = "admin"
                         });
                 });

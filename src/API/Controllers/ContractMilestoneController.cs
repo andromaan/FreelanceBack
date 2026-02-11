@@ -87,6 +87,33 @@ public class ContractMilestoneController(ISender sender)
         var result = await Sender.Send(command, ct);
         return GetResult(result);
     }
+    
+    [Authorize(Policy = Settings.Roles.AdminOrModerator)]
+    [HttpGet("status-moderator-enums")]
+    public IActionResult GetModeratorStatusEnumsAsync()
+    {
+        var platforms = Enum.GetValues<ContractMilestoneStatus>()
+            .Select(x => new { Name = x.ToString(), Value = (int)x })
+            .ToList();
+
+        return Ok(platforms);
+    }
+    
+    [Authorize(Policy = Settings.Roles.AdminOrModerator)]
+    [HttpPut("status/{id:guid}/moderator")]
+    public async Task<IActionResult> UpdateContractMilestoneStatusForModerator(
+        Guid id,
+        [FromBody] UpdContractMilestoneStatusModeratorVM vm,
+        CancellationToken ct)
+    {
+        var command = new Update.Command<UpdContractMilestoneStatusModeratorVM, Guid>
+        {
+            Id = id,
+            Model = vm
+        };
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
 
     [ApiExplorerSettings(IgnoreApi = true)]
     public override Task<IActionResult> GetAll(CancellationToken ct)

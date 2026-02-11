@@ -265,7 +265,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
 
         var request = new UpdContractMilestoneStatusEmployerVM
         {
-            Status = ContractMilestoneEmployerStatus.Rejected
+            Status = ContractMilestoneEmployerStatus.InProgress
         };
 
         // Act
@@ -336,7 +336,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
     }
 
     [Fact]
-    public async Task ShouldRejectContractMilestone_WithoutCreatingTransactions()
+    public async Task ShouldChangeStatusToInProgressForContractMilestone_WithoutCreatingTransactions()
     {
         // Arrange
         var employerWallet = new UserWallet
@@ -381,7 +381,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
 
         var request = new UpdContractMilestoneStatusEmployerVM
         {
-            Status = ContractMilestoneEmployerStatus.Rejected
+            Status = ContractMilestoneEmployerStatus.InProgress
         };
 
         // Act
@@ -394,16 +394,16 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
         var updatedMilestone = await Context.Set<ContractMilestone>()
             .FirstOrDefaultAsync(x => x.Id == milestone.Id);
         updatedMilestone.Should().NotBeNull();
-        updatedMilestone.Status.Should().Be(ContractMilestoneStatus.Rejected);
+        updatedMilestone.Status.Should().Be((ContractMilestoneStatus)request.Status);
 
         // Verify wallet balances remain unchanged (no transaction on rejection)
         var unchangedEmployerWallet = await Context.Set<UserWallet>()
             .FirstOrDefaultAsync(w => w.CreatedBy == _employerUser.Id);
-        unchangedEmployerWallet!.Balance.Should().Be(10000m);
+        unchangedEmployerWallet!.Balance.Should().Be(employerWallet.Balance);
 
         var unchangedFreelancerWallet = await Context.Set<UserWallet>()
             .FirstOrDefaultAsync(w => w.CreatedBy == _freelancerUser.Id);
-        unchangedFreelancerWallet!.Balance.Should().Be(0m);
+        unchangedFreelancerWallet!.Balance.Should().Be(freelancerWallet.Balance);
     }
 
     [Fact]

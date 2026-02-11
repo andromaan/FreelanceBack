@@ -80,7 +80,7 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         milestoneFromDb.Description.Should().Be("Updated contract milestone");
         milestoneFromDb.Amount.Should().Be(800m);
     }
-    
+
     [Fact]
     public async Task ShouldNotUpdateContractMilestone_WhenStatusIsNotPending()
     {
@@ -329,6 +329,42 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         var contractFromDb = await Context.Set<Contract>().FirstOrDefaultAsync(x => x.Id == contract.Id);
         contractFromDb.Should().NotBeNull();
         contractFromDb.Status.Should().Be(ContractStatus.InProgress);
+    }
+
+    [Fact]
+    public async Task ShouldUpdateContractStatusToRejected_ForModerator()
+    {
+        // Arrange
+        var contract =
+            ContractData.CreateContract(projectId: _project.Id, freelancerId: _freelancer.Id, agreedRate: 1000m,
+                createdById: UserId);
+        await Context.AddAsync(contract);
+        var milestone1 = new ContractMilestone
+        {
+            Id = Guid.NewGuid(), ContractId = contract.Id, Description = "M1", Amount = 500m,
+            DueDate = DateTime.UtcNow.AddDays(1), Status = ContractMilestoneStatus.Submitted,
+            CreatedBy = UserId
+        };
+
+        var userModerator =
+            UserData.CreateTestUser(Guid.NewGuid(), "moderator@mail.com", roleId: Settings.Roles.ModeratorRole);
+
+        await Context.AddAsync(userModerator);
+        await Context.AddAsync(milestone1);
+        await SaveChangesAsync();
+
+        SwitchUser(role: Settings.Roles.ModeratorRole, userId: userModerator.Id);
+
+        // Act: Set milestone to InProgress
+        var moderatorStatusVm = new UpdContractMilestoneStatusModeratorVM
+            { Status = ContractMilestoneStatus.Rejected };
+        await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone1.Id}/moderator", moderatorStatusVm);
+
+        // Assert
+        var contractFromDb =
+            await Context.Set<ContractMilestone>().FirstOrDefaultAsync(x => x.Id == milestone1.Id);
+        contractFromDb.Should().NotBeNull();
+        contractFromDb.Status.Should().Be(moderatorStatusVm.Status);
     }
 
     public async Task InitializeAsync()

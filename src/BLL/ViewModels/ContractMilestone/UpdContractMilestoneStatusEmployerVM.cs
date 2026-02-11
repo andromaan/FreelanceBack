@@ -12,5 +12,5 @@ public enum ContractMilestoneEmployerStatus
 {
     UnderReview = ContractMilestoneStatus.UnderReview,
     Approved = ContractMilestoneStatus.Approved,
-    Rejected = ContractMilestoneStatus.Rejected,
+    InProgress = ContractMilestoneStatus.InProgress,
 }

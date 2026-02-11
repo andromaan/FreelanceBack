@@ -58,6 +58,17 @@ public class DisputeController(ISender sender) : BaseController
         return GetResult(result);
     }
 
+    [Authorize(Policy = Settings.Roles.AdminOrModerator)]
+    [HttpGet("status-moderator-enums")]
+    public IActionResult GetModeratorStatusEnumsAsync()
+    {
+        var platforms = Enum.GetValues<DisputeStatusForModerator>()
+            .Select(x => new { Name = x.ToString(), Value = (int)x })
+            .ToList();
+
+        return Ok(platforms);
+    }
+    
     [HttpPut("{id}/status")]
     [Authorize(Policy = Settings.Roles.AdminOrModerator)]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateDisputeStatusForModeratorVM vm,

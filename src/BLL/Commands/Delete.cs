@@ -27,7 +27,7 @@ public class Delete
             CancellationToken cancellationToken)
         {
             var existingEntity = await queries.GetByIdAsync(request.Id, cancellationToken);
-            
+
             if (existingEntity is null)
             {
                 return ServiceResponse.NotFound($"{typeof(TEntity).Name} with ID {request.Id} not found");
@@ -38,7 +38,8 @@ public class Delete
                 var userId = await userProvider.GetUserId();
                 var userRole = userProvider.GetUserRole();
 
-                if (auditable.CreatedBy != userId && userRole != Settings.Roles.AdminRole)
+                if (auditable.CreatedBy != userId && userRole != Settings.Roles.AdminRole &&
+                    userRole != Settings.Roles.ModeratorRole)
                 {
                     return ServiceResponse.Forbidden("You do not have permission to delete this entity");
                 }

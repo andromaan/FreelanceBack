@@ -7,6 +7,7 @@ using BLL.Common.Interfaces.Repositories.Categories;
 using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
+using BLL.Common.Interfaces.Repositories.DisputeResolutions;
 using BLL.Common.Interfaces.Repositories.Disputes;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
@@ -25,6 +26,7 @@ using BLL.ViewModels.Contract;
 using BLL.ViewModels.ContractMilestone;
 using BLL.ViewModels.Country;
 using BLL.ViewModels.Dispute;
+using BLL.ViewModels.DisputeResolution;
 using BLL.ViewModels.Language;
 using BLL.ViewModels.Message;
 using BLL.ViewModels.Project;
@@ -162,7 +164,12 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateContractMilestoneVM),
                 UpdateViewModelType = typeof(UpdateContractMilestoneVM)
             },
-            updateVMs: [typeof(UpdContractMilestoneStatusEmployerVM), typeof(UpdContractMilestoneStatusFreelancerVM)]);
+            updateVMs:
+            [
+                typeof(UpdContractMilestoneStatusEmployerVM),
+                typeof(UpdContractMilestoneStatusFreelancerVM),
+                typeof(UpdContractMilestoneStatusModeratorVM)
+            ]);
 
         // registrations for Bids
         services.RegisterCrudHandlers(
@@ -202,7 +209,7 @@ public static class ConfigureBusinessLogic
             Guid, ContractVM,
             UpdateContractStatusVM,
             IContractQueries>();
-        
+
         // registrations for Reviews
         services.RegisterCrudHandlers(
             new CrudRegistration<Review, Guid, IReviewQueries>
@@ -211,7 +218,7 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateReviewVM),
                 UpdateViewModelType = typeof(UpdateReviewVM)
             });
-        
+
         // registrations for Disputes
         services.RegisterCrudHandlers(
             new CrudRegistration<Dispute, Guid, IDisputeQueries>
@@ -219,6 +226,14 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(DisputeVM),
                 CreateViewModelType = typeof(CreateDisputeVM)
             }, updateVMs: [typeof(UpdateDisputeStatusForModeratorVM)]);
+
+        // registrations for Dispute Resolutions
+        services.RegisterCrudHandlers(
+            new CrudRegistration<DisputeResolution, Guid, IDisputeResolutionQueries>
+            {
+                ViewModelType = typeof(DisputeResolutionVM),
+                CreateViewModelType = typeof(CreateDisputeResolutionVM)
+            });
     }
 
     private static void AddServices(this IServiceCollection services)

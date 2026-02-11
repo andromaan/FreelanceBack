@@ -17,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Employer> Employers { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Dispute> Disputes { get; set; }
+    public DbSet<DisputeResolution> DisputeResolutions { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
