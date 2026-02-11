@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Tests.Common;
 using TestsData;
 
-namespace Api.Tests.Integration;
+namespace Api.Tests.Integration.ContractMilestones;
 
 public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
     : BaseIntegrationTest(factory, customRole: Settings.Roles.FreelancerRole), IAsyncLifetime

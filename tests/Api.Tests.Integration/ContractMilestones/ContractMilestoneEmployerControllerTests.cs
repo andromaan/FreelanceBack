@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Tests.Common;
 using TestsData;
 
-namespace Api.Tests.Integration;
+namespace Api.Tests.Integration.ContractMilestones;
 
 public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory factory)
     : BaseIntegrationTest(factory, customRole: Settings.Roles.EmployerRole), IAsyncLifetime
@@ -171,6 +171,10 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
         var contractFromDb = await Context.Set<Contract>().FirstOrDefaultAsync(x => x.Id == contract.Id);
         contractFromDb.Should().NotBeNull();
         contractFromDb.Status.Should().Be(ContractStatus.Completed);
+        
+        var projectFromDb = await Context.Set<Project>().FirstOrDefaultAsync(x => x.Id == _project.Id);
+        projectFromDb.Should().NotBeNull();
+        projectFromDb.Status.Should().Be(ProjectStatus.Completed);
     }
 
     [Fact]

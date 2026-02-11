@@ -10,8 +10,6 @@ using Domain.Models.Disputes;
 
 namespace BLL.Commands.DisputeResolutions.Handlers;
 
-
-// TODO financial transactions and milestone updates handling
 public class CreateDisputeResolutionHandler(
     IUserProvider userProvider,
     IDisputeQueries disputeQueries,
