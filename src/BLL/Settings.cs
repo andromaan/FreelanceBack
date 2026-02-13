@@ -21,7 +21,6 @@ public static class Settings
             FreelancerRole,
             ModeratorRole
         };
-
     }
     
     public static class ImagesPathSettings

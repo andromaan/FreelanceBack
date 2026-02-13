@@ -150,7 +150,7 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(ProjectVM),
                 CreateViewModelType = typeof(CreateProjectVM),
                 UpdateViewModelType = typeof(UpdateProjectVM)
-            }, updateVMs: [typeof(UpdateProjectCategoriesVM)]);
+            }, specificUpdateVMs: [typeof(UpdateProjectCategoriesVM)]);
 
         // registrations for ProjectMilestone
         services.RegisterCrudHandlers(
@@ -169,7 +169,7 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateContractMilestoneVM),
                 UpdateViewModelType = typeof(UpdateContractMilestoneVM)
             },
-            updateVMs:
+            specificUpdateVMs:
             [
                 typeof(UpdContractMilestoneStatusEmployerVM),
                 typeof(UpdContractMilestoneStatusFreelancerVM),
@@ -202,18 +202,13 @@ public static class ConfigureBusinessLogic
                 CreateViewModelType = typeof(CreateMessageVM),
                 UpdateViewModelType = typeof(UpdateMessageVM)
             },
-            createVMs: [typeof(CreateMessageWithoutContractVM)]);
+            specificCreateVMs: [typeof(CreateMessageWithoutContractVM)]);
 
         // registrations for Contracts
         services.AddUpdateCommandHandler<Contract,
             Guid, ContractVM,
             UpdateContractVM,
-            IContractQueries>();
-
-        services.AddUpdateCommandHandler<Contract,
-            Guid, ContractVM,
-            UpdateContractStatusVM,
-            IContractQueries>();
+            IContractQueries>(specificUpdateVMs: [typeof(UpdateContractStatusVM)]);
 
         // registrations for Reviews
         services.RegisterCrudHandlers(
@@ -238,7 +233,7 @@ public static class ConfigureBusinessLogic
             {
                 ViewModelType = typeof(DisputeVM),
                 CreateViewModelType = typeof(CreateDisputeVM)
-            }, updateVMs: [typeof(UpdateDisputeStatusForModeratorVM)]);
+            }, specificUpdateVMs: [typeof(UpdateDisputeStatusForModeratorVM)]);
 
         // registrations for Dispute Resolutions
         services.RegisterCrudHandlers(

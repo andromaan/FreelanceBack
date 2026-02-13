@@ -11,8 +11,8 @@ public static class CrudRegistrationExtensions
 {
     public static void RegisterCrudHandlers<TEntity, TKey, TQueries>(
         this IServiceCollection services, CrudRegistration<TEntity, TKey, TQueries> reg,
-        Type[]? createVMs = null,
-        Type[]? updateVMs = null)
+        Type[]? specificCreateVMs = null,
+        Type[]? specificUpdateVMs = null)
         where TEntity : Entity<TKey>
         where TQueries : IQueries<TEntity, TKey>
     {
@@ -83,9 +83,9 @@ public static class CrudRegistrationExtensions
         }
 
         // Register additional create handlers
-        if (createVMs != null)
+        if (specificCreateVMs != null)
         {
-            foreach (var createVm in createVMs)
+            foreach (var createVm in specificCreateVMs)
             {
                 var createHandler = new HandlerDescriptor(
                     typeof(Create.Command<>),
@@ -103,9 +103,9 @@ public static class CrudRegistrationExtensions
         }
 
         // Register additional update handlers
-        if (updateVMs != null)
+        if (specificUpdateVMs != null)
         {
-            foreach (var updateVm in updateVMs)
+            foreach (var updateVm in specificUpdateVMs)
             {
                 var updateHandler = new HandlerDescriptor(
                     typeof(Update.Command<,>),
