@@ -2,7 +2,7 @@ using Domain.Models.Users;
 
 namespace BLL.Common.Interfaces.Repositories.Users;
 
-public interface IUserQueries : IQueries<User, Guid>
+public interface IUserQueries : IQueries<User, Guid>, IByUserQuery<User, Guid>
 {
     Task<User?> GetByEmailAsync(string email, CancellationToken token, bool includes = false);
     Task<bool> IsUniqueEmailAsync(string email, CancellationToken token);

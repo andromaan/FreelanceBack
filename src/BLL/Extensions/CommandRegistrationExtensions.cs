@@ -18,7 +18,7 @@ public static class CommandRegistrationExtensions
         
     {
         services.AddTransient(
-            typeof(IRequestHandler<Update.Command<TUpdateViewModel, Guid>, ServiceResponse>),
+            typeof(IRequestHandler<Update.Command<TUpdateViewModel, TKey>, ServiceResponse>),
             typeof(Update.CommandHandler<TUpdateViewModel, TViewModel, TEntity, TKey, TQueries>)
         );
         
@@ -28,6 +28,35 @@ public static class CommandRegistrationExtensions
             {
                 var requestType = typeof(Update.Command<,>).MakeGenericType(updateVm, typeof(TKey));
                 var handlerType = typeof(Update.CommandHandler<,,,,>)
+                    .MakeGenericType(updateVm, typeof(TViewModel), typeof(TEntity), typeof(TKey), typeof(TQueries));
+                var serviceType = typeof(IRequestHandler<,>).MakeGenericType(requestType, typeof(ServiceResponse));
+
+                services.AddTransient(serviceType, handlerType);
+            }
+        }
+        
+        return services;
+    }
+    
+    public static IServiceCollection AddUpdateByUserCommandHandler<TEntity, TKey, TViewModel, TUpdateViewModel, TQueries>(
+        this IServiceCollection services, Type[]? specificUpdateVMs = null)
+        where TEntity : Entity<TKey>
+        where TViewModel : class
+        where TUpdateViewModel : class
+        where TQueries : class, IQueries<TEntity, TKey>, IByUserQuery<TEntity, TKey>
+        
+    {
+        services.AddTransient(
+            typeof(IRequestHandler<UpdateByUser.Command<TUpdateViewModel>, ServiceResponse>),
+            typeof(UpdateByUser.CommandHandler<TUpdateViewModel, TViewModel, TEntity, TKey, TQueries>)
+        );
+        
+        if (specificUpdateVMs != null)
+        {
+            foreach (var updateVm in specificUpdateVMs)
+            {
+                var requestType = typeof(UpdateByUser.Command<>).MakeGenericType(updateVm);
+                var handlerType = typeof(UpdateByUser.CommandHandler<,,,,>)
                     .MakeGenericType(updateVm, typeof(TViewModel), typeof(TEntity), typeof(TKey), typeof(TQueries));
                 var serviceType = typeof(IRequestHandler<,>).MakeGenericType(requestType, typeof(ServiceResponse));
 

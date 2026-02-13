@@ -9,6 +9,8 @@ using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Countries;
 using BLL.Common.Interfaces.Repositories.DisputeResolutions;
 using BLL.Common.Interfaces.Repositories.Disputes;
+using BLL.Common.Interfaces.Repositories.Employers;
+using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
@@ -28,6 +30,8 @@ using BLL.ViewModels.ContractMilestone;
 using BLL.ViewModels.Country;
 using BLL.ViewModels.Dispute;
 using BLL.ViewModels.DisputeResolution;
+using BLL.ViewModels.Employer;
+using BLL.ViewModels.Freelancer;
 using BLL.ViewModels.Language;
 using BLL.ViewModels.Message;
 using BLL.ViewModels.Project;
@@ -39,6 +43,8 @@ using BLL.ViewModels.User;
 using Domain.Models.Contracts;
 using Domain.Models.Countries;
 using Domain.Models.Disputes;
+using Domain.Models.Employers;
+using Domain.Models.Freelance;
 using Domain.Models.Languages;
 using Domain.Models.Messaging;
 using Domain.Models.Projects;
@@ -209,6 +215,18 @@ public static class ConfigureBusinessLogic
             Guid, ContractVM,
             UpdateContractVM,
             IContractQueries>(specificUpdateVMs: [typeof(UpdateContractStatusVM)]);
+
+        // registrations for Freelancers
+        services.AddUpdateByUserCommandHandler<Freelancer,
+            Guid, FreelancerVM,
+            UpdateFreelancerVM,
+            IFreelancerQueries>(specificUpdateVMs: [typeof(UpdateFreelancerLanguagesVM)]);
+
+        // registrations for Employers
+        services.AddUpdateByUserCommandHandler<Employer,
+            Guid, EmployerVM,
+            UpdateEmployerVM,
+            IEmployerQueries>();
 
         // registrations for Reviews
         services.RegisterCrudHandlers(

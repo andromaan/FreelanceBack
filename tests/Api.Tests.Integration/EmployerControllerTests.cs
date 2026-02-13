@@ -29,7 +29,7 @@ public class EmployerControllerTests(IntegrationTestWebFactory factory)
         
         employerFromResponse.Should().NotBeNull();
         employerFromResponse.Id.Should().Be(_employer.Id);
-        employerFromResponse.UserId.Should().Be(_employer.UserId);
+        employerFromResponse.CreatedBy.Should().Be(_employer.CreatedBy);
         employerFromResponse.CompanyName.Should().Be(_employer.CompanyName);
     }
     
@@ -79,7 +79,7 @@ public class EmployerControllerTests(IntegrationTestWebFactory factory)
     public async Task InitializeAsync()
     {
         _user = UserData.CreateTestUser(UserId);
-        _employer = EmployerData.CreateEmployer(userId: _user.Id);
+        _employer = EmployerData.CreateEmployer(createdBy: _user.Id);
 
         await Context.AddAsync(_user);
         await Context.AddAsync(_employer);

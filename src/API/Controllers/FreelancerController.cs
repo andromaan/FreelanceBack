@@ -1,5 +1,6 @@
 using API.Controllers.Common;
 using BLL;
+using BLL.Commands;
 using BLL.Commands.Freelancers;
 using BLL.ViewModels.Freelancer;
 using MediatR;
@@ -18,12 +19,12 @@ public class FreelancerController(ISender sender) : BaseController
     [HttpGet]
     public virtual async Task<IActionResult> GetByUser(CancellationToken ct)
         => GetResult(await sender.Send(new GetFreelancerByUserQuery(), ct));
-    
+
     [HttpPut]
     public virtual async Task<IActionResult> Update(UpdateFreelancerVM vm, CancellationToken ct)
-        => GetResult(await sender.Send(new UpdateFreelancerCommand(vm), ct));
-    
+        => GetResult(await sender.Send(new UpdateByUser.Command<UpdateFreelancerVM> { Model = vm }, ct));
+
     [HttpPut("languages")]
     public virtual async Task<IActionResult> UpdateLanguages(UpdateFreelancerLanguagesVM vm, CancellationToken ct)
-        => GetResult(await sender.Send(new UpdateFrInfoLangCommand(vm), ct));
+        => GetResult(await sender.Send(new UpdateByUser.Command<UpdateFreelancerLanguagesVM> { Model = vm }, ct));
 }

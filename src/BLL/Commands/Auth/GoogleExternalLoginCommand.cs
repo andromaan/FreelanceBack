@@ -123,7 +123,7 @@ public class GoogleExternalLoginCommandHandler(
             var employer = new Employer
             {
                 Id = Guid.NewGuid(),
-                UserId = createdUser.Id,
+                CreatedBy = createdUser.Id,
             };
 
             await employerRepository.CreateAsync(employer, createdUser.Id, cancellationToken);

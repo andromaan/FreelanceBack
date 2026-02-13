@@ -78,4 +78,9 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
     {
         return await _appDbContext.Users.FirstOrDefaultAsync(u => u.Email == email, token) == null;
     }
+
+    public async Task<User?> GetByUser(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+    }
 }

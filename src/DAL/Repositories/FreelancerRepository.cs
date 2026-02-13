@@ -35,4 +35,14 @@ public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userP
         
         return await query.FirstOrDefaultAsync(up => up.CreatedBy == userId, token);
     }
+
+    public async Task<Freelancer?> GetByUser(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _appDbContext.Freelancers
+            .Include(up => up.Skills)
+            .Include(up => up.Portfolio)
+            .Include(up => up.Country)
+            .Include(up => up.Languages)
+            .FirstOrDefaultAsync(up => up.CreatedBy == userId, cancellationToken);
+    }
 }

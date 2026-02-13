@@ -71,7 +71,7 @@ public class SignUpCommandHandler(
                 var employer = new Employer
                 {
                     Id = Guid.NewGuid(),
-                    UserId = user.Id,
+                    CreatedBy = user.Id,
                 };
 
                 await employerRepository.CreateAsync(employer, user.Id, cancellationToken);

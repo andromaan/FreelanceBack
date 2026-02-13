@@ -11,7 +11,7 @@ public class EmployerRepository(AppDbContext appDbContext, IUserProvider userPro
     : Repository<Employer, Guid>(appDbContext, userProvider), IEmployerRepository, IEmployerQueries
 {
     private readonly AppDbContext _appDbContext = appDbContext;
-    
+
     public async Task<Employer?> CreateAsync(Employer entity, Guid createdBy, CancellationToken token)
     {
         entity.CreatedBy = createdBy;
@@ -23,7 +23,13 @@ public class EmployerRepository(AppDbContext appDbContext, IUserProvider userPro
     public async Task<Employer?> GetByUserId(Guid userId, CancellationToken token)
     {
         var query = _appDbContext.Employers.AsQueryable();
-        
-        return await query.FirstOrDefaultAsync(up => up.UserId == userId, token);
+
+        return await query.FirstOrDefaultAsync(up => up.CreatedBy == userId, token);
+    }
+
+    public async Task<Employer?> GetByUser(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _appDbContext.Employers.AsQueryable()
+            .FirstOrDefaultAsync(up => up.CreatedBy == userId, cancellationToken);
     }
 }

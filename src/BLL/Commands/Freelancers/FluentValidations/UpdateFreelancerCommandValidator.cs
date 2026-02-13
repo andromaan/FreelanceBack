@@ -1,19 +1,20 @@
+using BLL.ViewModels.Freelancer;
 using FluentValidation;
 
 namespace BLL.Commands.Freelancers.FluentValidations;
 
-public class UpdateFreelancerCommandValidator : AbstractValidator<UpdateFreelancerCommand>
+public class UpdateFreelancerCommandValidator : AbstractValidator<UpdateByUser.Command<UpdateFreelancerVM>>
 {
     public UpdateFreelancerCommandValidator()
     {
-        RuleFor(x => x.Vm.Bio)
+        RuleFor(x => x.Model.Bio)
             .NotEmpty().WithMessage("Bio is required")
             .MaximumLength(1000).WithMessage("Bio must not exceed 1000 characters");
 
-        RuleFor(x => x.Vm.HourlyRate)
+        RuleFor(x => x.Model.HourlyRate)
             .GreaterThanOrEqualTo(0).WithMessage("Hourly rate must be non-negative");
 
-        RuleFor(x => x.Vm.Location)
+        RuleFor(x => x.Model.Location)
             .NotEmpty().WithMessage("Location is required")
             .MaximumLength(200).WithMessage("Location must not exceed 200 characters");
     }

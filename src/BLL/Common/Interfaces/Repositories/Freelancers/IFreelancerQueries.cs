@@ -2,7 +2,7 @@ using Domain.Models.Freelance;
 
 namespace BLL.Common.Interfaces.Repositories.Freelancers;
 
-public interface IFreelancerQueries : IQueries<Freelancer, Guid>
+public interface IFreelancerQueries : IQueries<Freelancer, Guid>, IByUserQuery<Freelancer, Guid>
 {
     Task<Freelancer?> GetByUserIdAsync(Guid userId, CancellationToken token, bool includes = false);
 }

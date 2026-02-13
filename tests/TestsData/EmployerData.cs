@@ -4,14 +4,14 @@ namespace TestsData;
 
 public class EmployerData
 {
-    public static Employer CreateEmployer(Guid? id = null, Guid? userId = null)
+    public static Employer CreateEmployer(Guid? id = null, Guid? createdBy = null)
     {
         return new Employer
         {
             Id = id ?? Guid.NewGuid(),
-            UserId = userId ?? Guid.NewGuid(),
             CompanyName = "Test Company",
             CompanyWebsite = "https://testcompany.com",
+            CreatedBy = createdBy ?? Guid.NewGuid(),
         };
     }
 }
