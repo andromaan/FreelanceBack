@@ -1,0 +1,57 @@
+using API.Controllers.Common;
+using BLL;
+using BLL.Commands.Users;
+using BLL.ViewModels.User;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace API.Controllers;
+
+[Route("[controller]")]
+[ApiController]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+public class UserController(ISender sender)
+    : GenericCrudController<Guid, UserVM, CreateUserVM, UpdateUserVM>(sender)
+{
+    [HttpGet("get-myself")]
+    public async Task<IActionResult> GetMyself(CancellationToken ct)
+    {
+        var command = new GetUserByTokenQuery();
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+
+    [HttpPatch("update-avatar")]
+    public async Task<IActionResult> UpdateAvatar(IFormFile file, CancellationToken ct)
+    {
+        var command = new UpdateUserAvatarCommand(file);
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+    
+    [Authorize(Roles = Settings.Roles.AdminRole)]
+    public override async Task<IActionResult> Create(CreateUserVM vm, CancellationToken ct)
+    {
+        var command = new CreateUserCommand(vm);
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+    
+    [Authorize(Roles = Settings.Roles.AdminRole)]
+    public override Task<IActionResult> Update(Guid id, UpdateUserVM vm, CancellationToken ct)
+        => base.Update(id, vm, ct);
+    
+    [Authorize(Roles = Settings.Roles.AdminRole)]
+    public override Task<IActionResult> Delete(Guid id, CancellationToken ct)
+        => base.Delete(id, ct);
+    
+    [Authorize(Roles = Settings.Roles.AdminRole)]
+    public override Task<IActionResult> GetAll(CancellationToken ct)
+        => base.GetAll(ct);
+    
+    [Authorize(Roles = Settings.Roles.AdminRole)]
+    public override Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        => base.GetById(id, ct);
+}

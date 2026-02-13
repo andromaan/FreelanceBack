@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using BLL;
 using BLL.ViewModels.Project;
-using Domain;
 using Domain.Models.Projects;
 using Domain.Models.Users;
 using FluentAssertions;

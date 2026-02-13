@@ -1,8 +1,8 @@
 using API.Controllers.Common;
+using BLL;
 using BLL.Commands;
 using BLL.Commands.Disputes;
 using BLL.ViewModels.Dispute;
-using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

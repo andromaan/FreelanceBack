@@ -1,7 +1,7 @@
 using API.Controllers.Common;
+using BLL;
 using BLL.Commands.Quotes;
 using BLL.ViewModels.Quote;
-using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

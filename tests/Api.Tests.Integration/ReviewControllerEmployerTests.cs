@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using BLL;
 using BLL.ViewModels.Reviews;
-using Domain;
 using Domain.Models.Contracts;
 using Domain.Models.Freelance;
 using Domain.Models.Projects;

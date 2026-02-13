@@ -3,7 +3,6 @@ using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Services;
 using BLL.ViewModels.Dispute;
-using Domain;
 using Domain.Models.Disputes;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using Domain.Models.Contracts;

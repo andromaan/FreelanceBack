@@ -1,7 +1,7 @@
 using API.Controllers.Common;
+using BLL;
 using BLL.Commands.Bids;
 using BLL.ViewModels.Bid;
-using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

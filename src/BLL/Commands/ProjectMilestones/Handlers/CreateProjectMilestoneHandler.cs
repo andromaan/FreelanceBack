@@ -5,7 +5,6 @@ using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Services;
 using BLL.ViewModels.ProjectMilestone;
-using Domain;
 using Domain.Models.Projects;
 
 namespace BLL.Commands.ProjectMilestones.Handlers;

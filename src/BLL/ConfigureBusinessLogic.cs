@@ -16,6 +16,7 @@ using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Reviews;
 using BLL.Common.Interfaces.Repositories.Skills;
+using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Extensions;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
@@ -34,7 +35,7 @@ using BLL.ViewModels.ProjectMilestone;
 using BLL.ViewModels.Quote;
 using BLL.ViewModels.Reviews;
 using BLL.ViewModels.Skill;
-using Domain;
+using BLL.ViewModels.User;
 using Domain.Models.Contracts;
 using Domain.Models.Countries;
 using Domain.Models.Disputes;
@@ -42,6 +43,7 @@ using Domain.Models.Languages;
 using Domain.Models.Messaging;
 using Domain.Models.Projects;
 using Domain.Models.Reviews;
+using Domain.Models.Users;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -220,6 +222,14 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(ReviewVM),
                 CreateViewModelType = typeof(CreateReviewVM),
                 UpdateViewModelType = typeof(UpdateReviewVM)
+            });
+
+        // registrations for Users
+        services.RegisterCrudHandlers(
+            new CrudRegistration<User, Guid, IUserQueries>
+            {
+                ViewModelType = typeof(UserVM),
+                UpdateViewModelType = typeof(UpdateUserVM)
             });
 
         // registrations for Disputes

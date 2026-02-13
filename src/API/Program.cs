@@ -4,6 +4,7 @@ using BLL;
 using BLL.Common.Interfaces;
 using BLL.Middlewares;
 using DAL;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +51,29 @@ if (!app.Environment.IsEnvironment("Test"))
 app.MapControllers();
 
 app.UseMiddleware<MiddlewareExceptionsHandling>();
+
+var imagesPath = Path.Combine(builder.Environment.ContentRootPath, Settings.ImagesPathSettings.ImagesPath);
+
+if (!Directory.Exists(imagesPath))
+{
+    Directory.CreateDirectory(imagesPath);
+
+    foreach (var file in Settings.ImagesPathSettings.ListOfDirectoriesNames)
+    {
+        var containersPath = Path.Combine(imagesPath, file);
+        if (!Directory.Exists(containersPath))
+        {
+            Directory.CreateDirectory(containersPath);
+        }
+    }
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(imagesPath),
+    RequestPath = $"/{Settings.ImagesPathSettings.StaticFileRequestPath}"
+});
+
 
 app.Run();
 

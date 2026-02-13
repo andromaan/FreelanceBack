@@ -5,7 +5,6 @@ using BLL.Common.Interfaces.Repositories.ContractMilestones;
 using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Services;
 using BLL.ViewModels.ContractMilestone;
-using Domain;
 using Domain.Models.Contracts;
 
 namespace BLL.Commands.ContractMilestones.Handlers;

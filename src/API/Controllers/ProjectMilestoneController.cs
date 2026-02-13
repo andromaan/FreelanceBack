@@ -1,7 +1,7 @@
 using API.Controllers.Common;
+using BLL;
 using BLL.Commands.ProjectMilestones;
 using BLL.ViewModels.ProjectMilestone;
-using Domain;
 using Domain.Models.Projects;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

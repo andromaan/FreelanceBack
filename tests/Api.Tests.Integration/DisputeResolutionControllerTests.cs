@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using BLL;
 using BLL.ViewModels.DisputeResolution;
-using Domain;
 using Domain.Models.Contracts;
 using Domain.Models.Disputes;
 using Domain.Models.Freelance;

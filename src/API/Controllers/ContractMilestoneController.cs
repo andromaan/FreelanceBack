@@ -1,8 +1,8 @@
 using API.Controllers.Common;
+using BLL;
 using BLL.Commands;
 using BLL.Commands.ContractMilestones;
 using BLL.ViewModels.ContractMilestone;
-using Domain;
 using Domain.Models.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

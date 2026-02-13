@@ -4,7 +4,6 @@ using BLL.Common.Interfaces.Repositories.Contracts;
 using BLL.Common.Interfaces.Repositories.Disputes;
 using BLL.Services;
 using BLL.ViewModels.DisputeResolution;
-using Domain;
 using Domain.Models.Contracts;
 using Domain.Models.Disputes;
 

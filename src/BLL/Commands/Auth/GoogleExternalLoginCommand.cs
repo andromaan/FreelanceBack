@@ -6,7 +6,6 @@ using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
 using BLL.ViewModels.Auth;
-using Domain;
 using Domain.Models.Employers;
 using Domain.Models.Freelance;
 using Domain.Models.Payments;
