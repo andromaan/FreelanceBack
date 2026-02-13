@@ -32,6 +32,13 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseCors(options => options
+    .WithOrigins("http://localhost:3000", "https://localhost:3000")
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials()
+);
+
 app.UseAuthentication();
 app.UseAuthorization();
 

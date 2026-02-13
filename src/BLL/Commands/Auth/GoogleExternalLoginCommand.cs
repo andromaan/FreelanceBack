@@ -80,7 +80,8 @@ public class GoogleExternalLoginCommandHandler(
             Id = userId,
             Email = payload.Email,
             RoleId = Settings.Roles.AdminRole,
-            PasswordHash = hashPasswordService.HashPassword(randomPassword)
+            PasswordHash = hashPasswordService.HashPassword(randomPassword),
+            CreatedBy = userId
         };
 
         var result = await userRepository.CreateAsync(userModel, cancellationToken);

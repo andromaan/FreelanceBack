@@ -33,7 +33,7 @@ public class SignUpCommandHandler(
         var vm = request.Vm;
         if (!await userQueries.IsUniqueEmailAsync(vm.Email, cancellationToken))
         {
-            return ServiceResponse.BadRequest($"{vm.Email} вже використовується");
+            return ServiceResponse.BadRequest($"{vm.Email} already exists");
         }
 
         var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count() != 0;
@@ -71,13 +71,13 @@ public class SignUpCommandHandler(
 
                 await employerRepository.CreateAsync(employer, user.Id, cancellationToken);
             }
-            
+
             if (user.RoleId != Settings.Roles.AdminRole)
             {
                 var userWallet = new UserWallet
                 {
                     Id = Guid.NewGuid(),
-                    CreatedBy =  user.Id,
+                    CreatedBy = user.Id,
                     Balance = 0m
                 };
 
@@ -91,6 +91,6 @@ public class SignUpCommandHandler(
 
         var tokens = await jwtTokenService.GenerateTokensAsync(user, cancellationToken);
 
-        return ServiceResponse.Ok($"Користувач {vm.Email} успішно зареєстрований", tokens);
+        return ServiceResponse.Ok($"User {vm.Email} successfully created", tokens);
     }
 }
