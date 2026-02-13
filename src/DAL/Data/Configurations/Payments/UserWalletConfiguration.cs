@@ -16,6 +16,6 @@ public class UserWalletConfiguration : IEntityTypeConfiguration<UserWallet>
         builder.Property(uw => uw.Balance).HasPrecision(18, 2).IsRequired();
         builder.Property(uw => uw.Currency).HasMaxLength(8).IsRequired();
         
-        builder.ConfigureAudit();
+        builder.ConfigureAudit(DeleteBehavior.Cascade);
     }
 }

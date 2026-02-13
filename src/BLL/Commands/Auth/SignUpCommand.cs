@@ -35,16 +35,22 @@ public class SignUpCommandHandler(
         {
             return ServiceResponse.BadRequest($"{vm.Email} already exists");
         }
+        
+        if (vm is not {UserRole: Settings.Roles.EmployerRole or Settings.Roles.FreelancerRole})
+        {
+            return ServiceResponse.BadRequest(
+                $"Invalid user role, must be '{Settings.Roles.EmployerRole}' or '{Settings.Roles.FreelancerRole}'");
+        }
 
         var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count() != 0;
+        var userRole = isDbHasUsers ? vm.UserRole : Settings.Roles.AdminRole;
+
 
         var user = mapper.Map<User>(vm);
         user.Id = Guid.NewGuid();
         user.PasswordHash = passwordHasher.HashPassword(vm.Password);
         user.CreatedBy = user.Id;
-        user.RoleId = isDbHasUsers
-            ? (vm.IsFreelancer ? Settings.Roles.FreelancerRole : Settings.Roles.EmployerRole)
-            : Settings.Roles.AdminRole;
+        user.RoleId = userRole;
 
         try
         {

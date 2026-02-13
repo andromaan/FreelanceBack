@@ -1,3 +1,4 @@
+using DAL.Extensions;
 using Domain.Models.Employers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -18,5 +19,7 @@ public class EmployerConfiguration : IEntityTypeConfiguration<Employer>
 
         builder.Property(e => e.CompanyWebsite)
             .HasMaxLength(512);
+        
+        builder.ConfigureAudit(DeleteBehavior.Cascade);
     }
 }

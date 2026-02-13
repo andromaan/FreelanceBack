@@ -32,6 +32,6 @@ public class FreelancerConfiguration : IEntityTypeConfiguration<Freelancer>
             .WithMany()
             .UsingEntity(join => join.ToTable("freelancers_skills"));
 
-        builder.ConfigureAudit();
+        builder.ConfigureAudit(DeleteBehavior.Cascade);
     }
 }
