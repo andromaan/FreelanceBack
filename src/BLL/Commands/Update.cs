@@ -35,9 +35,9 @@ public class Update
             CancellationToken cancellationToken)
         {
             // 1. Check entity existence
-            var entity = await queries.GetByIdAsync(request.Id, cancellationToken, asNoTracking: true);
+            var existingEntity = await queries.GetByIdAsync(request.Id, cancellationToken, asNoTracking: true);
 
-            if (entity == null)
+            if (existingEntity == null)
             {
                 return ServiceResponse.NotFound(
                     $"{typeof(TEntity).Name} with ID {request.Id} not found");
@@ -46,7 +46,7 @@ public class Update
             // 2. Check access rights (auditable)
             if (request.Model is not ISkipAuditable)
             {
-                if (entity is AuditableEntity<TKey> auditable)
+                if (existingEntity is AuditableEntity<TKey> auditable)
                 {
                     var userId = await userProvider.GetUserId();
                     var userRole = userProvider.GetUserRole();
@@ -63,13 +63,13 @@ public class Update
             // 3. Mapping
             if (request.Model is not ISkipMapper)
             {
-                mapper.Map(request.Model, entity);
+                mapper.Map(request.Model, existingEntity);
             }
             
             // 4. Check uniqueness
             if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
             {
-                if (!await uniqueQuery.IsUniqueAsync(entity, cancellationToken))
+                if (!await uniqueQuery.IsUniqueAsync(existingEntity, cancellationToken))
                 {
                     return ServiceResponse.BadRequest(
                         $"{typeof(TEntity).Name} with the same unique fields already exists");
@@ -80,7 +80,7 @@ public class Update
             foreach (var handler in handlers)
             {
                 var result = await handler.HandleAsync(
-                    entity,
+                    existingEntity,
                     request.Model,
                     cancellationToken);
 
@@ -93,10 +93,10 @@ public class Update
             // 6. Save to database
             try
             {
-                await repository.UpdateAsync(entity, cancellationToken);
+                await repository.UpdateAsync(existingEntity, cancellationToken);
                 return ServiceResponse.Ok(
                     $"{typeof(TEntity).Name} updated",
-                    mapper.Map<TViewModel>(entity));
+                    mapper.Map<TViewModel>(existingEntity));
             }
             catch (Exception exception)
             {

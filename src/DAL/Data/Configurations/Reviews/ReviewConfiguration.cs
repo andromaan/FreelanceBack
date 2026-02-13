@@ -20,7 +20,7 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
         builder.HasOne(r => r.Contract)
             .WithMany()
             .HasForeignKey(r => r.ContractId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
         
         builder.ConfigureAudit();
     }

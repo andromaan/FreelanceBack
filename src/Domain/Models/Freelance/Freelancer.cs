@@ -18,5 +18,5 @@ public class Freelancer : AuditableEntity<Guid>
     
     public ICollection<Language> Languages { get; set; } = new List<Language>();
     public ICollection<Skill> Skills { get; set; } = new List<Skill>();
-    public ICollection<PortfolioItem> Portfolio { get; set; } = new List<PortfolioItem>();
+    public ICollection<Portfolio> Portfolio { get; set; } = new List<Portfolio>();
 }

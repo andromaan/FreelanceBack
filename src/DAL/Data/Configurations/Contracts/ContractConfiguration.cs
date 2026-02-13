@@ -36,8 +36,8 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.HasOne(c => c.Freelancer)
             .WithMany()
             .HasForeignKey(c => c.FreelancerId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
-        builder.ConfigureAudit();
+        builder.ConfigureAudit(DeleteBehavior.SetNull);
     }
 }

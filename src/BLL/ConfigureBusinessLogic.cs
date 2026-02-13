@@ -100,6 +100,9 @@ public static class ConfigureBusinessLogic
             .AddClasses(classes => classes.AssignableTo(typeof(IUpdateHandler<,>)))
             .AsImplementedInterfaces()
             .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IDeleteHandler<>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
         );
 
         // registrations for Country

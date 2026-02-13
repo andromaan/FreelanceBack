@@ -5,23 +5,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DAL.Data.Configurations.Freelance;
 
-public class PortfolioItemConfiguration : IEntityTypeConfiguration<PortfolioItem>
+public class PortfolioItemConfiguration : IEntityTypeConfiguration<Portfolio>
 {
-    public void Configure(EntityTypeBuilder<PortfolioItem> builder)
+    public void Configure(EntityTypeBuilder<Portfolio> builder)
     {
-        builder.ToTable("portfolio_items");
+        builder.ToTable("portfolio");
         
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Title).IsRequired().HasMaxLength(200);
         builder.Property(p => p.Description).HasMaxLength(2000);
-        builder.Property(p => p.FileUrl).HasMaxLength(512);
-
-        builder.HasOne(p => p.Freelancer)
-            .WithMany(u => u.Portfolio)
-            .HasForeignKey(p => p.FreelancerId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(p => p.PortfolioUrl).HasMaxLength(512);
         
-        builder.ConfigureAudit();
+        builder.ConfigureAudit(DeleteBehavior.Cascade);
     }
 }

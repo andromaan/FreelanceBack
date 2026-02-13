@@ -25,7 +25,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.HasOne(p => p.Receiver)
             .WithMany()
             .HasForeignKey(p => p.ReceiverId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.ConfigureAudit();
     }

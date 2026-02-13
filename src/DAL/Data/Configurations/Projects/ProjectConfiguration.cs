@@ -21,8 +21,6 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .HasConversion(new DateTimeUtcConverter())
             .HasDefaultValueSql("timezone('utc', now())");
         
-        // TODO: rethink this mb
-        // builder.Property(p => p.Status).HasMaxLength(32).IsRequired();
         builder.Property(p => p.Status).HasMaxLength(32)
             .HasConversion(
                 v => v.ToString(), 

@@ -1,3 +1,4 @@
+using BLL.Common.Handlers;
 using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories;
 using BLL.Services;
@@ -18,7 +19,8 @@ public class Delete
     public class CommandHandler<TViewModel, TEntity, TKey>(
         IRepository<TEntity, TKey> repository,
         IQueries<TEntity, TKey> queries,
-        IUserProvider userProvider)
+        IUserProvider userProvider,
+        IEnumerable<IDeleteHandler<TEntity>> handlers)
         : IRequestHandler<Command<TViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
         where TViewModel : class
@@ -42,6 +44,18 @@ public class Delete
                     userRole != Settings.Roles.ModeratorRole)
                 {
                     return ServiceResponse.Forbidden("You do not have permission to delete this entity");
+                }
+            }
+            
+            foreach (var handler in handlers)
+            {
+                var result = await handler.HandleAsync(
+                    existingEntity,
+                    cancellationToken);
+
+                if (result is { Success: false })
+                {
+                    return result;
                 }
             }
 
