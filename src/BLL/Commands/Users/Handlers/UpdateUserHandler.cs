@@ -27,6 +27,11 @@ public class UpdateUserHandler(IPasswordHasher passwordHasher, IUserQueries user
         {
             existingEntity.PasswordHash = passwordHasher.HashPassword(updateModel.Password);
         }
+        
+        if (updateModel.DisplayName != null)
+        {
+            existingEntity.DisplayName = updateModel.DisplayName;
+        }
 
         return ServiceResponse.Ok();
     }

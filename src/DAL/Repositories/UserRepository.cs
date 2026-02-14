@@ -18,11 +18,6 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
         return await GetUserAsync(u => u.Email == email, token, includes);
     }
 
-    public override async Task<User?> GetByIdAsync(Guid id, CancellationToken token, bool includes = false)
-    {
-        return await GetUserAsync(u => u.Id == id, token, includes);
-    }
-
     private async Task<User?> GetUserAsync(Expression<Func<User, bool>> predicate, CancellationToken token,
         bool includes = false)
     {

@@ -14,7 +14,8 @@ public class UserData
             Email = email ?? $"user_{userId}@test.com",
             DisplayName = displayName ?? $"user_{userId}",
             PasswordHash = string.Empty,
-            RoleId = roleId ?? "test-role"
+            RoleId = roleId ?? "test-role",
+            CreatedBy = userId
         };
     }
 }

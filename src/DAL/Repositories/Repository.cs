@@ -73,6 +73,7 @@ public class Repository<TEntity, TKey>(AppDbContext appDbContext, IUserProvider 
     public virtual async Task<TEntity?> GetByIdAsync(TKey id, CancellationToken token, bool asNoTracking = false)
     {
         var query = appDbContext.Set<TEntity>().AsQueryable();
+        
         if (asNoTracking)
             query = query.AsNoTracking();
         return await query.FirstOrDefaultAsync(e => e.Id!.Equals(id), token);

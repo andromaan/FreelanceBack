@@ -21,6 +21,11 @@ public class UpdateUserAvatarCommandHandler(
 {
     public async Task<ServiceResponse> Handle(UpdateUserAvatarCommand request, CancellationToken cancellationToken)
     {
+        if (request.AvatarImg.Length == 0)
+        {
+            return ServiceResponse.BadRequest("No image uploaded");
+        }
+        
         var userId = await userProvider.GetUserId();
         var existingEntity = await userQueries.GetByIdAsync(userId, cancellationToken);
         
@@ -28,7 +33,7 @@ public class UpdateUserAvatarCommandHandler(
 
         var newImageName =
             await imageService.SaveImageFromFileAsync(Settings.ImagesPathSettings.UserAvatarImagesPath, request.AvatarImg, imageName);
-
+        
         if (newImageName == null)
         {
             return ServiceResponse.BadRequest("No image uploaded");
