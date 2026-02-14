@@ -19,6 +19,14 @@ public class FreelancerController(ISender sender) : BaseController
     [HttpGet]
     public virtual async Task<IActionResult> GetByUser(CancellationToken ct)
         => GetResult(await sender.Send(new GetFreelancerByUserQuery(), ct));
+    
+    [HttpGet("{id:guid}")]
+    public virtual async Task<IActionResult> GetByUser(Guid id, CancellationToken ct)
+        => GetResult(await sender.Send(new GetFreelancerByIdQuery(id), ct));
+    
+    [HttpGet("{email}")]
+    public virtual async Task<IActionResult> GetByUserEmail(string email, CancellationToken ct)
+        => GetResult(await sender.Send(new GetFreelancerByEmailQuery(email), ct));
 
     [HttpPut]
     public virtual async Task<IActionResult> Update(UpdateFreelancerVM vm, CancellationToken ct)
@@ -27,4 +35,8 @@ public class FreelancerController(ISender sender) : BaseController
     [HttpPut("languages")]
     public virtual async Task<IActionResult> UpdateLanguages(UpdateFreelancerLanguagesVM vm, CancellationToken ct)
         => GetResult(await sender.Send(new UpdateByUser.Command<UpdateFreelancerLanguagesVM> { Model = vm }, ct));
+
+    [HttpPut("skills")]
+    public virtual async Task<IActionResult> UpdateSkills(UpdateFreelancerSkillsVM vm, CancellationToken ct)
+        => GetResult(await sender.Send(new UpdateByUser.Command<UpdateFreelancerSkillsVM> { Model = vm }, ct));
 }

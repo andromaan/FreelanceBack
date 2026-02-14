@@ -14,7 +14,7 @@ public class UserProvider(IHttpContextAccessor context, AppDbContext appDbContex
 
         if (userIdStr == null)
         {
-            throw new InvalidOperationException("User ID claim not found.");
+            throw new InvalidOperationException("User ID claim not found. Most likely the user is not authenticated.");
         }
 
         var userIdGuid = Guid.Parse(userIdStr);

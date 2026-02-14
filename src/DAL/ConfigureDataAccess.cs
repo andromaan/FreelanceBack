@@ -11,6 +11,7 @@ using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
+using BLL.Common.Interfaces.Repositories.Portfolios;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
@@ -80,5 +81,6 @@ public static class ConfigureDataAccess
         services.AddRepository<ContractPaymentRepository, IContractPaymentRepository, IContractPaymentQueries>();
         services.AddRepository<DisputeRepository, IDisputeRepository, IDisputeQueries>();
         services.AddRepository<DisputeResolutionRepository, IDisputeResolutionRepository, IDisputeResolutionQueries>();
+        services.AddRepository<PortfolioRepository, IPortfolioRepository, IPortfolioQueries>();
     }
 }

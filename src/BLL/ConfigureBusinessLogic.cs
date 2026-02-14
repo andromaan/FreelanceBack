@@ -13,6 +13,7 @@ using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
+using BLL.Common.Interfaces.Repositories.Portfolios;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
@@ -34,6 +35,7 @@ using BLL.ViewModels.Employer;
 using BLL.ViewModels.Freelancer;
 using BLL.ViewModels.Language;
 using BLL.ViewModels.Message;
+using BLL.ViewModels.Portfolio;
 using BLL.ViewModels.Project;
 using BLL.ViewModels.ProjectMilestone;
 using BLL.ViewModels.Quote;
@@ -220,7 +222,9 @@ public static class ConfigureBusinessLogic
         services.AddUpdateByUserCommandHandler<Freelancer,
             Guid, FreelancerVM,
             UpdateFreelancerVM,
-            IFreelancerQueries>(specificUpdateVMs: [typeof(UpdateFreelancerLanguagesVM)]);
+            IFreelancerQueries>(specificUpdateVMs:
+            [typeof(UpdateFreelancerLanguagesVM), 
+                typeof(UpdateFreelancerSkillsVM)]);
 
         // registrations for Employers
         services.AddUpdateByUserCommandHandler<Employer,
@@ -235,6 +239,15 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(ReviewVM),
                 CreateViewModelType = typeof(CreateReviewVM),
                 UpdateViewModelType = typeof(UpdateReviewVM)
+            });
+
+        // registrations for Portfolios
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Portfolio, Guid, IPortfolioQueries>
+            {
+                ViewModelType = typeof(PortfolioVM),
+                CreateViewModelType = typeof(CreatePortfolioVM),
+                UpdateViewModelType = typeof(UpdatePortfolioVM)
             });
 
         // registrations for Users

@@ -11,7 +11,15 @@ public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userP
     : Repository<Freelancer, Guid>(appDbContext, userProvider), IFreelancerRepository, IFreelancerQueries
 {
     private readonly AppDbContext _appDbContext = appDbContext;
-    
+
+    public override Task<Freelancer?> GetByIdAsync(Guid id, CancellationToken token, bool asNoTracking = false)
+    {
+        return base.GetByIdAsync(id, token, asNoTracking,
+            freelancer => freelancer.Portfolio,
+            freelancer => freelancer.Skills,
+            freelancer => freelancer.Languages);
+    }
+
     public async Task<Freelancer?> CreateAsync(Freelancer entity, Guid createdBy, CancellationToken token)
     {
         entity.CreatedBy = createdBy;
@@ -32,7 +40,7 @@ public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userP
                 .Include(up => up.Country)
                 .Include(up => up.Languages);
         }
-        
+
         return await query.FirstOrDefaultAsync(up => up.CreatedBy == userId, token);
     }
 

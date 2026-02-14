@@ -13,7 +13,7 @@ public class UpdateFreelancerLanguagesHandler(ILanguageQueries languageQueries) 
     {
         existingEntity.Languages.Clear();
 
-        foreach (var langId in updateModel.LanguageIds)
+        foreach (var langId in updateModel.LanguageIds.Distinct())
         {
             var existingLanguage = await languageQueries.GetByIdAsync(langId, cancellationToken);
             if (existingLanguage == null)

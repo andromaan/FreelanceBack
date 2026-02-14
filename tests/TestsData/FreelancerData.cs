@@ -11,7 +11,6 @@ public class FreelancerData
             Id = id ?? Guid.NewGuid(),
             CreatedBy = userId ?? Guid.NewGuid(),
             Bio = "Test Freelancer Bio",
-            HourlyRate = 50.0m,
             Location = "Test Location",
         };
     }

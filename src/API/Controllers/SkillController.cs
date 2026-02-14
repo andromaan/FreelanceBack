@@ -15,4 +15,11 @@ namespace API.Controllers;
 public class SkillController(ISender sender)
     : GenericCrudController<int, SkillVM, CreateSkillVM, UpdateSkillVM>(sender)
 {
+    [AllowAnonymous]
+    public override Task<IActionResult> GetAll(CancellationToken ct)
+        => base.GetAll(ct);
+
+    [AllowAnonymous]
+    public override Task<IActionResult> GetById(int id, CancellationToken ct)
+        => base.GetById(id, ct);
 }

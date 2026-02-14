@@ -8,7 +8,6 @@ namespace Domain.Models.Freelance;
 public class Freelancer : AuditableEntity<Guid>
 {
     public string? Bio { get; set; }
-    public decimal? HourlyRate { get; set; }
     public string? Location { get; set; }
     
     public string? AvatarLogo { get; set; }

@@ -14,7 +14,6 @@ public class FreelancerConfiguration : IEntityTypeConfiguration<Freelancer>
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Bio).HasMaxLength(2000);
-        builder.Property(p => p.HourlyRate).HasPrecision(18, 2);
         builder.Property(p => p.Location).HasMaxLength(128);
         builder.Property(p => p.AvatarLogo).HasMaxLength(256);
 
