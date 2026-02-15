@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace BLL.Commands.Users.FluentValidations;
 
-public class CreateUserValidator : AbstractValidator<CreateUserCommand>
+public class CreateUserByAdminValidator : AbstractValidator<CreateUserByAdminCommand>
 {
-    public CreateUserValidator()
+    public CreateUserByAdminValidator()
     {
         RuleFor(x => x.CreateModel.Email)
             .NotEmpty().WithMessage("Email is required.")

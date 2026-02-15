@@ -14,7 +14,7 @@ using TestsData;
 
 namespace Api.Tests.Integration;
 
-public class ReviewControllerEmployerTests(IntegrationTestWebFactory factory)
+public class ReviewControllerTests(IntegrationTestWebFactory factory)
     : BaseIntegrationTest(factory, customRole: Settings.Roles.EmployerRole), IAsyncLifetime
 {
     private User _employerUser = null!;
@@ -53,6 +53,42 @@ public class ReviewControllerEmployerTests(IntegrationTestWebFactory factory)
         reviewFromDb.ContractId.Should().Be(_contract.Id);
         reviewFromDb.ReviewedUserId.Should().Be(_freelancerUser.Id);
         reviewFromDb.ReviewerRoleId.Should().Be(_employerUser.RoleId);
+        reviewFromDb.Rating.Should().Be(request.Rating);
+        reviewFromDb.ReviewText.Should().Be(request.ReviewText);
+        reviewFromDb.CreatedBy.Should().Be(UserId);
+    }
+    
+    [Fact]
+    public async Task ShouldCreateReviewByFreelancer()
+    {
+        SwitchUser(_freelancerUser.RoleId, _freelancerUser.Id);
+        
+        // Arrange
+        Context.Set<Review>().RemoveRange(Context.Set<Review>());
+        await SaveChangesAsync();
+        
+        var request = new CreateReviewVM
+        {
+            ContractId = _contract.Id,
+            Rating = 4.5m,
+            ReviewText = "Excellent employer, great to work with!"
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("Review", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        var reviewFromResponse = await JsonHelper.GetPayloadAsync<ReviewVM>(response);
+        var reviewId = reviewFromResponse.Id;
+
+        var reviewFromDb = await Context.Set<Review>().FirstOrDefaultAsync(x => x.Id == reviewId);
+
+        reviewFromDb.Should().NotBeNull();
+        reviewFromDb.ContractId.Should().Be(_contract.Id);
+        reviewFromDb.ReviewedUserId.Should().Be(_employerUser.Id);
+        reviewFromDb.ReviewerRoleId.Should().Be(_freelancerUser.RoleId);
         reviewFromDb.Rating.Should().Be(request.Rating);
         reviewFromDb.ReviewText.Should().Be(request.ReviewText);
         reviewFromDb.CreatedBy.Should().Be(UserId);

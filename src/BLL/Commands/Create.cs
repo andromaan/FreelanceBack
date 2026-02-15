@@ -30,40 +30,42 @@ public class Create
         {
             // 1. Map to entity
             var mappedEntity = mapper.Map<TEntity>(request.Model);
-            
+
             // 2. Check uniqueness
             if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
             {
                 if (!await uniqueQuery.IsUniqueAsync(mappedEntity, cancellationToken))
                 {
-                    return ServiceResponse.BadRequest($"{typeof(TEntity).Name} with the same unique fields already exists");
+                    return ServiceResponse.BadRequest(
+                        $"{typeof(TEntity).Name} with the same unique fields already exists");
                 }
             }
-            
-            // 3. Execute new unified handlers (validation + processing in one place)
-            foreach (var handler in handlers)
-            {
-                var result = await handler.HandleAsync(
-                    mappedEntity!, 
-                    request.Model,
-                    cancellationToken);
-                    
-                if (result is {Success: false})
-                {
-                    return result;
-                }
-            }
-            
-            // 4. Save to database
+
+
             try
             {
+                // 3. Execute new unified handlers (validation + processing in one place)
+                foreach (var handler in handlers)
+                {
+                    var result = await handler.HandleAsync(
+                        mappedEntity!,
+                        request.Model,
+                        cancellationToken);
+
+                    if (result is { Success: false })
+                    {
+                        return result;
+                    }
+                }
+
+                // 4. Save to database
                 var createdEntity = await repository.CreateAsync(mappedEntity!, cancellationToken);
                 return ServiceResponse.Ok($"{typeof(TEntity).Name} created",
                     mapper.Map<TViewModel>(createdEntity));
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalError(exception.Message, data: exception.InnerException?.Message );
+                return ServiceResponse.InternalError(exception.Message, data: exception.InnerException?.Message);
             }
         }
     }

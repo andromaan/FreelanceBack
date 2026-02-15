@@ -1,5 +1,6 @@
 using API.Controllers.Common;
 using BLL;
+using BLL.Commands;
 using BLL.Commands.Users;
 using BLL.ViewModels.User;
 using MediatR;
@@ -13,7 +14,7 @@ namespace API.Controllers;
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class UserController(ISender sender)
-    : GenericCrudController<Guid, UserVM, CreateUserVM, UpdateUserVM>(sender)
+    : GenericCrudController<Guid, UserVM, CreateUserByAdminVM, UpdateUserByAdminVM>(sender)
 {
     [HttpGet("get-myself")]
     public async Task<IActionResult> GetMyself(CancellationToken ct)
@@ -30,27 +31,38 @@ public class UserController(ISender sender)
         var result = await Sender.Send(command, ct);
         return GetResult(result);
     }
-    
+
+    [HttpPut("languages")]
+    public virtual async Task<IActionResult> UpdateLanguages(UpdateUserLanguagesVM vm, CancellationToken ct)
+        => GetResult(await Sender.Send(new UpdateByUser.Command<UpdateUserLanguagesVM> { Model = vm }, ct));
+
     [Authorize(Roles = Settings.Roles.AdminRole)]
-    public override async Task<IActionResult> Create(CreateUserVM vm, CancellationToken ct)
+    [HttpPut("{userId:guid}/languages")]
+    public virtual async Task<IActionResult> UpdateLanguages(Guid userId, UpdateUserLanguagesByAdminVM vm,
+        CancellationToken ct)
+        => GetResult(await Sender.Send(
+            new Update.Command<UpdateUserLanguagesByAdminVM, Guid> { Id = userId, Model = vm }, ct));
+
+    [Authorize(Roles = Settings.Roles.AdminRole)]
+    public override async Task<IActionResult> Create(CreateUserByAdminVM byAdminVm, CancellationToken ct)
     {
-        var command = new CreateUserCommand(vm);
+        var command = new CreateUserByAdminCommand(byAdminVm);
         var result = await Sender.Send(command, ct);
         return GetResult(result);
     }
-    
+
     [Authorize(Roles = Settings.Roles.AdminRole)]
-    public override Task<IActionResult> Update(Guid id, UpdateUserVM vm, CancellationToken ct)
-        => base.Update(id, vm, ct);
-    
+    public override Task<IActionResult> Update(Guid id, UpdateUserByAdminVM byAdminVm, CancellationToken ct)
+        => base.Update(id, byAdminVm, ct);
+
     [Authorize(Roles = Settings.Roles.AdminRole)]
     public override Task<IActionResult> Delete(Guid id, CancellationToken ct)
         => base.Delete(id, ct);
-    
+
     [Authorize(Roles = Settings.Roles.AdminRole)]
     public override Task<IActionResult> GetAll(CancellationToken ct)
         => base.GetAll(ct);
-    
+
     [Authorize(Roles = Settings.Roles.AdminRole)]
     public override Task<IActionResult> GetById(Guid id, CancellationToken ct)
         => base.GetById(id, ct);

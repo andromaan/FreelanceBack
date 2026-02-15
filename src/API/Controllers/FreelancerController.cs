@@ -32,10 +32,6 @@ public class FreelancerController(ISender sender) : BaseController
     public virtual async Task<IActionResult> Update(UpdateFreelancerVM vm, CancellationToken ct)
         => GetResult(await sender.Send(new UpdateByUser.Command<UpdateFreelancerVM> { Model = vm }, ct));
 
-    [HttpPut("languages")]
-    public virtual async Task<IActionResult> UpdateLanguages(UpdateFreelancerLanguagesVM vm, CancellationToken ct)
-        => GetResult(await sender.Send(new UpdateByUser.Command<UpdateFreelancerLanguagesVM> { Model = vm }, ct));
-
     [HttpPut("skills")]
     public virtual async Task<IActionResult> UpdateSkills(UpdateFreelancerSkillsVM vm, CancellationToken ct)
         => GetResult(await sender.Send(new UpdateByUser.Command<UpdateFreelancerSkillsVM> { Model = vm }, ct));

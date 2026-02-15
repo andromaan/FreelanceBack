@@ -12,9 +12,9 @@ public class UserMapperProfile : Profile
         CreateMap<SignUpVM, User>().ReverseMap();
 
         CreateMap<User, UserVM>().ReverseMap();
-        CreateMap<CreateUserVM, User>()
+        CreateMap<CreateUserByAdminVM, User>()
             .ForSourceMember(src => src.Password, opt => opt.DoNotValidate());
-        CreateMap<UpdateUserVM, User>()
+        CreateMap<UpdateUserByAdminVM, User>()
             .ForSourceMember(src => src.Password, opt => opt.DoNotValidate())
             .ForSourceMember(src => src.Email, opt => opt.DoNotValidate());
     }

@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Json;
 using BLL.ViewModels.Freelancer;
 using Domain.Models.Countries;
@@ -18,9 +17,6 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
 {
     private Freelancer _freelancer = null!;
     private User _user = null!;
-    private Country _country = null!;
-    private Language _language1 = null!;
-    private Language _language2 = null!;
     
     private Skill _skill1 = null!;
     private Skill _skill2 = null!;
@@ -48,8 +44,7 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
         var request = new UpdateFreelancerVM 
         { 
             Bio = "Updated Bio",
-            Location = "Updated Location",
-            CountryId = _country.Id
+            Location = "Updated Location"
         };
 
         // Act
@@ -66,32 +61,6 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
         freelancerFromDb.Should().NotBeNull();
         freelancerFromDb.Bio.Should().Be("Updated Bio");
         freelancerFromDb.Location.Should().Be("Updated Location");
-        freelancerFromDb.CountryId.Should().Be(_country.Id);
-    }
-    
-    [Fact]
-    public async Task ShouldUpdateFreelancerLanguages()
-    {
-        // Arrange
-        var request = new UpdateFreelancerLanguagesVM 
-        { 
-            LanguageIds = new List<int> { _language1.Id, _language2.Id }
-        };
-
-        // Act
-        var response = await Client.PutAsJsonAsync("Freelancer/languages", request);
-        
-        // Assert
-        response.IsSuccessStatusCode.Should().BeTrue();
-        
-        var freelancerFromDb = await Context.Set<Freelancer>()
-            .Include(f => f.Languages)
-            .FirstOrDefaultAsync(x => x.CreatedBy == _user.Id);
-        
-        freelancerFromDb.Should().NotBeNull();
-        freelancerFromDb.Languages.Should().HaveCount(2);
-        freelancerFromDb.Languages.Should().Contain(l => l.Id == _language1.Id);
-        freelancerFromDb.Languages.Should().Contain(l => l.Id == _language2.Id);
     }
     
     [Fact]
@@ -120,29 +89,6 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
     }
     
     [Fact]
-    public async Task ShouldUpdateFreelancerLanguagesWithEmptyList()
-    {
-        // Arrange
-        var request = new UpdateFreelancerLanguagesVM 
-        { 
-            LanguageIds = new List<int>()
-        };
-
-        // Act
-        var response = await Client.PutAsJsonAsync("Freelancer/languages", request);
-        
-        // Assert
-        response.IsSuccessStatusCode.Should().BeTrue();
-        
-        var freelancerFromDb = await Context.Set<Freelancer>()
-            .Include(f => f.Languages)
-            .FirstOrDefaultAsync(x => x.CreatedBy == _user.Id);
-        
-        freelancerFromDb.Should().NotBeNull();
-        freelancerFromDb.Languages.Should().BeEmpty();
-    }
-    
-    [Fact]
     public async Task ShouldUpdateFreelancerSkillsWithEmptyList()
     {
         // Arrange
@@ -164,41 +110,17 @@ public class FreelancerControllerTests(IntegrationTestWebFactory factory)
         freelancerFromDb.Should().NotBeNull();
         freelancerFromDb.Skills.Should().BeEmpty();
     }
-    
-    [Fact]
-    public async Task ShouldNotUpdateFreelancerLanguagesBecauseLanguageNotFound()
-    {
-        // Arrange
-        var request = new UpdateFreelancerLanguagesVM 
-        { 
-            LanguageIds = new List<int> { int.MaxValue }
-        };
-
-        // Act
-        var response = await Client.PutAsJsonAsync("Freelancer/languages", request);
-        
-        // Assert
-        response.IsSuccessStatusCode.Should().BeFalse();
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-    }
 
     public async Task InitializeAsync()
     {
         _user = UserData.CreateTestUser(UserId);
-        _country = CountryData.MainCountry;
-        _language1 = new Language { Id = 0, Name = "English", Code = "EN" };
-        _language2 = new Language { Id = 0, Name = "Spanish", Code = "ES" };
         
         _skill1 = new Skill { Id = 0, Name = "C#" };
         _skill2 = new Skill { Id = 0, Name = "React" };
         
         _freelancer = FreelancerData.CreateFreelancer(userId: _user.Id);
-        _freelancer.CountryId = _country.Id;
 
         await Context.AddAsync(_user);
-        await Context.AddAsync(_country);
-        await Context.AddAsync(_language1);
-        await Context.AddAsync(_language2);
         await Context.AddAsync(_skill1);
         await Context.AddAsync(_skill2);
         await Context.AddAsync(_freelancer);

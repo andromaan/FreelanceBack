@@ -61,4 +61,12 @@ public class ContractController(ISender sender) : BaseController
         var result = await sender.Send(query, ct);
         return GetResult(result);
     }
+
+    [HttpGet("completed-by-freelancer-id/{freelancerId:guid}")]
+    public async Task<IActionResult> GetProjectsByEmployer(Guid freelancerId, CancellationToken ct)
+    {
+        var query = new GetContractByFreelancerIdQuery(freelancerId);
+        var result = await sender.Send(query, ct);
+        return GetResult(result);
+    }
 }

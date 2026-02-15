@@ -36,16 +36,16 @@ public static partial class DataSeed
             new() { Id = 9, Name = "Kubernetes" },
             new() { Id = 10, Name = "React" }
         };
-        
+
         modelBuilder.Entity<Skill>().HasData(skills);
     }
 
     private static void SeedUsers(ModelBuilder modelBuilder)
     {
         var passwordHasher = new PasswordHasher();
-        
+
         var adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        
+
         var adminUser = new User
         {
             Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
@@ -58,7 +58,7 @@ public static partial class DataSeed
             ModifiedBy = adminId,
             ModifiedAt = DateTime.UtcNow
         };
-        
+
         modelBuilder.Entity<User>().HasData(adminUser);
     }
 
@@ -73,13 +73,14 @@ public static partial class DataSeed
 
         modelBuilder.Entity<Role>().HasData(roles);
     }
-    
+
     private static void SeedLanguages(ModelBuilder modelBuilder)
     {
         try
         {
             var json = File.ReadAllText("wwwroot/languages/languages.json");
-            var languagesDto = JsonSerializer.Deserialize<List<LanguageDto>>(json);
+            var languagesDto = JsonSerializer.Deserialize<List<LanguageDto>>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             var languages = languagesDto!
                 .Select((l, index) => new { Id = index + 1, l.Code, l.Name });
@@ -98,7 +99,8 @@ public static partial class DataSeed
         try
         {
             var json = File.ReadAllText("wwwroot/countries/countries.json");
-            var countryDtos = JsonSerializer.Deserialize<List<CountryDto>>(json);
+            var countryDtos = JsonSerializer.Deserialize<List<CountryDto>>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (countryDtos == null || !countryDtos.Any())
             {

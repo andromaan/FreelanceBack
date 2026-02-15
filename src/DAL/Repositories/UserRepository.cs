@@ -18,6 +18,13 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
         return await GetUserAsync(u => u.Email == email, token, includes);
     }
 
+    public override async Task<User?> GetByIdAsync(Guid id, CancellationToken token, bool asNoTracking = false)
+    {
+        return await base.GetByIdAsync(id, token, asNoTracking,
+            user => user.Languages,
+            user => user.Country!);
+    }
+
     private async Task<User?> GetUserAsync(Expression<Func<User, bool>> predicate, CancellationToken token,
         bool includes = false)
     {
@@ -51,7 +58,7 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
 
         return user;
     }
-    
+
     public async Task<IdentityResult> AddLoginAsync(User user, UserLoginInfo loginInfo,
         CancellationToken cancellationToken)
     {
@@ -76,6 +83,9 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
 
     public async Task<User?> GetByUser(Guid userId, CancellationToken cancellationToken)
     {
-        return await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+        return await _appDbContext.Users
+            .Include(u => u.Languages)
+            .Include(u => u.Country)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
     }
 }

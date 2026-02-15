@@ -16,16 +16,6 @@ public class FreelancerConfiguration : IEntityTypeConfiguration<Freelancer>
         builder.Property(p => p.Bio).HasMaxLength(2000);
         builder.Property(p => p.Location).HasMaxLength(128);
         builder.Property(p => p.AvatarLogo).HasMaxLength(256);
-
-        builder.Property(p => p.CountryId).IsRequired(false);
-        builder.HasOne(p => p.Country)
-            .WithMany()
-            .HasForeignKey(p => p.CountryId)
-            .OnDelete(DeleteBehavior.SetNull);
-
-        builder.HasMany(p => p.Languages)
-            .WithMany()
-            .UsingEntity(join => join.ToTable("freelancers_languages"));
         
         builder.HasMany(p => p.Skills)
             .WithMany()

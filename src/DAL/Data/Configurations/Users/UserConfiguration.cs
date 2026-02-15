@@ -24,6 +24,16 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(x => x.RoleId)
             .OnDelete(DeleteBehavior.Restrict);
         
+        builder.Property(p => p.CountryId).IsRequired(false);
+        builder.HasOne(p => p.Country)
+            .WithMany()
+            .HasForeignKey(p => p.CountryId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasMany(p => p.Languages)
+            .WithMany()
+            .UsingEntity(join => join.ToTable("users_languages"));
+        
         builder.Property(x => x.AvatarImg).HasMaxLength(256);
         
         builder.Property(x => x.DisplayName).HasMaxLength(256);

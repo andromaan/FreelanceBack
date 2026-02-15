@@ -223,8 +223,7 @@ public static class ConfigureBusinessLogic
             Guid, FreelancerVM,
             UpdateFreelancerVM,
             IFreelancerQueries>(specificUpdateVMs:
-            [typeof(UpdateFreelancerLanguagesVM), 
-                typeof(UpdateFreelancerSkillsVM)]);
+            [typeof(UpdateFreelancerSkillsVM)]);
 
         // registrations for Employers
         services.AddUpdateByUserCommandHandler<Employer,
@@ -255,8 +254,11 @@ public static class ConfigureBusinessLogic
             new CrudRegistration<User, Guid, IUserQueries>
             {
                 ViewModelType = typeof(UserVM),
-                UpdateViewModelType = typeof(UpdateUserVM)
-            });
+                UpdateViewModelType = typeof(UpdateUserByAdminVM)
+            }, specificUpdateVMs: [typeof(UpdateUserLanguagesByAdminVM)]);
+
+        services.AddUpdateByUserCommandHandler<User, Guid, UserVM, UpdateUserVM, IUserQueries>
+            (specificUpdateVMs: [typeof(UpdateUserLanguagesVM)]);
 
         // registrations for Disputes
         services.RegisterCrudHandlers(

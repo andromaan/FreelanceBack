@@ -16,8 +16,7 @@ public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userP
     {
         return base.GetByIdAsync(id, token, asNoTracking,
             freelancer => freelancer.Portfolio,
-            freelancer => freelancer.Skills,
-            freelancer => freelancer.Languages);
+            freelancer => freelancer.Skills);
     }
 
     public async Task<Freelancer?> CreateAsync(Freelancer entity, Guid createdBy, CancellationToken token)
@@ -36,9 +35,7 @@ public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userP
         {
             query = query
                 .Include(up => up.Skills)
-                .Include(up => up.Portfolio)
-                .Include(up => up.Country)
-                .Include(up => up.Languages);
+                .Include(up => up.Portfolio);
         }
 
         return await query.FirstOrDefaultAsync(up => up.CreatedBy == userId, token);
@@ -49,8 +46,6 @@ public class FreelancerRepository(AppDbContext appDbContext, IUserProvider userP
         return await _appDbContext.Freelancers
             .Include(up => up.Skills)
             .Include(up => up.Portfolio)
-            .Include(up => up.Country)
-            .Include(up => up.Languages)
             .FirstOrDefaultAsync(up => up.CreatedBy == userId, cancellationToken);
     }
 }

@@ -5,7 +5,7 @@ using Domain.Models.Users;
 
 namespace BLL.Commands.Users.Handlers;
 
-public class DeleteUserHandler(IImageService imageService) : IDeleteHandler<User>
+public class DeleteUserByAdminHandler(IImageService imageService) : IDeleteHandler<User>
 {
     public Task<ServiceResponse?> HandleAsync(User entity, CancellationToken cancellationToken)
     {

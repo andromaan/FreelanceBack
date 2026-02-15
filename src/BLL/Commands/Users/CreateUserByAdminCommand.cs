@@ -14,7 +14,7 @@ using MediatR;
 
 namespace BLL.Commands.Users;
 
-public record CreateUserCommand(CreateUserVM CreateModel) : IRequest<ServiceResponse>;
+public record CreateUserByAdminCommand(CreateUserByAdminVM CreateModel) : IRequest<ServiceResponse>;
 
 public class CreateUserCommandHandler(
     IUserRepository userRepository,
@@ -23,9 +23,9 @@ public class CreateUserCommandHandler(
     IFreelancerRepository freelancerRepository,
     IEmployerRepository employerRepository,
     IUserWalletRepository userWalletRepository,
-    IMapper mapper) : IRequestHandler<CreateUserCommand, ServiceResponse>
+    IMapper mapper) : IRequestHandler<CreateUserByAdminCommand, ServiceResponse>
 {
-    public async Task<ServiceResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<ServiceResponse> Handle(CreateUserByAdminCommand request, CancellationToken cancellationToken)
     {
         var entity = mapper.Map<User>(request.CreateModel);
         

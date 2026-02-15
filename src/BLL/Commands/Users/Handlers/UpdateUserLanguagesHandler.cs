@@ -1,14 +1,14 @@
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Services;
-using BLL.ViewModels.Freelancer;
-using Domain.Models.Freelance;
+using BLL.ViewModels.User;
+using Domain.Models.Users;
 
-namespace BLL.Commands.Freelancers.Handlers;
+namespace BLL.Commands.Users.Handlers;
 
-public class UpdateFreelancerLanguagesHandler(ILanguageQueries languageQueries) : IUpdateHandler<Freelancer, UpdateFreelancerLanguagesVM>
+public class UpdateUserLanguagesHandler(ILanguageQueries languageQueries) : IUpdateHandler<User, UpdateUserLanguagesVM>
 {
-    public async Task<ServiceResponse?> HandleAsync(Freelancer existingEntity, UpdateFreelancerLanguagesVM updateModel,
+    public async Task<ServiceResponse?> HandleAsync(User existingEntity, UpdateUserLanguagesVM updateModel,
         CancellationToken cancellationToken)
     {
         existingEntity.Languages.Clear();
@@ -23,7 +23,7 @@ public class UpdateFreelancerLanguagesHandler(ILanguageQueries languageQueries) 
 
             existingEntity.Languages.Add(existingLanguage);
         }
-        
+
         return ServiceResponse.Ok();
     }
 }
