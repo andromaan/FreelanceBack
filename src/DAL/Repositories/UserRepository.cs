@@ -21,6 +21,7 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
     public override async Task<User?> GetByIdAsync(Guid id, CancellationToken token, bool asNoTracking = false)
     {
         return await base.GetByIdAsync(id, token, asNoTracking,
+            // user => user.Role!,
             user => user.Languages,
             user => user.Country!);
     }
@@ -84,6 +85,7 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
     public async Task<User?> GetByUser(Guid userId, CancellationToken cancellationToken)
     {
         return await _appDbContext.Users
+            // .Include(u => u.Role)
             .Include(u => u.Languages)
             .Include(u => u.Country)
             .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);

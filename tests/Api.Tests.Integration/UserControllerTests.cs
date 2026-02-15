@@ -583,6 +583,10 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
     
     public async Task InitializeAsync()
     {
+        // var employerRole = new Role { Id = Settings.Roles.EmployerRole, Name = Settings.Roles.EmployerRole };
+        // var freelancerRole = new Role { Id = Settings.Roles.FreelancerRole, Name = Settings.Roles.FreelancerRole };
+        // var adminRole = new Role { Id = Settings.Roles.AdminRole, Name = Settings.Roles.AdminRole, };
+        
         _country = CountryData.MainCountry;
         _language1 = new Language { Id = 0, Name = "English", Code = "EN" };
         _language2 = new Language { Id = 0, Name = "Spanish", Code = "ES" };
@@ -598,6 +602,9 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
             roleId: Settings.Roles.EmployerRole
         );
 
+        // await Context.AddAsync(employerRole);
+        // await Context.AddAsync(freelancerRole);
+        // await Context.AddAsync(adminRole);
         await Context.AddAsync(_country);
         await Context.AddAsync(_language1);
         await Context.AddAsync(_language2);
@@ -608,8 +615,10 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
 
     public async Task DisposeAsync()
     {
-        // Просто очищаємо ChangeTracker, щоб уникнути проблем із залежностями
-        Context.ChangeTracker.Clear();
-        await Task.CompletedTask;
+        Context.Set<User>().RemoveRange(Context.Set<User>());
+        // Context.Set<Role>().RemoveRange(Context.Set<Role>());
+        Context.Set<Country>().RemoveRange(Context.Set<Country>());
+        Context.Set<Language>().RemoveRange(Context.Set<Language>());
+        await SaveChangesAsync();
     }
 }

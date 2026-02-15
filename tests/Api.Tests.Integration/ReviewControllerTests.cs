@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BLL;
 using BLL.ViewModels.Reviews;
+using Domain.Models.Auth;
 using Domain.Models.Contracts;
 using Domain.Models.Freelance;
 using Domain.Models.Projects;
@@ -333,6 +334,9 @@ public class ReviewControllerTests(IntegrationTestWebFactory factory)
 
     public async Task InitializeAsync()
     {
+        // var employerRole = new Role { Id = Settings.Roles.EmployerRole, Name = Settings.Roles.EmployerRole };
+        // var freelancerRole = new Role { Id = Settings.Roles.FreelancerRole, Name = Settings.Roles.FreelancerRole };
+        
         // Set employer user to the same UserId as the JWT token
         _employerUser = UserData.CreateTestUser(email: "employer@test.com");
         _employerUser.Id = UserId;
@@ -361,6 +365,8 @@ public class ReviewControllerTests(IntegrationTestWebFactory factory)
             createdById: _employerUser.Id
         );
 
+        // await Context.AddAsync(employerRole);
+        // await Context.AddAsync(freelancerRole);
         await Context.AddAsync(_employerUser);
         await Context.AddAsync(_freelancerUser);
         await Context.AddAsync(_project);
@@ -377,6 +383,7 @@ public class ReviewControllerTests(IntegrationTestWebFactory factory)
         Context.Set<Freelancer>().RemoveRange(Context.Set<Freelancer>());
         Context.Set<Project>().RemoveRange(Context.Set<Project>());
         Context.Set<User>().RemoveRange(Context.Set<User>());
+        Context.Set<Role>().RemoveRange(Context.Set<Role>());
         await SaveChangesAsync();
     }
 }
