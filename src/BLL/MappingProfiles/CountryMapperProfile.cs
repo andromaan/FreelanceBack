@@ -1,6 +1,6 @@
 using AutoMapper;
+using BLL.ViewModels.Country;
 using Domain.Models.Countries;
-using Domain.ViewModels.Country;
 
 namespace BLL.MappingProfiles;
 

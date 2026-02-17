@@ -1,21 +1,14 @@
 using Domain.Common.Abstractions;
-using Domain.Models.Freelance;
+using Domain.Models.Contracts;
 
 namespace Domain.Models.Payments;
 
-public class Payment : AuditableEntity<Guid>
+public class Payment : Entity<Guid>
 {
-    public required Guid ContractId { get; set; }
+    public Guid ContractId { get; set; }
     public Contract? Contract { get; set; }
-
-    public string? StripePaymentIntentId { get; set; }
+    
     public decimal Amount { get; set; }
-    public string Status { get; set; } = nameof(PaymentStatus.Pending);
-}
-
-public enum PaymentStatus
-{
-    Pending,
-    Succeeded,
-    Failed
+    public DateTime PaymentDate { get; set; }
+    public string PaymentMethod { get; set; } = string.Empty; // TODO enum
 }

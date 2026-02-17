@@ -1,38 +1,71 @@
 using AutoMapper;
-using BLL.Common;
+using BLL.Common.Handlers;
+using BLL.Common.Interfaces.Repositories;
 using BLL.Services;
 using Domain.Common.Abstractions;
 using MediatR;
 
 namespace BLL.Commands;
 
-public partial class Create
+public class Create
 {
-    public record Command<TViewModel, TEntity, TKey> : IRequest<ServiceResponse>
-        where TEntity : Entity<TKey>
-        where TViewModel : class
+    public record Command<TCreateViewModel> : IRequest<ServiceResponse> where TCreateViewModel : class
     {
-        public required TViewModel Model { get; init; }
+        public required TCreateViewModel Model { get; init; }
     }
 
-    public class
-        CommandHandler<TViewModel, TEntity, TKey>(IRepository<TEntity, TKey> repository, IMapper mapper)
-        : IRequestHandler<Command<TViewModel, TEntity, TKey>, ServiceResponse>
+    public class CommandHandler<TCreateViewModel, TViewModel, TEntity, TKey, TQueries>(
+        IRepository<TEntity, TKey> repository,
+        IMapper mapper,
+        TQueries queries,
+        IEnumerable<ICreateHandler<TEntity, TCreateViewModel>> handlers)
+        : IRequestHandler<Command<TCreateViewModel>, ServiceResponse>
         where TEntity : Entity<TKey>
+        where TCreateViewModel : class
         where TViewModel : class
+        where TQueries : IQueries<TEntity, TKey>
     {
-        public async Task<ServiceResponse> Handle(Command<TViewModel, TEntity, TKey> request,
+        public async Task<ServiceResponse> Handle(Command<TCreateViewModel> request,
             CancellationToken cancellationToken)
         {
+            // 1. Map to entity
+            var mappedEntity = mapper.Map<TEntity>(request.Model);
+
+            // 2. Check uniqueness
+            if (queries is IUniqueQuery<TEntity, TKey> uniqueQuery)
+            {
+                if (!await uniqueQuery.IsUniqueAsync(mappedEntity, cancellationToken))
+                {
+                    return ServiceResponse.BadRequest(
+                        $"{typeof(TEntity).Name} with the same unique fields already exists");
+                }
+            }
+
+
             try
             {
-                var entity = mapper.Map<TEntity>(request.Model);
-                var createdEntity = await repository.CreateAsync(entity, cancellationToken);
-                return ServiceResponse.OkResponse($"{typeof(TEntity).Name} created", createdEntity);
+                // 3. Execute new unified handlers (validation + processing in one place)
+                foreach (var handler in handlers)
+                {
+                    var result = await handler.HandleAsync(
+                        mappedEntity!,
+                        request.Model,
+                        cancellationToken);
+
+                    if (result is { Success: false })
+                    {
+                        return result;
+                    }
+                }
+
+                // 4. Save to database
+                var createdEntity = await repository.CreateAsync(mappedEntity!, cancellationToken);
+                return ServiceResponse.Ok($"{typeof(TEntity).Name} created",
+                    mapper.Map<TViewModel>(createdEntity));
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalServerErrorResponse(exception.Message);
+                return ServiceResponse.InternalError(exception.Message, data: exception.InnerException?.Message);
             }
         }
     }

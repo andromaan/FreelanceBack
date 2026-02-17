@@ -1,7 +1,10 @@
 using System.Reflection;
 using DAL.Data.Initializer;
 using Domain.Models.Auth;
-using Domain.Models.Auth.Users;
+using Domain.Models.Disputes;
+using Domain.Models.Employers;
+using Domain.Models.Freelance;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Data;
@@ -10,7 +13,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<Freelancer> Freelancers { get; set; }
+    public DbSet<Employer> Employers { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Dispute> Disputes { get; set; }
+    public DbSet<DisputeResolution> DisputeResolutions { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

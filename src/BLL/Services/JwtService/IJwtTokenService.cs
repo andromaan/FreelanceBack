@@ -1,14 +1,14 @@
 ﻿using System.Security.Claims;
-using Domain.Models.Auth.Users;
-using Domain.ViewModels;
-using Domain.ViewModels.Auth;
+using BLL.ViewModels;
+using BLL.ViewModels.Auth;
+using Domain.Models.Users;
 using Google.Apis.Auth;
 
 namespace BLL.Services.JwtService;
 
 public interface IJwtTokenService
 {
-    Task<JwtVm> GenerateTokensAsync(User user, CancellationToken token = default);
+    Task<JwtVM> GenerateTokensAsync(User user, CancellationToken token = default);
     ClaimsPrincipal GetPrincipals(string accessToken);
-    Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(ExternalLoginVm vm);
+    Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(ExternalLoginVM vm);
 }

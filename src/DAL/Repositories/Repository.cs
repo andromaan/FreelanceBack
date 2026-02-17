@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
-using BLL.Common;
+using BLL.Common.Interfaces;
+using BLL.Common.Interfaces.Repositories;
 using DAL.Data;
 using DAL.Extensions;
 using Domain.Common.Abstractions;
-using Domain.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
@@ -73,9 +73,26 @@ public class Repository<TEntity, TKey>(AppDbContext appDbContext, IUserProvider 
     public virtual async Task<TEntity?> GetByIdAsync(TKey id, CancellationToken token, bool asNoTracking = false)
     {
         var query = appDbContext.Set<TEntity>().AsQueryable();
+
         if (asNoTracking)
             query = query.AsNoTracking();
         return await query.FirstOrDefaultAsync(e => e.Id!.Equals(id), token);
+    }
+
+    public async Task<(List<TEntity> Entities, int TotalCount)> GetPaginatedAsync(int page, int pageSize,
+        CancellationToken token = default)
+    {
+        var query = appDbContext.Set<TEntity>()
+            .AsQueryable();
+
+        var totalCount = await query.CountAsync(token);
+
+        var entities = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(token);
+
+        return (entities, totalCount);
     }
 
     protected async Task<TEntity?> GetByIdAsync(

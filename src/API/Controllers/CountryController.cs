@@ -1,9 +1,7 @@
 using API.Controllers.Common;
-using AutoMapper;
-using BLL.Commands;
-using BLL.Services;
-using Domain.Models.Countries;
-using Domain.ViewModels.Country;
+using BLL;
+using BLL.ViewModels;
+using BLL.ViewModels.Country;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -13,22 +11,20 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-// [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class CountryController(ISender sender, IMapper mapper)
-    : CrudControllerBase<int, CreateCountryVM, UpdateCountryVM>(sender, mapper)
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+[Authorize(Roles = Settings.Roles.AdminRole)]
+public class CountryController(ISender sender)
+    : GenericCrudController<int, CountryVM, CreateCountryVM, UpdateCountryVM>(sender)
 {
-    protected override IRequest<ServiceResponse> GetAllQuery()
-        => new GetAll.Query<Country, int, CountryVM>();
-    
-    protected override IRequest<ServiceResponse> GetByIdQuery(int id) 
-        => new GetById.Query<Country, int, CountryVM> { Id = id };
-    
-    protected override IRequest<ServiceResponse> CreateCommand(CreateCountryVM vm)
-        => new Create.Command<CreateCountryVM, Country, int> { Model = vm };
+    [AllowAnonymous]
+    public override async Task<IActionResult> GetAll(CancellationToken ct)
+        => await base.GetAll(ct);
 
-    protected override IRequest<ServiceResponse> UpdateCommand(int id, UpdateCountryVM vm)
-        => new Update.Command<UpdateCountryVM, Country, int> { Id = id, Model = vm };
+    [AllowAnonymous]
+    public override async Task<IActionResult> GetById(int id, CancellationToken ct)
+        => await base.GetById(id, ct);
 
-    protected override IRequest<ServiceResponse> DeleteCommand(int id)
-        => new Delete.Command<Country, int> { Id = id };
+    [AllowAnonymous]
+    public override async Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
+        => await base.GetAllPaginated(pagedVm, ct);
 }

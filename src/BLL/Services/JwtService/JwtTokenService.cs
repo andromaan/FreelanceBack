@@ -2,11 +2,11 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces.Repositories.RefreshTokens;
+using BLL.ViewModels;
+using BLL.ViewModels.Auth;
 using Domain.Models.Auth;
-using Domain.Models.Auth.Users;
-using Domain.ViewModels;
-using Domain.ViewModels.Auth;
+using Domain.Models.Users;
 using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -53,7 +53,7 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
         }
     }
 
-    private async Task<RefreshToken?> SaveRefreshTokenAsync(User userEntity, string refreshToken, string jwtId,
+    private async Task SaveRefreshTokenAsync(User userEntity, string refreshToken, string jwtId,
         CancellationToken cancellationToken)
     {
         var model = new RefreshToken
@@ -68,12 +68,11 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
 
         try
         {
-            var tokenEntity = await refreshTokenRepository.CreateAsync(model, cancellationToken);
-            return tokenEntity;
+            await refreshTokenRepository.CreateAsync(model, cancellationToken);
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            return null;
+            throw new Exception("Failed to save refresh token", exception);
         }
     }
 
@@ -87,7 +86,7 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
             ValidateAudience = false,
             ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecurityKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecurityKey!))
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -104,16 +103,16 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
         return principals;
     }
 
-    public async Task<JwtVm> GenerateTokensAsync(User user, CancellationToken token)
+    public async Task<JwtVM> GenerateTokensAsync(User user, CancellationToken token)
     {
         var accessToken = GenerateAccessToken(user);
         var refreshToken = GenerateRefreshToken();
 
         await refreshTokenRepository.MakeAllRefreshTokensExpiredForUser(user.Id, token);
 
-        var saveResult = await SaveRefreshTokenAsync(user, refreshToken, accessToken.Id, token);
+        await SaveRefreshTokenAsync(user, refreshToken, accessToken.Id, token);
 
-        var tokens = new JwtVm
+        var tokens = new JwtVM
         {
             AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
             RefreshToken = refreshToken
@@ -122,7 +121,7 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
         return tokens;
     }
 
-    public async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(ExternalLoginVm vm)
+    public async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(ExternalLoginVM vm)
     {
         string clientId = configuration["GoogleAuthSettings:ClientId"]!;
         var settings = new GoogleJsonWebSignature.ValidationSettings

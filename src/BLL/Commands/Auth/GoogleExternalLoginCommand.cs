@@ -1,12 +1,15 @@
-using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces.Repositories.Employers;
+using BLL.Common.Interfaces.Repositories.Freelancers;
+using BLL.Common.Interfaces.Repositories.Users;
+using BLL.Common.Interfaces.Repositories.UserWallets;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
-using Domain;
-using Domain.Models.Auth.Users;
-using Domain.ViewModels;
-using Domain.ViewModels.Auth;
-using Google.Apis.Auth;
+using BLL.ViewModels.Auth;
+using Domain.Models.Employers;
+using Domain.Models.Freelance;
+using Domain.Models.Payments;
+using Domain.Models.Users;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
@@ -14,100 +17,140 @@ namespace BLL.Commands.Auth;
 
 public record GoogleExternalLoginCommand : IRequest<ServiceResponse>
 {
-    public required ExternalLoginVm Model { get; init; }
+    public required ExternalLoginVM Model { get; init; }
 }
 
 public class GoogleExternalLoginCommandHandler(
     IUserRepository userRepository,
+    IUserQueries userQueries,
     IJwtTokenService jwtTokenService,
-    IPasswordHasher hashPasswordService)
+    IPasswordHasher hashPasswordService,
+    IFreelancerRepository freelancerRepository,
+    IEmployerRepository employerRepository,
+    IUserWalletRepository userWalletRepository)
     : IRequestHandler<GoogleExternalLoginCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(GoogleExternalLoginCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (request.Model == null || string.IsNullOrEmpty(request.Model.Token))
-                return ServiceResponse.BadRequestResponse("Google token not sent");
+            if (string.IsNullOrEmpty(request.Model.Token))
+                return ServiceResponse.BadRequest("Google token not sent");
 
             var payload = await jwtTokenService.VerifyGoogleToken(request.Model);
 
-            if (payload is null)
-                return ServiceResponse.BadRequestResponse("Invalid Google token");
-
             var info = new UserLoginInfo(request.Model.Provider, payload.Subject, request.Model.Provider);
 
-            var isUsersNullOrEmpty = (await userRepository.GetAllAsync(cancellationToken)).Any();
+            var user = await userQueries.FindByLoginAsync(info.LoginProvider, info.ProviderKey, cancellationToken);
+            if (user == null)
+            {
+                user = await userQueries.GetByEmailAsync(payload.Email, cancellationToken);
+                if (user == null)
+                {
+                    var userId = Guid.NewGuid();
+                    var randomPassword = GenerateRandomPassword();
 
-            var user = await FindOrCreateUserAsync(payload, info, isUsersNullOrEmpty, cancellationToken);
+                    var fullName = SplitFullName(payload.Name);
+        
+                    if (request.Model.UserRole is null)
+                    {
+                        return ServiceResponse.BadRequest(
+                            "User role must be provided for new users", data: "role_required");
+                    }
+        
+                    if (request.Model.UserRole is not (Settings.Roles.EmployerRole or Settings.Roles.FreelancerRole))
+                    {
+                        return ServiceResponse.BadRequest(
+                            $"Invalid user role, must be '{Settings.Roles.EmployerRole}' or '{Settings.Roles.FreelancerRole}'");
+                    }
+        
+                    var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count() != 0;
+                    var userRole = isDbHasUsers ? request.Model.UserRole : Settings.Roles.AdminRole;
 
+                    var userModel = new User
+                    {
+                        Id = userId,
+                        Email = payload.Email,
+                        DisplayName = fullName.name,
+                        RoleId = userRole,
+                        PasswordHash = hashPasswordService.HashPassword(randomPassword),
+                        CreatedBy = userId
+                    };
+
+                    var createdUser = await userRepository.CreateAsync(userModel, cancellationToken);
+                    
+                    if (createdUser is null)
+                    {
+                        return ServiceResponse.InternalError("Failed to add user");
+                    }
+                    
+                    await ConfigureUserBaseOfRole(createdUser, cancellationToken);
+
+                    user = createdUser;
+                }
+
+                var loginResult = await userRepository.AddLoginAsync(user, info, cancellationToken);
+                user = loginResult.Succeeded ? user : null;
+            }
+            
             if (user is null)
-                return ServiceResponse.BadRequestResponse("Failed to add Google login");
+                return ServiceResponse.BadRequest("Failed to add Google login");
 
             var tokens = await jwtTokenService.GenerateTokensAsync(user, cancellationToken);
-            return ServiceResponse.OkResponse("Users tokens", tokens);
+            return ServiceResponse.Ok("Users tokens", tokens);
         }
         catch (Exception ex)
         {
-            return ServiceResponse.InternalServerErrorResponse(ex.Message);
+            return ServiceResponse.InternalError(ex.Message);
         }
     }
-
-    private async Task<User?> FindOrCreateUserAsync(GoogleJsonWebSignature.Payload payload,
-        UserLoginInfo info, bool isUsersNullOrEmpty, CancellationToken cancellationToken)
+    
+    private async Task ConfigureUserBaseOfRole(User createdUser, CancellationToken cancellationToken)
     {
-        var user = await userRepository.FindByLoginAsync(info.LoginProvider, info.ProviderKey, cancellationToken);
-        if (user != null)
-            return user;
-
-        user = await userRepository.GetByEmailAsync(payload.Email, cancellationToken);
-        if (user == null)
+        if (createdUser.RoleId == Settings.Roles.FreelancerRole)
         {
-            user = await CreateUserAsync(payload, isUsersNullOrEmpty, cancellationToken);
+            var freelancer = new Freelancer
+            {
+                Id = Guid.NewGuid(),
+                CreatedBy = createdUser.Id,
+            };
+
+            await freelancerRepository.CreateAsync(freelancer, createdUser.Id, cancellationToken);
         }
 
-        var loginResult = await userRepository.AddLoginAsync(user, info, cancellationToken);
-        return loginResult.Succeeded ? user : null;
-    }
-
-    private async Task<User> CreateUserAsync(GoogleJsonWebSignature.Payload payload,
-        bool isUsersNullOrEmpty,
-        CancellationToken cancellationToken)
-    {
-        var userId = Guid.NewGuid();
-        var randomPassword = GenerateRandomPassword();
-
-        var (name, patronymic) = SplitFullName(payload.Name);
-
-        var userModel = new User
+        if (createdUser.RoleId == Settings.Roles.EmployerRole)
         {
-            Id = userId,
-            Email = payload.Email,
-            RoleId = isUsersNullOrEmpty
-                ? Settings.Roles.AdminRole
-                : Settings.Roles.AdminRole, // TODO fix roles for user
-            PasswordHash = hashPasswordService.HashPassword(randomPassword)
-        };
+            var employer = new Employer
+            {
+                Id = Guid.NewGuid(),
+                CreatedBy = createdUser.Id,
+            };
 
-        var result = await userRepository.CreateAsync(userModel, cancellationToken);
-
-        if (result is null)
-        {
-            throw new Exception("Failed to create user");
+            await employerRepository.CreateAsync(employer, createdUser.Id, cancellationToken);
         }
 
-        return result;
+        if (createdUser.RoleId != Settings.Roles.AdminRole)
+        {
+            var userWallet = new UserWallet
+            {
+                Id = Guid.NewGuid(),
+                CreatedBy = createdUser.Id,
+                Balance = 0m
+            };
+
+            await userWalletRepository.CreateAsync(userWallet, cancellationToken);
+        }
     }
 
     private (string? name, string? patronymic) SplitFullName(string? fullName)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             return (null, null);
-
+    
         var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var name = parts.ElementAtOrDefault(0);
         var patronymic = parts.ElementAtOrDefault(1);
-
+    
         return (name, patronymic);
     }
 

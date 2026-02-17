@@ -1,3 +1,4 @@
+using System.Net;
 using BLL.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -16,17 +17,17 @@ public class MiddlewareExceptionsHandling(RequestDelegate next)
         catch (SecurityTokenException ex)
         {
             await context.Response.WriteJsonResponseAsync(StatusCodes.Status426UpgradeRequired,
-                ServiceResponse.GetResponse(ex.Message, false, null, System.Net.HttpStatusCode.UpgradeRequired));
+                ServiceResponse.GetResponse(ex.Message, false, null, HttpStatusCode.UpgradeRequired));
         }
         catch (ValidationException ex)
         {
             await context.Response.WriteJsonResponseAsync(StatusCodes.Status400BadRequest,
-                ServiceResponse.BadRequestResponse(ex.Message ?? throw new ArgumentNullException(nameof(ex))));
+                ServiceResponse.BadRequest(ex.Message ?? throw new ArgumentNullException(nameof(ex))));
         }
         catch (Exception ex)
         {
             await context.Response.WriteJsonResponseAsync(StatusCodes.Status500InternalServerError,
-                ServiceResponse.InternalServerErrorResponse(ex.Message));
+                ServiceResponse.InternalError(ex.Message));
         }
     }
 }

@@ -1,15 +1,15 @@
 using System.Linq.Expressions;
-using BLL.Common.Interfaces.Repositories;
+using BLL.Common.Interfaces;
+using BLL.Common.Interfaces.Repositories.Users;
 using DAL.Data;
-using Domain.Common.Interfaces;
-using Domain.Models.Auth.Users;
+using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
 
 public class UserRepository(AppDbContext appDbContext, IUserProvider userProvider)
-    : Repository<User, Guid>(appDbContext, userProvider), IUserRepository
+    : Repository<User, Guid>(appDbContext, userProvider), IUserRepository, IUserQueries
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
@@ -18,9 +18,12 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
         return await GetUserAsync(u => u.Email == email, token, includes);
     }
 
-    public override async Task<User?> GetByIdAsync(Guid id, CancellationToken token, bool includes = false)
+    public override async Task<User?> GetByIdAsync(Guid id, CancellationToken token, bool asNoTracking = false)
     {
-        return await GetUserAsync(u => u.Id == id, token, includes);
+        return await base.GetByIdAsync(id, token, asNoTracking,
+            // user => user.Role!,
+            user => user.Languages,
+            user => user.Country!);
     }
 
     private async Task<User?> GetUserAsync(Expression<Func<User, bool>> predicate, CancellationToken token,
@@ -56,7 +59,7 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
 
         return user;
     }
-    
+
     public async Task<IdentityResult> AddLoginAsync(User user, UserLoginInfo loginInfo,
         CancellationToken cancellationToken)
     {
@@ -77,5 +80,14 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
     public async Task<bool> IsUniqueEmailAsync(string email, CancellationToken token)
     {
         return await _appDbContext.Users.FirstOrDefaultAsync(u => u.Email == email, token) == null;
+    }
+
+    public async Task<User?> GetByUser(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _appDbContext.Users
+            // .Include(u => u.Role)
+            .Include(u => u.Languages)
+            .Include(u => u.Country)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
     }
 }

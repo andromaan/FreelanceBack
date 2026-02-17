@@ -76,7 +76,7 @@ public class ImageService(IWebHostEnvironment webHostEnvironment) : IImageServic
 
             return true;
         }
-        catch (Exception e)
+        catch
         {
             return false;
         }

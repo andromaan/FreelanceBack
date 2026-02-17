@@ -1,0 +1,39 @@
+using AutoMapper;
+using BLL.Common.Interfaces.Repositories.Contracts;
+using BLL.Common.Interfaces.Repositories.Messages;
+using BLL.Services;
+using BLL.ViewModels.Message;
+using MediatR;
+
+namespace BLL.Commands.Messages;
+
+public record GetMessagesByContractQuery : IRequest<ServiceResponse>
+{
+    public required Guid ContractId { get; set; }
+}
+
+public class GetMessagesByContractQueryHandler(
+    IMessageQueries messageQueries,
+    IMapper mapper,
+    IContractQueries contractQueries)
+    : IRequestHandler<GetMessagesByContractQuery, ServiceResponse>
+{
+    public async Task<ServiceResponse> Handle(GetMessagesByContractQuery request, CancellationToken cancellationToken)
+    {
+        if (await contractQueries.GetByIdAsync(request.ContractId, cancellationToken) is null)
+        {
+            return ServiceResponse.NotFound($"Contract with id {request.ContractId} not found");
+        }
+        
+        try
+        {
+            var messages = await messageQueries.GetByContractAsync(request.ContractId, cancellationToken);
+
+            return ServiceResponse.Ok("Messages retrieved", mapper.Map<List<MessageVM>>(messages));
+        }
+        catch (Exception exception)
+        {
+            return ServiceResponse.InternalError(exception.Message);
+        }
+    }
+}

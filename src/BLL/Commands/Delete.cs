@@ -1,36 +1,71 @@
-using BLL.Common;
+using BLL.Common.Handlers;
+using BLL.Common.Interfaces;
+using BLL.Common.Interfaces.Repositories;
 using BLL.Services;
 using Domain.Common.Abstractions;
 using MediatR;
 
 namespace BLL.Commands;
 
-public partial class Delete
+public class Delete
 {
-    public record Command<TEntity, TKey> : IRequest<ServiceResponse> where TEntity : Entity<TKey>
+    // ReSharper disable once UnusedTypeParameter
+    public record Command<TViewModel, TKey> : IRequest<ServiceResponse> where TViewModel : class
     {
         public required TKey Id { get; init; }
     }
 
-    public class CommandHandler<TEntity, TKey>(IRepository<TEntity, TKey> repository, IQueries<TEntity, TKey> queries)
-        : IRequestHandler<Command<TEntity, TKey>, ServiceResponse>
+    public class CommandHandler<TViewModel, TEntity, TKey>(
+        IRepository<TEntity, TKey> repository,
+        IQueries<TEntity, TKey> queries,
+        IUserProvider userProvider,
+        IEnumerable<IDeleteHandler<TEntity>> handlers)
+        : IRequestHandler<Command<TViewModel, TKey>, ServiceResponse>
         where TEntity : Entity<TKey>
+        where TViewModel : class
     {
-        public async Task<ServiceResponse> Handle(Command<TEntity, TKey> request, CancellationToken cancellationToken)
+        public async Task<ServiceResponse> Handle(Command<TViewModel, TKey> request,
+            CancellationToken cancellationToken)
         {
-            if (await queries.GetByIdAsync(request.Id, cancellationToken, true) is null)
+            var existingEntity = await queries.GetByIdAsync(request.Id, cancellationToken);
+
+            if (existingEntity is null)
             {
-                return ServiceResponse.NotFoundResponse($"{typeof(TEntity).Name} with ID {request.Id} not found");
+                return ServiceResponse.NotFound($"{typeof(TEntity).Name} with ID {request.Id} not found");
+            }
+
+            if (existingEntity is AuditableEntity<TKey> auditable)
+            {
+                var userId = await userProvider.GetUserId();
+                var userRole = userProvider.GetUserRole();
+
+                if (auditable.CreatedBy != userId && userRole != Settings.Roles.AdminRole &&
+                    userRole != Settings.Roles.ModeratorRole)
+                {
+                    return ServiceResponse.Forbidden("You do not have permission to delete this entity");
+                }
+            }
+            
+            foreach (var handler in handlers)
+            {
+                var result = await handler.HandleAsync(
+                    existingEntity,
+                    cancellationToken);
+
+                if (result is { Success: false })
+                {
+                    return result;
+                }
             }
 
             try
             {
                 await repository.DeleteAsync(request.Id, cancellationToken);
-                return ServiceResponse.OkResponse($"{typeof(TEntity).Name} deleted");
+                return ServiceResponse.Ok($"{typeof(TEntity).Name} deleted");
             }
             catch (Exception exception)
             {
-                return ServiceResponse.InternalServerErrorResponse(exception.Message);
+                return ServiceResponse.InternalError(exception.Message);
             }
         }
     }

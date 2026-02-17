@@ -1,6 +1,6 @@
 using AutoMapper;
+using BLL.ViewModels.Language;
 using Domain.Models.Languages;
-using Domain.ViewModels.Language;
 
 namespace BLL.MappingProfiles;
 

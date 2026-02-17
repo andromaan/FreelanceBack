@@ -8,6 +8,8 @@ public class LanguageConfiguration : IEntityTypeConfiguration<Language>
 {
     public void Configure(EntityTypeBuilder<Language> builder)
     {
+        builder.ToTable("languages");
+        
         builder.HasKey(c => c.Id);
         
         builder.Property(c => c.Name)

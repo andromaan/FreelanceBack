@@ -1,16 +1,57 @@
 using System.Reflection;
 using System.Text;
-using BLL.Commands;
 using BLL.Common.Behaviours;
-using BLL.Services;
+using BLL.Common.Handlers;
+using BLL.Common.Interfaces.Repositories.Bids;
+using BLL.Common.Interfaces.Repositories.Categories;
+using BLL.Common.Interfaces.Repositories.ContractMilestones;
+using BLL.Common.Interfaces.Repositories.Contracts;
+using BLL.Common.Interfaces.Repositories.Countries;
+using BLL.Common.Interfaces.Repositories.DisputeResolutions;
+using BLL.Common.Interfaces.Repositories.Disputes;
+using BLL.Common.Interfaces.Repositories.Employers;
+using BLL.Common.Interfaces.Repositories.Freelancers;
+using BLL.Common.Interfaces.Repositories.Languages;
+using BLL.Common.Interfaces.Repositories.Messages;
+using BLL.Common.Interfaces.Repositories.Portfolios;
+using BLL.Common.Interfaces.Repositories.ProjectMilestones;
+using BLL.Common.Interfaces.Repositories.Projects;
+using BLL.Common.Interfaces.Repositories.Quotes;
+using BLL.Common.Interfaces.Repositories.Reviews;
+using BLL.Common.Interfaces.Repositories.Skills;
+using BLL.Common.Interfaces.Repositories.Users;
+using BLL.Extensions;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
-using Domain;
+using BLL.ViewModels.Bid;
+using BLL.ViewModels.Category;
+using BLL.ViewModels.Contract;
+using BLL.ViewModels.ContractMilestone;
+using BLL.ViewModels.Country;
+using BLL.ViewModels.Dispute;
+using BLL.ViewModels.DisputeResolution;
+using BLL.ViewModels.Employer;
+using BLL.ViewModels.Freelancer;
+using BLL.ViewModels.Language;
+using BLL.ViewModels.Message;
+using BLL.ViewModels.Portfolio;
+using BLL.ViewModels.Project;
+using BLL.ViewModels.ProjectMilestone;
+using BLL.ViewModels.Quote;
+using BLL.ViewModels.Reviews;
+using BLL.ViewModels.Skill;
+using BLL.ViewModels.User;
+using Domain.Models.Contracts;
 using Domain.Models.Countries;
+using Domain.Models.Disputes;
+using Domain.Models.Employers;
+using Domain.Models.Freelance;
 using Domain.Models.Languages;
-using Domain.ViewModels.Country;
-using Domain.ViewModels.Language;
+using Domain.Models.Messaging;
+using Domain.Models.Projects;
+using Domain.Models.Reviews;
+using Domain.Models.Users;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,7 +68,7 @@ public static class ConfigureBusinessLogic
     {
         services.AddMediatrConfig();
         services.AddRegistrations();
-        
+
         services.AddServices();
 
         services.AddJwtTokenAuth(builder);
@@ -36,72 +77,208 @@ public static class ConfigureBusinessLogic
         services.AddAuthorization(options =>
         {
             options.AddPolicy(Settings.Roles.AnyAuthenticated,
-                policy => policy.RequireRole(Settings.Roles.AdminRole));
+                policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole,
+                    Settings.Roles.FreelancerRole, Settings.Roles.ModeratorRole));
+
+            options.AddPolicy(Settings.Roles.AdminOrModerator,
+                policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.ModeratorRole));
+
+            options.AddPolicy(Settings.Roles.AdminOrEmployer,
+                policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.EmployerRole));
+
+            options.AddPolicy(Settings.Roles.AdminOrFreelancer,
+                policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.FreelancerRole));
         });
     }
-    
+
     private static void AddMediatrConfig(this IServiceCollection services)
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-        
-       
     }
-    
+
     private static void AddRegistrations(this IServiceCollection services)
     {
+        // Автоматична реєстрація всіх валідаторів, процесорів та нових хендлерів
+        services.Scan(scan => scan
+            .FromAssemblyOf<BLLClassForScanning>()
+            // New unified handlers
+            .AddClasses(classes => classes.AssignableTo(typeof(ICreateHandler<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IUpdateHandler<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IDeleteHandler<>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IGetAllFilteredHandler<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+        );
+
         // registrations for Country
-        services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateCountryVM, Country, int>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateCountryVM, Country, int>)
-        );
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Country, int, ICountryQueries>
+            {
+                ViewModelType = typeof(CountryVM),
+                CreateViewModelType = typeof(CreateCountryVM),
+                UpdateViewModelType = typeof(UpdateCountryVM)
+            });
 
-        services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<Country, int, CountryVM>, ServiceResponse>),
-            typeof(GetAll.QueryHandler<Country, int, CountryVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<Country, int, CountryVM>, ServiceResponse>),
-            typeof(GetById.QueryHandler<Country, int, CountryVM>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateCountryVM, Country, int>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateCountryVM, Country, int>)
-        );
-
-        services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<Country, int>, ServiceResponse>),
-            typeof(Delete.CommandHandler<Country, int>)
-        );
-        
         // registrations for Language
-        services.AddTransient(
-            typeof(IRequestHandler<Create.Command<CreateLanguageVM, Language, int>, ServiceResponse>),
-            typeof(Create.CommandHandler<CreateLanguageVM, Language, int>)
-        );
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Language, int, ILanguageQueries>
+            {
+                ViewModelType = typeof(LanguageVM),
+                CreateViewModelType = typeof(CreateLanguageVM),
+                UpdateViewModelType = typeof(UpdateLanguageVM)
+            });
 
-        services.AddTransient(
-            typeof(IRequestHandler<GetAll.Query<Language, int, LanguageVM>, ServiceResponse>),
-            typeof(GetAll.QueryHandler<Language, int, LanguageVM>)
-        );
+        // registrations for Category
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Category, int, ICategoryQueries>
+            {
+                ViewModelType = typeof(CategoryVM),
+                CreateViewModelType = typeof(CreateCategoryVM),
+                UpdateViewModelType = typeof(UpdateCategoryVM)
+            });
 
-        services.AddTransient(
-            typeof(IRequestHandler<GetById.Query<Language, int, LanguageVM>, ServiceResponse>),
-            typeof(GetById.QueryHandler<Language, int, LanguageVM>)
-        );
+        // registrations for Skill
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Skill, int, ISkillQueries>
+            {
+                ViewModelType = typeof(SkillVM),
+                CreateViewModelType = typeof(CreateSkillVM),
+                UpdateViewModelType = typeof(UpdateSkillVM)
+            });
 
-        services.AddTransient(
-            typeof(IRequestHandler<Update.Command<UpdateLanguageVM, Language, int>, ServiceResponse>),
-            typeof(Update.CommandHandler<UpdateLanguageVM, Language, int>)
-        );
+        // registrations for Project
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Project, Guid, IProjectQueries>
+            {
+                ViewModelType = typeof(ProjectVM),
+                CreateViewModelType = typeof(CreateProjectVM),
+                UpdateViewModelType = typeof(UpdateProjectVM),
+                FilteringViewModelType = typeof(FilterProjectVM)
+            }, specificUpdateVMs: [typeof(UpdateProjectCategoriesVM)]);
 
-        services.AddTransient(
-            typeof(IRequestHandler<Delete.Command<Language, int>, ServiceResponse>),
-            typeof(Delete.CommandHandler<Language, int>)
-        );
+        // registrations for ProjectMilestone
+        services.RegisterCrudHandlers(
+            new CrudRegistration<ProjectMilestone, Guid, IProjectMilestoneQueries>
+            {
+                ViewModelType = typeof(ProjectMilestoneVM),
+                CreateViewModelType = typeof(CreateProjectMilestoneVM),
+                UpdateViewModelType = typeof(UpdateProjectMilestoneVM)
+            });
+
+        // registrations for ContractMilestone
+        services.RegisterCrudHandlers(
+            new CrudRegistration<ContractMilestone, Guid, IContractMilestoneQueries>
+            {
+                ViewModelType = typeof(ContractMilestoneVM),
+                CreateViewModelType = typeof(CreateContractMilestoneVM),
+                UpdateViewModelType = typeof(UpdateContractMilestoneVM)
+            },
+            specificUpdateVMs:
+            [
+                typeof(UpdContractMilestoneStatusEmployerVM),
+                typeof(UpdContractMilestoneStatusFreelancerVM),
+                typeof(UpdContractMilestoneStatusModeratorVM)
+            ]);
+
+        // registrations for Bids
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Bid, Guid, IBidQueries>
+            {
+                ViewModelType = typeof(BidVM),
+                CreateViewModelType = typeof(CreateBidVM),
+                UpdateViewModelType = typeof(UpdateBidVM)
+            });
+
+        // registrations for Quotes
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Quote, Guid, IQuoteQueries>
+            {
+                ViewModelType = typeof(QuoteVM),
+                CreateViewModelType = typeof(CreateQuoteVM),
+                UpdateViewModelType = typeof(UpdateQuoteVM)
+            });
+
+        // registrations for Messages
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Message, Guid, IMessageQueries>
+            {
+                ViewModelType = typeof(MessageVM),
+                CreateViewModelType = typeof(CreateMessageVM),
+                UpdateViewModelType = typeof(UpdateMessageVM)
+            },
+            specificCreateVMs: [typeof(CreateMessageWithoutContractVM)]);
+
+        // registrations for Contracts
+        services.AddUpdateCommandHandler<Contract,
+            Guid, ContractVM,
+            UpdateContractVM,
+            IContractQueries>(specificUpdateVMs: [typeof(UpdateContractStatusVM)]);
+
+        // registrations for Freelancers
+        services.AddUpdateByUserCommandHandler<Freelancer,
+            Guid, FreelancerVM,
+            UpdateFreelancerVM,
+            IFreelancerQueries>(specificUpdateVMs:
+            [typeof(UpdateFreelancerSkillsVM)]);
+
+        // registrations for Employers
+        services.AddUpdateByUserCommandHandler<Employer,
+            Guid, EmployerVM,
+            UpdateEmployerVM,
+            IEmployerQueries>();
+
+        // registrations for Reviews
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Review, Guid, IReviewQueries>
+            {
+                ViewModelType = typeof(ReviewVM),
+                CreateViewModelType = typeof(CreateReviewVM),
+                UpdateViewModelType = typeof(UpdateReviewVM)
+            });
+
+        // registrations for Portfolios
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Portfolio, Guid, IPortfolioQueries>
+            {
+                ViewModelType = typeof(PortfolioVM),
+                CreateViewModelType = typeof(CreatePortfolioVM),
+                UpdateViewModelType = typeof(UpdatePortfolioVM)
+            });
+
+        // registrations for Users
+        services.RegisterCrudHandlers(
+            new CrudRegistration<User, Guid, IUserQueries>
+            {
+                ViewModelType = typeof(UserVM),
+                UpdateViewModelType = typeof(UpdateUserByAdminVM)
+            }, specificUpdateVMs: [typeof(UpdateUserLanguagesByAdminVM)]);
+
+        services.AddUpdateByUserCommandHandler<User, Guid, UserVM, UpdateUserVM, IUserQueries>
+            (specificUpdateVMs: [typeof(UpdateUserLanguagesVM)]);
+
+        // registrations for Disputes
+        services.RegisterCrudHandlers(
+            new CrudRegistration<Dispute, Guid, IDisputeQueries>
+            {
+                ViewModelType = typeof(DisputeVM),
+                CreateViewModelType = typeof(CreateDisputeVM)
+            }, specificUpdateVMs: [typeof(UpdateDisputeStatusForModeratorVM)]);
+
+        // registrations for Dispute Resolutions
+        services.RegisterCrudHandlers(
+            new CrudRegistration<DisputeResolution, Guid, IDisputeResolutionQueries>
+            {
+                ViewModelType = typeof(DisputeResolutionVM),
+                CreateViewModelType = typeof(CreateDisputeResolutionVM)
+            });
     }
 
     private static void AddServices(this IServiceCollection services)
@@ -141,7 +318,7 @@ public static class ConfigureBusinessLogic
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey =
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder!.Configuration["AuthSettings:key"]!)),
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AuthSettings:key"]!)),
                     ValidIssuer = builder.Configuration["AuthSettings:issuer"],
                     ValidAudience = builder.Configuration["AuthSettings:audience"]
                 };
@@ -152,7 +329,7 @@ public static class ConfigureBusinessLogic
     {
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "softstream", Version = "v1" });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "freelance", Version = "v1" });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
@@ -181,3 +358,5 @@ public static class ConfigureBusinessLogic
         });
     }
 }
+
+public class BLLClassForScanning;

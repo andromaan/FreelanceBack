@@ -1,0 +1,30 @@
+using API.Controllers.Common;
+using BLL;
+using BLL.ViewModels;
+using BLL.ViewModels.Skill;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace API.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+[Authorize(Roles = Settings.Roles.AdminRole)]
+public class SkillController(ISender sender)
+    : GenericCrudController<int, SkillVM, CreateSkillVM, UpdateSkillVM>(sender)
+{
+    [AllowAnonymous]
+    public override async Task<IActionResult> GetAll(CancellationToken ct)
+        => await base.GetAll(ct);
+
+    [AllowAnonymous]
+    public override async Task<IActionResult> GetById(int id, CancellationToken ct)
+        => await base.GetById(id, ct);
+
+    [AllowAnonymous]
+    public override async Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
+        => await base.GetAllPaginated(pagedVm, ct);
+}
