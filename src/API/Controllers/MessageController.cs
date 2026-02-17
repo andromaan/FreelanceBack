@@ -1,6 +1,7 @@
 using API.Controllers.Common;
 using BLL.Commands;
 using BLL.Commands.Messages;
+using BLL.ViewModels;
 using BLL.ViewModels.Message;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,4 +39,12 @@ public class MessageController(ISender sender)
         var result = await Sender.Send(query, ct);
         return GetResult(result);
     }
+    
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<IActionResult> GetAll(CancellationToken ct)
+        => Task.FromResult<IActionResult>(NotFound());
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
+        => Task.FromResult<IActionResult>(NotFound());
 }

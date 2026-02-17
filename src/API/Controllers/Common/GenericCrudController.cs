@@ -1,4 +1,5 @@
 using BLL.Commands;
+using BLL.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,14 @@ public abstract class GenericCrudController<TKey, TViewModel, TCreateViewModel, 
     public virtual async Task<IActionResult> GetAll(CancellationToken ct)
     {
         var query = new GetAll.Query<TViewModel>();
+        var result = await Sender.Send(query, ct);
+        return GetResult(result);
+    }
+
+    [HttpGet("paginated")]
+    public virtual async Task<IActionResult> GetAllPaginated([FromQuery] PagedVM pagedVm, CancellationToken ct)
+    {
+        var query = new GetAllPaginated.Query<TViewModel>(pagedVm);
         var result = await Sender.Send(query, ct);
         return GetResult(result);
     }

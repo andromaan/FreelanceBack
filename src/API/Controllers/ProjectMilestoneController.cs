@@ -1,6 +1,7 @@
 using API.Controllers.Common;
 using BLL;
 using BLL.Commands.ProjectMilestones;
+using BLL.ViewModels;
 using BLL.ViewModels.ProjectMilestone;
 using Domain.Models.Projects;
 using MediatR;
@@ -38,5 +39,9 @@ public class ProjectMilestoneController(ISender sender)
 
     [ApiExplorerSettings(IgnoreApi = true)]
     public override Task<IActionResult> GetAll(CancellationToken ct)
+        => Task.FromResult<IActionResult>(NotFound());
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
         => Task.FromResult<IActionResult>(NotFound());
 }

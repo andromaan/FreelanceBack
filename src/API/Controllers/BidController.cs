@@ -1,6 +1,7 @@
 using API.Controllers.Common;
 using BLL;
 using BLL.Commands.Bids;
+using BLL.ViewModels;
 using BLL.ViewModels.Bid;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,7 +33,9 @@ public class BidController(ISender sender)
 
     [ApiExplorerSettings(IgnoreApi = true)]
     public override Task<IActionResult> GetAll(CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
+        => Task.FromResult<IActionResult>(NotFound());
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
+        => Task.FromResult<IActionResult>(NotFound());
 }

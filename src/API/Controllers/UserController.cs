@@ -2,6 +2,7 @@ using API.Controllers.Common;
 using BLL;
 using BLL.Commands;
 using BLL.Commands.Users;
+using BLL.ViewModels;
 using BLL.ViewModels.User;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -66,4 +67,8 @@ public class UserController(ISender sender)
     [Authorize(Roles = Settings.Roles.AdminRole)]
     public override Task<IActionResult> GetById(Guid id, CancellationToken ct)
         => base.GetById(id, ct);
+
+    [Authorize(Roles = Settings.Roles.AdminRole)]
+    public override Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
+    => base.GetAllPaginated(pagedVm, ct);
 }

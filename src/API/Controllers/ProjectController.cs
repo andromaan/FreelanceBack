@@ -2,6 +2,7 @@ using API.Controllers.Common;
 using BLL;
 using BLL.Commands;
 using BLL.Commands.Projects;
+using BLL.ViewModels;
 using BLL.ViewModels.Project;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -45,4 +46,8 @@ public class ProjectController(ISender sender)
     [AllowAnonymous]
     public override Task<IActionResult> GetById(Guid id, CancellationToken ct)
         => base.GetById(id, ct);
+    
+    [AllowAnonymous]
+    public override Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
+        => base.GetAllPaginated(pagedVm, ct);
 }

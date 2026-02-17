@@ -2,6 +2,7 @@ using API.Controllers.Common;
 using BLL;
 using BLL.Commands;
 using BLL.Commands.ContractMilestones;
+using BLL.ViewModels;
 using BLL.ViewModels.ContractMilestone;
 using Domain.Models.Contracts;
 using MediatR;
@@ -117,6 +118,12 @@ public class ContractMilestoneController(ISender sender)
 
     [ApiExplorerSettings(IgnoreApi = true)]
     public override Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
     {
         throw new NotImplementedException();
     }

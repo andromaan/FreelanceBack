@@ -19,6 +19,17 @@ public static class CrudRegistrationExtensions
         var handlers = new List<HandlerDescriptor>
         {
             new HandlerDescriptor(
+                typeof(GetAllPaginated.Query<>),
+                typeof(GetAllPaginated.QueryHandler<,,,>),
+                [reg.ViewModelType],
+                [
+                    reg.EntityType,
+                    reg.KeyType,
+                    reg.ViewModelType,
+                    reg.QueriesInterfaceType
+                ]),
+            
+            new HandlerDescriptor(
                 typeof(GetAll.Query<>),
                 typeof(GetAll.QueryHandler<,,,>),
                 [reg.ViewModelType],
