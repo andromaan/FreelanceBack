@@ -27,8 +27,8 @@ public class QuoteController(ISender sender)
     }
 
     [AllowAnonymous]
-    public override Task<IActionResult> GetById(Guid id, CancellationToken ct)
-        => base.GetById(id, ct);
+    public override async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        => await base.GetById(id, ct);
 
     [ApiExplorerSettings(IgnoreApi = true)]
     public override Task<IActionResult> GetAll(CancellationToken ct)

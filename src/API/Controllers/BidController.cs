@@ -28,14 +28,14 @@ public class BidController(ISender sender)
     }
     
     [AllowAnonymous]
-    public override Task<IActionResult> GetById(Guid id, CancellationToken ct)
-        => base.GetById(id, ct);
+    public override async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        => await base.GetById(id, ct);
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public override Task<IActionResult> GetAll(CancellationToken ct)
-        => Task.FromResult<IActionResult>(NotFound());
+    public override async Task<IActionResult> GetAll(CancellationToken ct)
+        => await Task.FromResult<IActionResult>(NotFound());
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public override Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
-        => Task.FromResult<IActionResult>(NotFound());
+    public override async Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
+        => await Task.FromResult<IActionResult>(NotFound());
 }

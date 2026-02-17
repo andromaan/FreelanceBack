@@ -10,7 +10,5 @@ public class ProjectVM
     public decimal Budget { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime Deadline { get; set; }
-    // public ICollection<Proposal> Proposals { get; set; } = new List<Proposal>();
-    // public ICollection<Contract> Contracts { get; set; } = new List<Contract>();
     public List<CategoryVM> Categories { get; set; } = new();
 }

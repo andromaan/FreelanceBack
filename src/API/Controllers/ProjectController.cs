@@ -40,14 +40,24 @@ public class ProjectController(ISender sender)
     }
 
     [AllowAnonymous]
-    public override Task<IActionResult> GetAll(CancellationToken ct)
-        => base.GetAll(ct);
+    public override async Task<IActionResult> GetAll(CancellationToken ct)
+        => await base.GetAll(ct);
 
     [AllowAnonymous]
-    public override Task<IActionResult> GetById(Guid id, CancellationToken ct)
-        => base.GetById(id, ct);
-    
+    public override async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        => await base.GetById(id, ct);
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override async Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
+        => await base.GetAllPaginated(pagedVm, ct);
+
     [AllowAnonymous]
-    public override Task<IActionResult> GetAllPaginated(PagedVM pagedVm, CancellationToken ct)
-        => base.GetAllPaginated(pagedVm, ct);
+    [HttpGet("paginated-filtered")]
+    public async Task<IActionResult> GetAllPaginatedFiltered(PagedVM pagedVm, [FromQuery] FilterProjectVM filterProjectVm,
+        CancellationToken ct)
+    {
+        var query = new GetAllPaginated.QueryFiltered<FilterProjectVM>(pagedVm, filterProjectVm);
+        var result = await Sender.Send(query, ct);
+        return GetResult(result);
+    }
 }

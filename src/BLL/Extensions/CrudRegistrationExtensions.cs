@@ -28,7 +28,7 @@ public static class CrudRegistrationExtensions
                     reg.ViewModelType,
                     reg.QueriesInterfaceType
                 ]),
-            
+
             new HandlerDescriptor(
                 typeof(GetAll.Query<>),
                 typeof(GetAll.QueryHandler<,,,>),
@@ -85,6 +85,21 @@ public static class CrudRegistrationExtensions
                     reg.EntityType,
                     reg.KeyType,
                     reg.QueriesInterfaceType
+                ]));
+        }
+        
+        if (reg.FilteringViewModelType != null)
+        {
+            handlers.Add(new HandlerDescriptor(
+                typeof(GetAllPaginated.QueryFiltered<>),
+                typeof(GetAllPaginated.QueryHandler<,,,,>),
+                [reg.FilteringViewModelType],
+                [
+                    reg.EntityType,
+                    reg.KeyType,
+                    reg.ViewModelType,
+                    reg.QueriesInterfaceType,
+                    reg.FilteringViewModelType
                 ]));
         }
 
@@ -161,4 +176,5 @@ public class CrudRegistration<TEntity, TKey, TQueries>
     public required Type ViewModelType { get; init; }
     public Type? CreateViewModelType { get; init; }
     public Type? UpdateViewModelType { get; init; }
+    public Type? FilteringViewModelType { get; init; }
 }

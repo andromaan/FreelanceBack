@@ -113,6 +113,9 @@ public static class ConfigureBusinessLogic
             .AddClasses(classes => classes.AssignableTo(typeof(IDeleteHandler<>)))
             .AsImplementedInterfaces()
             .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IGetAllFilteredHandler<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
         );
 
         // registrations for Country
@@ -157,7 +160,8 @@ public static class ConfigureBusinessLogic
             {
                 ViewModelType = typeof(ProjectVM),
                 CreateViewModelType = typeof(CreateProjectVM),
-                UpdateViewModelType = typeof(UpdateProjectVM)
+                UpdateViewModelType = typeof(UpdateProjectVM),
+                FilteringViewModelType = typeof(FilterProjectVM)
             }, specificUpdateVMs: [typeof(UpdateProjectCategoriesVM)]);
 
         // registrations for ProjectMilestone
