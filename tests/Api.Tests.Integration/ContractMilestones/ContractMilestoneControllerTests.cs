@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BLL;
 using BLL.ViewModels.ContractMilestone;
+using Domain.Models.Auth;
 using Domain.Models.Contracts;
 using Domain.Models.Freelance;
 using Domain.Models.Payments;
@@ -22,6 +23,7 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
     private Project _project = null!;
     private User _freelancerUser = null!;
     private Freelancer _freelancer = null!;
+    private Role _moderatorRole = null!;
 
     [Fact]
     public async Task ShouldCreateContractMilestone()
@@ -347,7 +349,9 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
         };
 
         var userModerator =
-            UserData.CreateTestUser(Guid.NewGuid(), "moderator@mail.com", roleId: Settings.Roles.ModeratorRole);
+            UserData.CreateTestUser(Guid.NewGuid(), "moderator@mail.com", roleId: _moderatorRole.Id);
+
+        userModerator.Role = null;
 
         await Context.AddAsync(userModerator);
         await Context.AddAsync(milestone1);
@@ -369,7 +373,9 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
 
     public async Task InitializeAsync()
     {
+        _moderatorRole = RoleData.CreateRole(name: Settings.Roles.ModeratorRole);
         _freelancerUser = UserData.CreateTestUser(UserId);
+        
         _freelancer = FreelancerData.CreateFreelancer(userId: _freelancerUser.Id);
         _project = ProjectData.CreateProject();
         _contract = ContractData.CreateContract(
@@ -389,6 +395,7 @@ public class ContractMilestoneControllerTests(IntegrationTestWebFactory factory)
             CreatedBy = UserId
         };
 
+        await Context.AddAsync(_moderatorRole);
         await Context.AddAsync(_freelancerUser);
         await Context.AddAsync(_freelancer);
         await Context.AddAsync(_project);

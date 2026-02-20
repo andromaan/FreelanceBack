@@ -19,7 +19,7 @@ public class CreateContractMilestoneHandler(
         CreateContractMilestoneVM createModel, CancellationToken cancellationToken)
     {
         var userRole = userProvider.GetUserRole();
-        var userId = await userProvider.GetUserId();
+        var userId = await userProvider.GetUserId(cancellationToken);
 
         var existingContract = await contractQueries.GetByIdAsync(createModel.ContractId, cancellationToken);
 

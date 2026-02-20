@@ -374,7 +374,10 @@ public class ContractMilestoneModeratorControllerTests(IntegrationTestWebFactory
 
     public async Task InitializeAsync()
     {
-        _moderatorUser = UserData.CreateTestUser(UserId, roleId: Settings.Roles.ModeratorRole);
+        var moderatorRole = RoleData.CreateRole(name: Settings.Roles.ModeratorRole);
+        await Context.AddAsync(moderatorRole);
+        
+        _moderatorUser = UserData.CreateTestUser(UserId, roleId: moderatorRole.Id);
         _employerUser = UserData.CreateTestUser(Guid.NewGuid());
         _freelancerUser = UserData.CreateTestUser(Guid.NewGuid());
         _freelancer = FreelancerData.CreateFreelancer(userId: _freelancerUser.Id);

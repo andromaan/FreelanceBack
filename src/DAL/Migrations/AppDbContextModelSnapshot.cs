@@ -90,9 +90,12 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Domain.Models.Auth.Role", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -107,22 +110,22 @@ namespace DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "admin",
+                            Id = 1,
                             Name = "admin"
                         },
                         new
                         {
-                            Id = "employer",
+                            Id = 2,
                             Name = "employer"
                         },
                         new
                         {
-                            Id = "freelancer",
+                            Id = 3,
                             Name = "freelancer"
                         },
                         new
                         {
-                            Id = "moderator",
+                            Id = 4,
                             Name = "moderator"
                         });
                 });
@@ -4052,10 +4055,9 @@ namespace DAL.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("reviewed_user_id");
 
-                    b.Property<string>("ReviewerRoleId")
-                        .IsRequired()
+                    b.Property<int>("ReviewerRoleId")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("integer")
                         .HasColumnName("reviewer_role_id");
 
                     b.HasKey("Id")
@@ -4133,9 +4135,8 @@ namespace DAL.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password_hash");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer")
                         .HasColumnName("role_id");
 
                     b.HasKey("Id")
@@ -4163,14 +4164,14 @@ namespace DAL.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 2, 20, 16, 18, 12, 866, DateTimeKind.Utc).AddTicks(1921),
+                            CreatedAt = new DateTime(2026, 2, 20, 18, 32, 13, 106, DateTimeKind.Utc).AddTicks(4221),
                             CreatedBy = new Guid("11111111-1111-1111-1111-111111111111"),
                             DisplayName = "Admin",
                             Email = "admin@mail.com",
-                            ModifiedAt = new DateTime(2026, 2, 20, 16, 18, 12, 866, DateTimeKind.Utc).AddTicks(1927),
+                            ModifiedAt = new DateTime(2026, 2, 20, 18, 32, 13, 106, DateTimeKind.Utc).AddTicks(4231),
                             ModifiedBy = new Guid("11111111-1111-1111-1111-111111111111"),
-                            PasswordHash = "BC6BCCCE69BAB78630A89CC85D2F56E381F40E95BF3EA8332C904F5F53F71C96-40AD3F19421F57885E401118B0EA9122",
-                            RoleId = "admin"
+                            PasswordHash = "15E01B6145A9E46373CCA10674CE101CB3F3FAE6D9497ADDF60AF6FD694D59C2-3278A42A79D4753EAEC4EF1047B15DFA",
+                            RoleId = 1
                         });
                 });
 
@@ -4632,7 +4633,7 @@ namespace DAL.Migrations
                         .HasConstraintName("fk_users_languages_languages_language_id");
 
                     b.HasOne("Domain.Models.Users.User", "User")
-                        .WithMany("UserLanguages")
+                        .WithMany("Languages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -4674,7 +4675,7 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Domain.Models.Users.User", b =>
                 {
-                    b.Navigation("UserLanguages");
+                    b.Navigation("Languages");
                 });
 #pragma warning restore 612, 618
         }

@@ -7,6 +7,6 @@ public class ReviewVM
     public Guid ReviewedUserId { get; set; }
     public decimal Rating { get; set; }
     public string ReviewText { get; set; } = string.Empty;
-    public string ReviewerRoleId { get; set; } = null!;
+    public int ReviewerRoleId { get; set; }
     public Guid ReviewerId { get; set; }
 }

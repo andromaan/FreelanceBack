@@ -14,10 +14,10 @@ public static partial class DataSeed
 {
     public static void SeedData(ModelBuilder modelBuilder)
     {
-        SeedRoles(modelBuilder);
+        var adminRole = SeedRoles(modelBuilder);
         SeedLanguages(modelBuilder);
         SeedCountries(modelBuilder);
-        SeedUsers(modelBuilder);
+        SeedUsers(modelBuilder, adminRole);
         SeedSkills(modelBuilder);
     }
 
@@ -40,7 +40,7 @@ public static partial class DataSeed
         modelBuilder.Entity<Skill>().HasData(skills);
     }
 
-    private static void SeedUsers(ModelBuilder modelBuilder)
+    private static void SeedUsers(ModelBuilder modelBuilder, Role adminRole)
     {
         var passwordHasher = new PasswordHasher();
 
@@ -52,7 +52,7 @@ public static partial class DataSeed
             DisplayName = "Admin",
             PasswordHash = passwordHasher.HashPassword("admin"),
             Email = "admin@mail.com",
-            RoleId = Settings.Roles.AdminRole,
+            RoleId = adminRole.Id,
             CreatedBy = adminId,
             CreatedAt = DateTime.UtcNow,
             ModifiedBy = adminId,
@@ -62,16 +62,18 @@ public static partial class DataSeed
         modelBuilder.Entity<User>().HasData(adminUser);
     }
 
-    private static void SeedRoles(ModelBuilder modelBuilder)
+    private static Role SeedRoles(ModelBuilder modelBuilder)
     {
         var roles = new List<Role>();
 
         foreach (var role in Settings.Roles.ListOfRoles)
         {
-            roles.Add(new Role { Name = role, Id = role.ToLower() });
+            roles.Add(new Role { Name = role, Id = roles.Count + 1 });
         }
 
         modelBuilder.Entity<Role>().HasData(roles);
+        
+        return roles.FirstOrDefault(r => r.Name == Settings.Roles.AdminRole)!;
     }
 
     private static void SeedLanguages(ModelBuilder modelBuilder)

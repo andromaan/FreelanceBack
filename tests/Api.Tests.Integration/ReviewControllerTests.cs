@@ -62,7 +62,7 @@ public class ReviewControllerTests(IntegrationTestWebFactory factory)
     [Fact]
     public async Task ShouldCreateReviewByFreelancer()
     {
-        SwitchUser(_freelancerUser.RoleId, _freelancerUser.Id);
+        SwitchUser(_freelancerUser.Role!.Name, _freelancerUser.Id);
         
         // Arrange
         Context.Set<Review>().RemoveRange(Context.Set<Review>());
@@ -334,16 +334,15 @@ public class ReviewControllerTests(IntegrationTestWebFactory factory)
 
     public async Task InitializeAsync()
     {
-        // var employerRole = new Role { Id = Settings.Roles.EmployerRole, Name = Settings.Roles.EmployerRole };
-        // var freelancerRole = new Role { Id = Settings.Roles.FreelancerRole, Name = Settings.Roles.FreelancerRole };
+        var employerRole = RoleData.CreateRole(name: Settings.Roles.EmployerRole);
+        var freelancerRole = RoleData.CreateRole(name: Settings.Roles.FreelancerRole);
+        
+        await Context.AddAsync(employerRole);
+        await Context.AddAsync(freelancerRole);
         
         // Set employer user to the same UserId as the JWT token
-        _employerUser = UserData.CreateTestUser(email: "employer@test.com");
-        _employerUser.Id = UserId;
-        _employerUser.RoleId = Settings.Roles.EmployerRole;
-        
-        _freelancerUser = UserData.CreateTestUser(email: "freelancer@test.com");
-        _freelancerUser.RoleId = Settings.Roles.FreelancerRole;
+        _employerUser = UserData.CreateTestUser(id: UserId, email: "employer@test.com", roleId: employerRole.Id);
+        _freelancerUser = UserData.CreateTestUser(email: "freelancer@test.com", roleId: freelancerRole.Id);
         
         _project = ProjectData.CreateProject(userId: _employerUser.Id);
         _freelancer = FreelancerData.CreateFreelancer(userId: _freelancerUser.Id);
@@ -361,12 +360,11 @@ public class ReviewControllerTests(IntegrationTestWebFactory factory)
             reviewedUserId: _freelancerUser.Id,
             rating: 4.0m,
             reviewText: "Good work overall.",
-            reviewerRoleId: Settings.Roles.EmployerRole,
+            reviewerRoleId: employerRole.Id,
             createdById: _employerUser.Id
         );
 
-        // await Context.AddAsync(employerRole);
-        // await Context.AddAsync(freelancerRole);
+
         await Context.AddAsync(_employerUser);
         await Context.AddAsync(_freelancerUser);
         await Context.AddAsync(_project);

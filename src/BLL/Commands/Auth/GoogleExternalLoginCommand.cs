@@ -1,5 +1,6 @@
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
+using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserWallets;
 using BLL.Services;
@@ -27,7 +28,8 @@ public class GoogleExternalLoginCommandHandler(
     IPasswordHasher hashPasswordService,
     IFreelancerRepository freelancerRepository,
     IEmployerRepository employerRepository,
-    IUserWalletRepository userWalletRepository)
+    IUserWalletRepository userWalletRepository,
+    IRoleQueries roleQueries)
     : IRequestHandler<GoogleExternalLoginCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(GoogleExternalLoginCommand request, CancellationToken cancellationToken)
@@ -51,39 +53,46 @@ public class GoogleExternalLoginCommandHandler(
                     var randomPassword = GenerateRandomPassword();
 
                     var fullName = SplitFullName(payload.Name);
-        
+
                     if (request.Model.UserRole is null)
                     {
                         return ServiceResponse.BadRequest(
                             "User role must be provided for new users", data: "role_required");
                     }
-        
+
                     if (request.Model.UserRole is not (Settings.Roles.EmployerRole or Settings.Roles.FreelancerRole))
                     {
                         return ServiceResponse.BadRequest(
                             $"Invalid user role, must be '{Settings.Roles.EmployerRole}' or '{Settings.Roles.FreelancerRole}'");
                     }
-        
+
                     var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count() != 0;
                     var userRole = isDbHasUsers ? request.Model.UserRole : Settings.Roles.AdminRole;
+
+                    var roleEntity = await roleQueries.GetByNameAsync(userRole, cancellationToken);
+                    if (roleEntity is null)
+                    {
+                        return ServiceResponse.InternalError("User role not found in database");
+                    }
 
                     var userModel = new User
                     {
                         Id = userId,
                         Email = payload.Email,
                         DisplayName = fullName.name,
-                        RoleId = userRole,
+                        RoleId = roleEntity.Id,
+                        Role = roleEntity,
                         PasswordHash = hashPasswordService.HashPassword(randomPassword),
                         CreatedBy = userId
                     };
 
                     var createdUser = await userRepository.CreateAsync(userModel, cancellationToken);
-                    
+
                     if (createdUser is null)
                     {
                         return ServiceResponse.InternalError("Failed to add user");
                     }
-                    
+
                     await ConfigureUserBaseOfRole(createdUser, cancellationToken);
 
                     user = createdUser;
@@ -92,7 +101,7 @@ public class GoogleExternalLoginCommandHandler(
                 var loginResult = await userRepository.AddLoginAsync(user, info, cancellationToken);
                 user = loginResult.Succeeded ? user : null;
             }
-            
+
             if (user is null)
                 return ServiceResponse.BadRequest("Failed to add Google login");
 
@@ -104,10 +113,10 @@ public class GoogleExternalLoginCommandHandler(
             return ServiceResponse.InternalError(ex.Message);
         }
     }
-    
+
     private async Task ConfigureUserBaseOfRole(User createdUser, CancellationToken cancellationToken)
     {
-        if (createdUser.RoleId == Settings.Roles.FreelancerRole)
+        if (createdUser.Role!.Name == Settings.Roles.FreelancerRole)
         {
             var freelancer = new Freelancer
             {
@@ -118,7 +127,7 @@ public class GoogleExternalLoginCommandHandler(
             await freelancerRepository.CreateAsync(freelancer, createdUser.Id, cancellationToken);
         }
 
-        if (createdUser.RoleId == Settings.Roles.EmployerRole)
+        if (createdUser.Role.Name == Settings.Roles.EmployerRole)
         {
             var employer = new Employer
             {
@@ -129,7 +138,7 @@ public class GoogleExternalLoginCommandHandler(
             await employerRepository.CreateAsync(employer, createdUser.Id, cancellationToken);
         }
 
-        if (createdUser.RoleId != Settings.Roles.AdminRole)
+        if (createdUser.Role.Name != Settings.Roles.AdminRole)
         {
             var userWallet = new UserWallet
             {
@@ -147,11 +156,11 @@ public class GoogleExternalLoginCommandHandler(
     {
         if (string.IsNullOrWhiteSpace(fullName))
             return (null, null);
-    
+
         var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var name = parts.ElementAtOrDefault(0);
         var patronymic = parts.ElementAtOrDefault(1);
-    
+
         return (name, patronymic);
     }
 

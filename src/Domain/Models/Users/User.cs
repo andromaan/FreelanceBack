@@ -9,7 +9,7 @@ public class User : AuditableEntity<Guid>
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
     
-    public required string RoleId { get; set; }
+    public required int RoleId { get; set; }
     public Role? Role { get; set; }
     
     public int? CountryId { get; set; }

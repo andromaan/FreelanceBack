@@ -263,20 +263,27 @@ public class DisputeResolutionControllerTests(IntegrationTestWebFactory factory)
 
     public async Task InitializeAsync()
     {
+        var employerRole = RoleData.CreateRole(name: Settings.Roles.EmployerRole);
+        var adminRole = RoleData.CreateRole(name: Settings.Roles.AdminRole);
+        var freelancerRole = RoleData.CreateRole(name: Settings.Roles.FreelancerRole);
+        await Context.AddAsync(employerRole);
+        await Context.AddAsync(freelancerRole);
+        await Context.AddAsync(adminRole);
+        
         _adminUser = UserData.CreateTestUser(
             id: UserId,
             email: "admin@test.com",
-            roleId: Settings.Roles.AdminRole
+            roleId: adminRole.Id
         );
 
         _employerUser = UserData.CreateTestUser(
             email: "employer@test.com",
-            roleId: Settings.Roles.EmployerRole
+            roleId: employerRole.Id
         );
 
         _freelancerUser = UserData.CreateTestUser(
             email: "freelancer@test.com",
-            roleId: Settings.Roles.FreelancerRole
+            roleId: freelancerRole.Id
         );
 
         _project = ProjectData.CreateProject(userId: _employerUser.Id);

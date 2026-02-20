@@ -7,7 +7,7 @@ public class UserVM
 {
     public Guid Id { get; set; }
     public string Email { get; set; } = string.Empty;
-    public string RoleId { get; set; } = string.Empty;
+    public int RoleId { get; set; }
     public string? AvatarImg { get; set; }
     public CountryVM? Country { get; set; }
     public List<UserLanguageVM> Languages { get; set; } = [];

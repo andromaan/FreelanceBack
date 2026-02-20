@@ -1,6 +1,7 @@
 using AutoMapper;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
+using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserWallets;
 using BLL.Services;
@@ -25,7 +26,8 @@ public class SignUpCommandHandler(
     IMapper mapper,
     IFreelancerRepository freelancerRepository,
     IEmployerRepository employerRepository,
-    IUserWalletRepository userWalletRepository) : IRequestHandler<SignUpCommand, ServiceResponse>
+    IUserWalletRepository userWalletRepository,
+    IRoleQueries roleQueries) : IRequestHandler<SignUpCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
@@ -44,18 +46,24 @@ public class SignUpCommandHandler(
         var isDbHasUsers = (await userQueries.GetAllAsync(cancellationToken)).Count() != 0;
         var userRole = isDbHasUsers ? vm.UserRole : Settings.Roles.AdminRole;
 
+        var roleEntity = await roleQueries.GetByNameAsync(userRole, cancellationToken);
+        if (roleEntity is null)
+        {
+            return ServiceResponse.InternalError("User role not found in database");
+        }
 
         var user = mapper.Map<User>(vm);
         user.Id = Guid.NewGuid();
         user.PasswordHash = passwordHasher.HashPassword(vm.Password);
         user.CreatedBy = user.Id;
-        user.RoleId = userRole;
+        user.RoleId = roleEntity.Id;
+        user.Role = roleEntity;
 
         try
         {
             await userRepository.CreateAsync(user, cancellationToken);
 
-            if (user.RoleId == Settings.Roles.FreelancerRole)
+            if (user.Role.Name == Settings.Roles.FreelancerRole)
             {
                 var freelancer = new Freelancer
                 {
@@ -66,7 +74,7 @@ public class SignUpCommandHandler(
                 await freelancerRepository.CreateAsync(freelancer, user.Id, cancellationToken);
             }
 
-            if (user.RoleId == Settings.Roles.EmployerRole)
+            if (user.Role.Name == Settings.Roles.EmployerRole)
             {
                 var employer = new Employer
                 {
@@ -77,7 +85,7 @@ public class SignUpCommandHandler(
                 await employerRepository.CreateAsync(employer, user.Id, cancellationToken);
             }
 
-            if (user.RoleId != Settings.Roles.AdminRole)
+            if (user.Role.Name != Settings.Roles.AdminRole)
             {
                 var userWallet = new UserWallet
                 {

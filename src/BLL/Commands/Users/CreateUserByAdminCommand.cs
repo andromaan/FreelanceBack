@@ -1,6 +1,7 @@
 using AutoMapper;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
+using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserWallets;
 using BLL.Services;
@@ -23,7 +24,8 @@ public class CreateUserCommandHandler(
     IFreelancerRepository freelancerRepository,
     IEmployerRepository employerRepository,
     IUserWalletRepository userWalletRepository,
-    IMapper mapper) : IRequestHandler<CreateUserByAdminCommand, ServiceResponse>
+    IMapper mapper,
+    IRoleQueries roleQueries) : IRequestHandler<CreateUserByAdminCommand, ServiceResponse>
 {
     public async Task<ServiceResponse> Handle(CreateUserByAdminCommand request, CancellationToken cancellationToken)
     {
@@ -31,10 +33,11 @@ public class CreateUserCommandHandler(
         
         var createModel = request.CreateModel;
         
-        if (!Settings.Roles.ListOfRoles.Contains(createModel.RoleId))
+        var role = await roleQueries.GetByIdAsync(createModel.RoleId, cancellationToken);
+        
+        if (role is null)
         {
-            return ServiceResponse.BadRequest("Invalid role specified. Valid roles are: " +
-                                              string.Join(", ", Settings.Roles.ListOfRoles));
+            return ServiceResponse.BadRequest($"Role with Id {createModel.RoleId} not found.");
         }
 
         var userWithEmail = await userQueries.GetByEmailAsync(createModel.Email, cancellationToken);
@@ -62,7 +65,7 @@ public class CreateUserCommandHandler(
     
     private async Task ConfigureUserBaseOfRole(User createdUser, CancellationToken cancellationToken)
     {
-        if (createdUser.RoleId == Settings.Roles.FreelancerRole)
+        if (createdUser.Role!.Name == Settings.Roles.FreelancerRole)
         {
             var freelancer = new Freelancer
             {
@@ -73,7 +76,7 @@ public class CreateUserCommandHandler(
             await freelancerRepository.CreateAsync(freelancer, createdUser.Id, cancellationToken);
         }
 
-        if (createdUser.RoleId == Settings.Roles.EmployerRole)
+        if (createdUser.Role.Name == Settings.Roles.EmployerRole)
         {
             var employer = new Employer
             {
@@ -84,7 +87,7 @@ public class CreateUserCommandHandler(
             await employerRepository.CreateAsync(employer, createdUser.Id, cancellationToken);
         }
 
-        if (createdUser.RoleId != Settings.Roles.AdminRole)
+        if (createdUser.Role.Name != Settings.Roles.AdminRole)
         {
             var userWallet = new UserWallet
             {

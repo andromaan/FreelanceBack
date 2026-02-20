@@ -43,24 +43,6 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "employers",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    company_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    company_website = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_employers", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "languages",
                 columns: table => new
                 {
@@ -78,7 +60,8 @@ namespace DAL.Migrations
                 name: "roles",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "text", nullable: false),
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -106,7 +89,8 @@ namespace DAL.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     password_hash = table.Column<string>(type: "text", nullable: false),
-                    role_id = table.Column<string>(type: "text", nullable: false),
+                    role_id = table.Column<int>(type: "integer", nullable: false),
+                    country_id = table.Column<int>(type: "integer", nullable: true),
                     avatar_img = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     display_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     external_provider = table.Column<string>(type: "text", nullable: true),
@@ -119,6 +103,12 @@ namespace DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_users", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_users_country_country_id",
+                        column: x => x.country_id,
+                        principalTable: "countries",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "fk_users_roles_role_id",
                         column: x => x.role_id,
@@ -140,16 +130,72 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "disputes",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    contract_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    reason = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    status = table.Column<int>(type: "integer", nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_disputes", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_disputes_users_created_by",
+                        column: x => x.created_by,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_disputes_users_modified_by",
+                        column: x => x.modified_by,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "employers",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    company_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    company_website = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_employers", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_employers_users_created_by",
+                        column: x => x.created_by,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_employers_users_modified_by",
+                        column: x => x.modified_by,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "freelancers",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     bio = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    hourly_rate = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
                     location = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
                     avatar_logo = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    country_id = table.Column<int>(type: "integer", nullable: true),
                     created_by = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
                     modified_by = table.Column<Guid>(type: "uuid", nullable: false),
@@ -159,26 +205,14 @@ namespace DAL.Migrations
                 {
                     table.PrimaryKey("pk_freelancers", x => x.id);
                     table.ForeignKey(
-                        name: "fk_freelancers_country_country_id",
-                        column: x => x.country_id,
-                        principalTable: "countries",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
                         name: "fk_freelancers_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_freelancers_users_modified_by",
                         column: x => x.modified_by,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_freelancers_users_user_id",
-                        column: x => x.user_id,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -191,10 +225,9 @@ namespace DAL.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    budget_min = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    budget_max = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    is_hourly = table.Column<bool>(type: "boolean", nullable: false),
+                    budget = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
                     created_by = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
                     modified_by = table.Column<Guid>(type: "uuid", nullable: false),
@@ -260,37 +293,73 @@ namespace DAL.Migrations
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_user_wallets_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "freelancers_languages",
+                name: "users_languages",
                 columns: table => new
                 {
-                    freelancer_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    languages_id = table.Column<int>(type: "integer", nullable: false)
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    language_id = table.Column<int>(type: "integer", nullable: false),
+                    proficiency_level = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_freelancers_languages", x => new { x.freelancer_id, x.languages_id });
+                    table.PrimaryKey("pk_users_languages", x => new { x.user_id, x.language_id });
                     table.ForeignKey(
-                        name: "fk_freelancers_languages_freelancers_freelancer_id",
-                        column: x => x.freelancer_id,
-                        principalTable: "freelancers",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_freelancers_languages_language_languages_id",
-                        column: x => x.languages_id,
+                        name: "fk_users_languages_languages_language_id",
+                        column: x => x.language_id,
                         principalTable: "languages",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_users_languages_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "dispute_resolutions",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    dispute_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    resolution_details = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_dispute_resolutions", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_dispute_resolutions_disputes_dispute_id",
+                        column: x => x.dispute_id,
+                        principalTable: "disputes",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_dispute_resolutions_users_created_by",
+                        column: x => x.created_by,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_dispute_resolutions_users_modified_by",
+                        column: x => x.modified_by,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -318,14 +387,14 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "portfolio_items",
+                name: "portfolio",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     freelancer_id = table.Column<Guid>(type: "uuid", nullable: false),
                     title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    file_url = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
+                    portfolio_url = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
                     created_by = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
                     modified_by = table.Column<Guid>(type: "uuid", nullable: false),
@@ -333,25 +402,25 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_portfolio_items", x => x.id);
+                    table.PrimaryKey("pk_portfolio", x => x.id);
                     table.ForeignKey(
-                        name: "fk_portfolio_items_freelancers_freelancer_id",
+                        name: "fk_portfolio_freelancers_freelancer_id",
                         column: x => x.freelancer_id,
                         principalTable: "freelancers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_portfolio_items_users_created_by",
+                        name: "fk_portfolio_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_portfolio_items_users_modified_by",
+                        name: "fk_portfolio_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -394,7 +463,7 @@ namespace DAL.Migrations
                     freelancer_id = table.Column<Guid>(type: "uuid", nullable: false),
                     start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
                     end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true, defaultValueSql: "timezone('utc', now())"),
-                    amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    agreed_rate = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     created_by = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
@@ -409,7 +478,7 @@ namespace DAL.Migrations
                         column: x => x.freelancer_id,
                         principalTable: "freelancers",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "fk_contracts_project_project_id",
                         column: x => x.project_id,
@@ -421,13 +490,13 @@ namespace DAL.Migrations
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "fk_contracts_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -490,50 +559,6 @@ namespace DAL.Migrations
                         principalTable: "projects",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "proposals",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    project_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    freelancer_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    price = table.Column<decimal>(type: "numeric", nullable: false),
-                    cover_letter = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
-                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_proposals", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_proposals_freelancers_freelancer_id",
-                        column: x => x.freelancer_id,
-                        principalTable: "freelancers",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_proposals_project_project_id",
-                        column: x => x.project_id,
-                        principalTable: "projects",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_proposals_users_created_by",
-                        column: x => x.created_by,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_proposals_users_modified_by",
-                        column: x => x.modified_by,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -631,9 +656,9 @@ namespace DAL.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    contract_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    sender_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    content = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    contract_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    receiver_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    text = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
                     sent_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_by = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
@@ -662,11 +687,11 @@ namespace DAL.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_messages_users_sender_id",
-                        column: x => x.sender_id,
+                        name: "fk_messages_users_receiver_id",
+                        column: x => x.receiver_id,
                         principalTable: "users",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -675,13 +700,9 @@ namespace DAL.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     contract_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    stripe_payment_intent_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
-                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
+                    amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    payment_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    payment_method = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -692,18 +713,328 @@ namespace DAL.Migrations
                         principalTable: "contracts",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "reviews",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    contract_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    reviewed_user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    rating = table.Column<decimal>(type: "numeric(3,2)", precision: 3, scale: 2, nullable: false),
+                    review_text = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    reviewer_role_id = table.Column<int>(type: "integer", maxLength: 50, nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_reviews", x => x.id);
                     table.ForeignKey(
-                        name: "fk_payments_users_created_by",
+                        name: "fk_reviews_contracts_contract_id",
+                        column: x => x.contract_id,
+                        principalTable: "contracts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "fk_reviews_users_created_by",
                         column: x => x.created_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_payments_users_modified_by",
+                        name: "fk_reviews_users_modified_by",
                         column: x => x.modified_by,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "contract_payments",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    contract_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    milestone_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    payment_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    payment_method = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_contract_payments", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_contract_payments_contract_milestones_milestone_id",
+                        column: x => x.milestone_id,
+                        principalTable: "contract_milestones",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_contract_payments_contracts_contract_id",
+                        column: x => x.contract_id,
+                        principalTable: "contracts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "countries",
+                columns: new[] { "id", "alpha2code", "alpha3code", "name" },
+                values: new object[,]
+                {
+                    { 1, "AF", "AFG", "Afghanistan" },
+                    { 2, "AL", "ALB", "Albania" },
+                    { 3, "DZ", "DZA", "Algeria" },
+                    { 4, "AS", "ASM", "American Samoa" },
+                    { 5, "AD", "AND", "Andorra" },
+                    { 6, "AO", "AGO", "Angola" },
+                    { 7, "AI", "AIA", "Anguilla" },
+                    { 8, "AQ", "ATA", "Antarctica" },
+                    { 9, "AG", "ATG", "Antigua and Barbuda" },
+                    { 10, "AR", "ARG", "Argentina" },
+                    { 11, "AM", "ARM", "Armenia" },
+                    { 12, "AW", "ABW", "Aruba" },
+                    { 13, "AU", "AUS", "Australia" },
+                    { 14, "AT", "AUT", "Austria" },
+                    { 15, "AZ", "AZE", "Azerbaijan" },
+                    { 16, "BS", "BHS", "Bahamas" },
+                    { 17, "BH", "BHR", "Bahrain" },
+                    { 18, "BD", "BGD", "Bangladesh" },
+                    { 19, "BB", "BRB", "Barbados" },
+                    { 20, "BY", "BLR", "Belarus" },
+                    { 21, "BE", "BEL", "Belgium" },
+                    { 22, "BZ", "BLZ", "Belize" },
+                    { 23, "BJ", "BEN", "Benin" },
+                    { 24, "BM", "BMU", "Bermuda" },
+                    { 25, "BT", "BTN", "Bhutan" },
+                    { 26, "BO", "BOL", "Bolivia" },
+                    { 27, "BQ", "BES", "Bonaire, Sint Eustatius and Saba" },
+                    { 28, "BA", "BIH", "Bosnia and Herzegovina" },
+                    { 29, "BW", "BWA", "Botswana" },
+                    { 30, "BV", "BVT", "Bouvet Island" },
+                    { 31, "BR", "BRA", "Brazil" },
+                    { 32, "IO", "IOT", "British Indian Ocean Territory" },
+                    { 33, "BN", "BRN", "Brunei Darussalam" },
+                    { 34, "BG", "BGR", "Bulgaria" },
+                    { 35, "BF", "BFA", "Burkina Faso" },
+                    { 36, "BI", "BDI", "Burundi" },
+                    { 37, "KH", "KHM", "Cambodia" },
+                    { 38, "CM", "CMR", "Cameroon" },
+                    { 39, "CA", "CAN", "Canada" },
+                    { 40, "CV", "CPV", "Cape Verde" },
+                    { 41, "KY", "CYM", "Cayman Islands" },
+                    { 42, "CF", "CAF", "Central African Republic" },
+                    { 43, "TD", "TCD", "Chad" },
+                    { 44, "CL", "CHL", "Chile" },
+                    { 45, "CN", "CHN", "China" },
+                    { 46, "CX", "CXR", "Christmas Island" },
+                    { 47, "CC", "CCK", "Cocos (Keeling) Islands" },
+                    { 48, "CO", "COL", "Colombia" },
+                    { 49, "KM", "COM", "Comoros" },
+                    { 50, "CD", "COD", "Congo" },
+                    { 51, "CG", "COG", "Congo" },
+                    { 52, "CK", "COK", "Cook Islands" },
+                    { 53, "CR", "CRI", "Costa Rica" },
+                    { 54, "HR", "HRV", "Croatia" },
+                    { 55, "CU", "CUB", "Cuba" },
+                    { 56, "CW", "CUW", "Curaçao" },
+                    { 57, "CY", "CYP", "Cyprus" },
+                    { 58, "CZ", "CZE", "Czech Republic" },
+                    { 59, "CI", "CIV", "Côte D'Ivoire" },
+                    { 60, "DK", "DNK", "Denmark" },
+                    { 61, "DJ", "DJI", "Djibouti" },
+                    { 62, "DM", "DMA", "Dominica" },
+                    { 63, "DO", "DOM", "Dominican Republic" },
+                    { 64, "EC", "ECU", "Ecuador" },
+                    { 65, "EG", "EGY", "Egypt" },
+                    { 66, "SV", "SLV", "El Salvador" },
+                    { 67, "GQ", "GNQ", "Equatorial Guinea" },
+                    { 68, "ER", "ERI", "Eritrea" },
+                    { 69, "EE", "EST", "Estonia" },
+                    { 70, "ET", "ETH", "Ethiopia" },
+                    { 71, "FK", "FLK", "Falkland Islands (Malvinas)" },
+                    { 72, "FO", "FRO", "Faroe Islands" },
+                    { 73, "FJ", "FJI", "Fiji" },
+                    { 74, "FI", "FIN", "Finland" },
+                    { 75, "FR", "FRA", "France" },
+                    { 76, "GF", "GUF", "French Guiana" },
+                    { 77, "PF", "PYF", "French Polynesia" },
+                    { 78, "TF", "ATF", "French Southern Territories" },
+                    { 79, "GA", "GAB", "Gabon" },
+                    { 80, "GM", "GMB", "Gambia" },
+                    { 81, "GE", "GEO", "Georgia" },
+                    { 82, "DE", "DEU", "Germany" },
+                    { 83, "GH", "GHA", "Ghana" },
+                    { 84, "GI", "GIB", "Gibraltar" },
+                    { 85, "GR", "GRC", "Greece" },
+                    { 86, "GL", "GRL", "Greenland" },
+                    { 87, "GD", "GRD", "Grenada" },
+                    { 88, "GP", "GLP", "Guadeloupe" },
+                    { 89, "GU", "GUM", "Guam" },
+                    { 90, "GT", "GTM", "Guatemala" },
+                    { 91, "GG", "GGY", "Guernsey" },
+                    { 92, "GN", "GIN", "Guinea" },
+                    { 93, "GW", "GNB", "Guinea-Bissau" },
+                    { 94, "GY", "GUY", "Guyana" },
+                    { 95, "HT", "HTI", "Haiti" },
+                    { 96, "HM", "HMD", "Heard Island and Mcdonald Islands" },
+                    { 97, "HN", "HND", "Honduras" },
+                    { 98, "HK", "HKG", "Hong Kong" },
+                    { 99, "HU", "HUN", "Hungary" },
+                    { 100, "IS", "ISL", "Iceland" },
+                    { 101, "IN", "IND", "India" },
+                    { 102, "ID", "IDN", "Indonesia" },
+                    { 103, "IR", "IRN", "Iran" },
+                    { 104, "IQ", "IRQ", "Iraq" },
+                    { 105, "IE", "IRL", "Ireland" },
+                    { 106, "IM", "IMN", "Isle of Man" },
+                    { 107, "IL", "ISR", "Israel" },
+                    { 108, "IT", "ITA", "Italy" },
+                    { 109, "JM", "JAM", "Jamaica" },
+                    { 110, "JP", "JPN", "Japan" },
+                    { 111, "JE", "JEY", "Jersey" },
+                    { 112, "JO", "JOR", "Jordan" },
+                    { 113, "KZ", "KAZ", "Kazakhstan" },
+                    { 114, "KE", "KEN", "Kenya" },
+                    { 115, "KI", "KIR", "Kiribati" },
+                    { 116, "KW", "KWT", "Kuwait" },
+                    { 117, "KG", "KGZ", "Kyrgyzstan" },
+                    { 118, "LA", "LAO", "Lao People's Democratic Republic" },
+                    { 119, "LV", "LVA", "Latvia" },
+                    { 120, "LB", "LBN", "Lebanon" },
+                    { 121, "LS", "LSO", "Lesotho" },
+                    { 122, "LR", "LBR", "Liberia" },
+                    { 123, "LY", "LBY", "Libya" },
+                    { 124, "LI", "LIE", "Liechtenstein" },
+                    { 125, "LT", "LTU", "Lithuania" },
+                    { 126, "LU", "LUX", "Luxembourg" },
+                    { 127, "MO", "MAC", "Macao" },
+                    { 128, "MK", "MKD", "Macedonia" },
+                    { 129, "MG", "MDG", "Madagascar" },
+                    { 130, "MW", "MWI", "Malawi" },
+                    { 131, "MY", "MYS", "Malaysia" },
+                    { 132, "MV", "MDV", "Maldives" },
+                    { 133, "ML", "MLI", "Mali" },
+                    { 134, "MT", "MLT", "Malta" },
+                    { 135, "MH", "MHL", "Marshall Islands" },
+                    { 136, "MQ", "MTQ", "Martinique" },
+                    { 137, "MR", "MRT", "Mauritania" },
+                    { 138, "MU", "MUS", "Mauritius" },
+                    { 139, "YT", "MYT", "Mayotte" },
+                    { 140, "MX", "MEX", "Mexico" },
+                    { 141, "FM", "FSM", "Micronesia" },
+                    { 142, "MD", "MDA", "Moldova" },
+                    { 143, "MC", "MCO", "Monaco" },
+                    { 144, "MN", "MNG", "Mongolia" },
+                    { 145, "ME", "MNE", "Montenegro" },
+                    { 146, "MS", "MSR", "Montserrat" },
+                    { 147, "MA", "MAR", "Morocco" },
+                    { 148, "MZ", "MOZ", "Mozambique" },
+                    { 149, "MM", "MMR", "Myanmar" },
+                    { 150, "NA", "NAM", "Namibia" },
+                    { 151, "NR", "NRU", "Nauru" },
+                    { 152, "NP", "NPL", "Nepal" },
+                    { 153, "NL", "NLD", "Netherlands" },
+                    { 154, "NC", "NCL", "New Caledonia" },
+                    { 155, "NZ", "NZL", "New Zealand" },
+                    { 156, "NI", "NIC", "Nicaragua" },
+                    { 157, "NE", "NER", "Niger" },
+                    { 158, "NG", "NGA", "Nigeria" },
+                    { 159, "NU", "NIU", "Niue" },
+                    { 160, "NF", "NFK", "Norfolk Island" },
+                    { 161, "KP", "PRK", "North Korea" },
+                    { 162, "MP", "MNP", "Northern Mariana Islands" },
+                    { 163, "NO", "NOR", "Norway" },
+                    { 164, "OM", "OMN", "Oman" },
+                    { 165, "PK", "PAK", "Pakistan" },
+                    { 166, "PW", "PLW", "Palau" },
+                    { 167, "PS", "PSE", "Palestinian Territory" },
+                    { 168, "PA", "PAN", "Panama" },
+                    { 169, "PG", "PNG", "Papua New Guinea" },
+                    { 170, "PY", "PRY", "Paraguay" },
+                    { 171, "PE", "PER", "Peru" },
+                    { 172, "PH", "PHL", "Philippines" },
+                    { 173, "PN", "PCN", "Pitcairn" },
+                    { 174, "PL", "POL", "Poland" },
+                    { 175, "PT", "PRT", "Portugal" },
+                    { 176, "PR", "PRI", "Puerto Rico" },
+                    { 177, "QA", "QAT", "Qatar" },
+                    { 178, "RO", "ROU", "Romania" },
+                    { 179, "RU", "RUS", "Russia" },
+                    { 180, "RW", "RWA", "Rwanda" },
+                    { 181, "RE", "REU", "Réunion" },
+                    { 182, "BL", "BLM", "Saint Barthélemy" },
+                    { 183, "SH", "SHN", "Saint Helena, Ascension and Tristan Da Cunha" },
+                    { 184, "KN", "KNA", "Saint Kitts and Nevis" },
+                    { 185, "LC", "LCA", "Saint Lucia" },
+                    { 186, "MF", "MAF", "Saint Martin (French Part)" },
+                    { 187, "PM", "SPM", "Saint Pierre and Miquelon" },
+                    { 188, "VC", "VCT", "Saint Vincent and The Grenadines" },
+                    { 189, "WS", "WSM", "Samoa" },
+                    { 190, "SM", "SMR", "San Marino" },
+                    { 191, "ST", "STP", "Sao Tome and Principe" },
+                    { 192, "SA", "SAU", "Saudi Arabia" },
+                    { 193, "SN", "SEN", "Senegal" },
+                    { 194, "RS", "SRB", "Serbia" },
+                    { 195, "SC", "SYC", "Seychelles" },
+                    { 196, "SL", "SLE", "Sierra Leone" },
+                    { 197, "SG", "SGP", "Singapore" },
+                    { 198, "SX", "SXM", "Sint Maarten (Dutch Part)" },
+                    { 199, "SK", "SVK", "Slovakia" },
+                    { 200, "SI", "SVN", "Slovenia" },
+                    { 201, "SB", "SLB", "Solomon Islands" },
+                    { 202, "SO", "SOM", "Somalia" },
+                    { 203, "ZA", "ZAF", "South Africa" },
+                    { 204, "GS", "SGS", "South Georgia" },
+                    { 205, "KR", "KOR", "South Korea" },
+                    { 206, "SS", "SSD", "South Sudan" },
+                    { 207, "ES", "ESP", "Spain" },
+                    { 208, "LK", "LKA", "Sri Lanka" },
+                    { 209, "SD", "SDN", "Sudan" },
+                    { 210, "SR", "SUR", "Suriname" },
+                    { 211, "SJ", "SJM", "Svalbard and Jan Mayen" },
+                    { 212, "SZ", "SWZ", "Swaziland" },
+                    { 213, "SE", "SWE", "Sweden" },
+                    { 214, "CH", "CHE", "Switzerland" },
+                    { 215, "SY", "SYR", "Syrian Arab Republic" },
+                    { 216, "TW", "TWN", "Taiwan" },
+                    { 217, "TJ", "TJK", "Tajikistan" },
+                    { 218, "TZ", "TZA", "Tanzania" },
+                    { 219, "TH", "THA", "Thailand" },
+                    { 220, "TL", "TLS", "Timor-Leste" },
+                    { 221, "TG", "TGO", "Togo" },
+                    { 222, "TK", "TKL", "Tokelau" },
+                    { 223, "TO", "TON", "Tonga" },
+                    { 224, "TT", "TTO", "Trinidad and Tobago" },
+                    { 225, "TN", "TUN", "Tunisia" },
+                    { 226, "TR", "TUR", "Turkey" },
+                    { 227, "TM", "TKM", "Turkmenistan" },
+                    { 228, "TC", "TCA", "Turks and Caicos Islands" },
+                    { 229, "TV", "TUV", "Tuvalu" },
+                    { 230, "UG", "UGA", "Uganda" },
+                    { 231, "UA", "UKR", "Ukraine" },
+                    { 232, "AE", "ARE", "United Arab Emirates" },
+                    { 233, "GB", "GBR", "United Kingdom" },
+                    { 234, "US", "USA", "United States" },
+                    { 235, "UM", "UMI", "United States Minor Outlying Islands" },
+                    { 236, "UY", "URY", "Uruguay" },
+                    { 237, "UZ", "UZB", "Uzbekistan" },
+                    { 238, "VU", "VUT", "Vanuatu" },
+                    { 239, "VA", "VAT", "Vatican City" },
+                    { 240, "VE", "VEN", "Venezuela" },
+                    { 241, "VN", "VNM", "Viet Nam" },
+                    { 242, "VG", "VGB", "Virgin Islands, British" },
+                    { 243, "VI", "VIR", "Virgin Islands, U.S." },
+                    { 244, "WF", "WLF", "Wallis and Futuna" },
+                    { 245, "EH", "ESH", "Western Sahara" },
+                    { 246, "YE", "YEM", "Yemen" },
+                    { 247, "ZM", "ZMB", "Zambia" },
+                    { 248, "ZW", "ZWE", "Zimbabwe" },
+                    { 249, "AX", "ALA", "Åland Islands" }
                 });
 
             migrationBuilder.InsertData(
@@ -711,188 +1042,188 @@ namespace DAL.Migrations
                 columns: new[] { "id", "code", "name" },
                 values: new object[,]
                 {
-                    { 1, "", "" },
-                    { 2, "", "" },
-                    { 3, "", "" },
-                    { 4, "", "" },
-                    { 5, "", "" },
-                    { 6, "", "" },
-                    { 7, "", "" },
-                    { 8, "", "" },
-                    { 9, "", "" },
-                    { 10, "", "" },
-                    { 11, "", "" },
-                    { 12, "", "" },
-                    { 13, "", "" },
-                    { 14, "", "" },
-                    { 15, "", "" },
-                    { 16, "", "" },
-                    { 17, "", "" },
-                    { 18, "", "" },
-                    { 19, "", "" },
-                    { 20, "", "" },
-                    { 21, "", "" },
-                    { 22, "", "" },
-                    { 23, "", "" },
-                    { 24, "", "" },
-                    { 25, "", "" },
-                    { 26, "", "" },
-                    { 27, "", "" },
-                    { 28, "", "" },
-                    { 29, "", "" },
-                    { 30, "", "" },
-                    { 31, "", "" },
-                    { 32, "", "" },
-                    { 33, "", "" },
-                    { 34, "", "" },
-                    { 35, "", "" },
-                    { 36, "", "" },
-                    { 37, "", "" },
-                    { 38, "", "" },
-                    { 39, "", "" },
-                    { 40, "", "" },
-                    { 41, "", "" },
-                    { 42, "", "" },
-                    { 43, "", "" },
-                    { 44, "", "" },
-                    { 45, "", "" },
-                    { 46, "", "" },
-                    { 47, "", "" },
-                    { 48, "", "" },
-                    { 49, "", "" },
-                    { 50, "", "" },
-                    { 51, "", "" },
-                    { 52, "", "" },
-                    { 53, "", "" },
-                    { 54, "", "" },
-                    { 55, "", "" },
-                    { 56, "", "" },
-                    { 57, "", "" },
-                    { 58, "", "" },
-                    { 59, "", "" },
-                    { 60, "", "" },
-                    { 61, "", "" },
-                    { 62, "", "" },
-                    { 63, "", "" },
-                    { 64, "", "" },
-                    { 65, "", "" },
-                    { 66, "", "" },
-                    { 67, "", "" },
-                    { 68, "", "" },
-                    { 69, "", "" },
-                    { 70, "", "" },
-                    { 71, "", "" },
-                    { 72, "", "" },
-                    { 73, "", "" },
-                    { 74, "", "" },
-                    { 75, "", "" },
-                    { 76, "", "" },
-                    { 77, "", "" },
-                    { 78, "", "" },
-                    { 79, "", "" },
-                    { 80, "", "" },
-                    { 81, "", "" },
-                    { 82, "", "" },
-                    { 83, "", "" },
-                    { 84, "", "" },
-                    { 85, "", "" },
-                    { 86, "", "" },
-                    { 87, "", "" },
-                    { 88, "", "" },
-                    { 89, "", "" },
-                    { 90, "", "" },
-                    { 91, "", "" },
-                    { 92, "", "" },
-                    { 93, "", "" },
-                    { 94, "", "" },
-                    { 95, "", "" },
-                    { 96, "", "" },
-                    { 97, "", "" },
-                    { 98, "", "" },
-                    { 99, "", "" },
-                    { 100, "", "" },
-                    { 101, "", "" },
-                    { 102, "", "" },
-                    { 103, "", "" },
-                    { 104, "", "" },
-                    { 105, "", "" },
-                    { 106, "", "" },
-                    { 107, "", "" },
-                    { 108, "", "" },
-                    { 109, "", "" },
-                    { 110, "", "" },
-                    { 111, "", "" },
-                    { 112, "", "" },
-                    { 113, "", "" },
-                    { 114, "", "" },
-                    { 115, "", "" },
-                    { 116, "", "" },
-                    { 117, "", "" },
-                    { 118, "", "" },
-                    { 119, "", "" },
-                    { 120, "", "" },
-                    { 121, "", "" },
-                    { 122, "", "" },
-                    { 123, "", "" },
-                    { 124, "", "" },
-                    { 125, "", "" },
-                    { 126, "", "" },
-                    { 127, "", "" },
-                    { 128, "", "" },
-                    { 129, "", "" },
-                    { 130, "", "" },
-                    { 131, "", "" },
-                    { 132, "", "" },
-                    { 133, "", "" },
-                    { 134, "", "" },
-                    { 135, "", "" },
-                    { 136, "", "" },
-                    { 137, "", "" },
-                    { 138, "", "" },
-                    { 139, "", "" },
-                    { 140, "", "" },
-                    { 141, "", "" },
-                    { 142, "", "" },
-                    { 143, "", "" },
-                    { 144, "", "" },
-                    { 145, "", "" },
-                    { 146, "", "" },
-                    { 147, "", "" },
-                    { 148, "", "" },
-                    { 149, "", "" },
-                    { 150, "", "" },
-                    { 151, "", "" },
-                    { 152, "", "" },
-                    { 153, "", "" },
-                    { 154, "", "" },
-                    { 155, "", "" },
-                    { 156, "", "" },
-                    { 157, "", "" },
-                    { 158, "", "" },
-                    { 159, "", "" },
-                    { 160, "", "" },
-                    { 161, "", "" },
-                    { 162, "", "" },
-                    { 163, "", "" },
-                    { 164, "", "" },
-                    { 165, "", "" },
-                    { 166, "", "" },
-                    { 167, "", "" },
-                    { 168, "", "" },
-                    { 169, "", "" },
-                    { 170, "", "" },
-                    { 171, "", "" },
-                    { 172, "", "" },
-                    { 173, "", "" },
-                    { 174, "", "" },
-                    { 175, "", "" },
-                    { 176, "", "" },
-                    { 177, "", "" },
-                    { 178, "", "" },
-                    { 179, "", "" },
-                    { 180, "", "" },
-                    { 181, "", "" },
-                    { 182, "", "" }
+                    { 1, "aa", "Afar" },
+                    { 2, "ab", "Abkhazian" },
+                    { 3, "ae", "Avestan" },
+                    { 4, "af", "Afrikaans" },
+                    { 5, "ak", "Akan" },
+                    { 6, "am", "Amharic" },
+                    { 7, "an", "Aragonese" },
+                    { 8, "ar", "Arabic" },
+                    { 9, "as", "Assamese" },
+                    { 10, "av", "Avaric" },
+                    { 11, "ay", "Aymara" },
+                    { 12, "az", "Azerbaijani" },
+                    { 13, "ba", "Bashkir" },
+                    { 14, "be", "Belarusian" },
+                    { 15, "bg", "Bulgarian" },
+                    { 16, "bh", "Bihari languages" },
+                    { 17, "bi", "Bislama" },
+                    { 18, "bm", "Bambara" },
+                    { 19, "bn", "Bengali" },
+                    { 20, "bo", "Tibetan" },
+                    { 21, "br", "Breton" },
+                    { 22, "bs", "Bosnian" },
+                    { 23, "ca", "Catalan; Valencian" },
+                    { 24, "ce", "Chechen" },
+                    { 25, "ch", "Chamorro" },
+                    { 26, "co", "Corsican" },
+                    { 27, "cr", "Cree" },
+                    { 28, "cs", "Czech" },
+                    { 29, "cv", "Chuvash" },
+                    { 30, "cy", "Welsh" },
+                    { 31, "da", "Danish" },
+                    { 32, "de", "German" },
+                    { 33, "dv", "Divehi; Dhivehi; Maldivian" },
+                    { 34, "dz", "Dzongkha" },
+                    { 35, "ee", "Ewe" },
+                    { 36, "el", "Greek, Modern (1453-)" },
+                    { 37, "en", "English" },
+                    { 38, "eo", "Esperanto" },
+                    { 39, "es", "Spanish; Castilian" },
+                    { 40, "et", "Estonian" },
+                    { 41, "eu", "Basque" },
+                    { 42, "fa", "Persian" },
+                    { 43, "ff", "Fulah" },
+                    { 44, "fi", "Finnish" },
+                    { 45, "fj", "Fijian" },
+                    { 46, "fo", "Faroese" },
+                    { 47, "fr", "French" },
+                    { 48, "fy", "Western Frisian" },
+                    { 49, "ga", "Irish" },
+                    { 50, "gd", "Gaelic; Scomttish Gaelic" },
+                    { 51, "gl", "Galician" },
+                    { 52, "gn", "Guarani" },
+                    { 53, "gu", "Gujarati" },
+                    { 54, "gv", "Manx" },
+                    { 55, "ha", "Hausa" },
+                    { 56, "he", "Hebrew" },
+                    { 57, "hi", "Hindi" },
+                    { 58, "ho", "Hiri Motu" },
+                    { 59, "hr", "Croatian" },
+                    { 60, "ht", "Haitian; Haitian Creole" },
+                    { 61, "hu", "Hungarian" },
+                    { 62, "hy", "Armenian" },
+                    { 63, "hz", "Herero" },
+                    { 64, "id", "Indonesian" },
+                    { 65, "ie", "Interlingue; Occidental" },
+                    { 66, "ig", "Igbo" },
+                    { 67, "ii", "Sichuan Yi; Nuosu" },
+                    { 68, "ik", "Inupiaq" },
+                    { 69, "io", "Ido" },
+                    { 70, "is", "Icelandic" },
+                    { 71, "it", "Italian" },
+                    { 72, "iu", "Inuktitut" },
+                    { 73, "ja", "Japanese" },
+                    { 74, "jv", "Javanese" },
+                    { 75, "ka", "Georgian" },
+                    { 76, "kg", "Kongo" },
+                    { 77, "ki", "Kikuyu; Gikuyu" },
+                    { 78, "kj", "Kuanyama; Kwanyama" },
+                    { 79, "kk", "Kazakh" },
+                    { 80, "kl", "Kalaallisut; Greenlandic" },
+                    { 81, "km", "Central Khmer" },
+                    { 82, "kn", "Kannada" },
+                    { 83, "ko", "Korean" },
+                    { 84, "kr", "Kanuri" },
+                    { 85, "ks", "Kashmiri" },
+                    { 86, "ku", "Kurdish" },
+                    { 87, "kv", "Komi" },
+                    { 88, "kw", "Cornish" },
+                    { 89, "ky", "Kirghiz; Kyrgyz" },
+                    { 90, "la", "Latin" },
+                    { 91, "lb", "Luxembourgish; Letzeburgesch" },
+                    { 92, "lg", "Ganda" },
+                    { 93, "li", "Limburgan; Limburger; Limburgish" },
+                    { 94, "ln", "Lingala" },
+                    { 95, "lo", "Lao" },
+                    { 96, "lt", "Lithuanian" },
+                    { 97, "lu", "Luba-Katanga" },
+                    { 98, "lv", "Latvian" },
+                    { 99, "mg", "Malagasy" },
+                    { 100, "mh", "Marshallese" },
+                    { 101, "mi", "Maori" },
+                    { 102, "mk", "Macedonian" },
+                    { 103, "ml", "Malayalam" },
+                    { 104, "mn", "Mongolian" },
+                    { 105, "mr", "Marathi" },
+                    { 106, "ms", "Malay" },
+                    { 107, "mt", "Maltese" },
+                    { 108, "my", "Burmese" },
+                    { 109, "na", "Nauru" },
+                    { 110, "nb", "Bokmål, Norwegian; Norwegian Bokmål" },
+                    { 111, "nd", "Ndebele, North; North Ndebele" },
+                    { 112, "ne", "Nepali" },
+                    { 113, "ng", "Ndonga" },
+                    { 114, "nl", "Dutch; Flemish" },
+                    { 115, "nn", "Norwegian Nynorsk; Nynorsk, Norwegian" },
+                    { 116, "no", "Norwegian" },
+                    { 117, "nr", "Ndebele, South; South Ndebele" },
+                    { 118, "nv", "Navajo; Navaho" },
+                    { 119, "ny", "Chichewa; Chewa; Nyanja" },
+                    { 120, "oc", "Occitan (post 1500)" },
+                    { 121, "oj", "Ojibwa" },
+                    { 122, "om", "Oromo" },
+                    { 123, "or", "Oriya" },
+                    { 124, "os", "Ossetian; Ossetic" },
+                    { 125, "pa", "Panjabi; Punjabi" },
+                    { 126, "pi", "Pali" },
+                    { 127, "pl", "Polish" },
+                    { 128, "ps", "Pushto; Pashto" },
+                    { 129, "pt", "Portuguese" },
+                    { 130, "qu", "Quechua" },
+                    { 131, "rm", "Romansh" },
+                    { 132, "rn", "Rundi" },
+                    { 133, "ro", "Romanian; Moldavian; Moldovan" },
+                    { 134, "ru", "Russian" },
+                    { 135, "rw", "Kinyarwanda" },
+                    { 136, "sa", "Sanskrit" },
+                    { 137, "sc", "Sardinian" },
+                    { 138, "sd", "Sindhi" },
+                    { 139, "se", "Northern Sami" },
+                    { 140, "sg", "Sango" },
+                    { 141, "si", "Sinhala; Sinhalese" },
+                    { 142, "sk", "Slovak" },
+                    { 143, "sl", "Slovenian" },
+                    { 144, "sm", "Samoan" },
+                    { 145, "sn", "Shona" },
+                    { 146, "so", "Somali" },
+                    { 147, "sq", "Albanian" },
+                    { 148, "sr", "Serbian" },
+                    { 149, "ss", "Swati" },
+                    { 150, "st", "Sotho, Southern" },
+                    { 151, "su", "Sundanese" },
+                    { 152, "sv", "Swedish" },
+                    { 153, "sw", "Swahili" },
+                    { 154, "ta", "Tamil" },
+                    { 155, "te", "Telugu" },
+                    { 156, "tg", "Tajik" },
+                    { 157, "th", "Thai" },
+                    { 158, "ti", "Tigrinya" },
+                    { 159, "tk", "Turkmen" },
+                    { 160, "tl", "Tagalog" },
+                    { 161, "tn", "Tswana" },
+                    { 162, "to", "Tonga (Tonga Islands)" },
+                    { 163, "tr", "Turkish" },
+                    { 164, "ts", "Tsonga" },
+                    { 165, "tt", "Tatar" },
+                    { 166, "tw", "Twi" },
+                    { 167, "ty", "Tahitian" },
+                    { 168, "ug", "Uighur; Uyghur" },
+                    { 169, "uk", "Ukrainian" },
+                    { 170, "ur", "Urdu" },
+                    { 171, "uz", "Uzbek" },
+                    { 172, "ve", "Venda" },
+                    { 173, "vi", "Vietnamese" },
+                    { 174, "vo", "Volapük" },
+                    { 175, "wa", "Walloon" },
+                    { 176, "wo", "Wolof" },
+                    { 177, "xh", "Xhosa" },
+                    { 178, "yi", "Yiddish" },
+                    { 179, "yo", "Yoruba" },
+                    { 180, "za", "Zhuang; Chuang" },
+                    { 181, "zh", "Chinese" },
+                    { 182, "zu", "Zulu" }
                 });
 
             migrationBuilder.InsertData(
@@ -900,15 +1231,33 @@ namespace DAL.Migrations
                 columns: new[] { "id", "name" },
                 values: new object[,]
                 {
-                    { "admin", "admin" },
-                    { "employer", "employer" },
-                    { "freelancer", "freelancer" }
+                    { 1, "admin" },
+                    { 2, "employer" },
+                    { 3, "freelancer" },
+                    { 4, "moderator" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "skills",
+                columns: new[] { "id", "name" },
+                values: new object[,]
+                {
+                    { 1, "C#" },
+                    { 2, "Java" },
+                    { 3, "Python" },
+                    { 4, "JavaScript" },
+                    { 5, "SQL" },
+                    { 6, "AWS" },
+                    { 7, "Azure" },
+                    { 8, "Docker" },
+                    { 9, "Kubernetes" },
+                    { 10, "React" }
                 });
 
             migrationBuilder.InsertData(
                 table: "users",
-                columns: new[] { "id", "avatar_img", "created_at", "created_by", "display_name", "email", "external_provider", "external_provider_key", "modified_at", "modified_by", "password_hash", "role_id" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), null, new DateTime(2026, 1, 25, 14, 16, 3, 579, DateTimeKind.Utc).AddTicks(5164), new Guid("11111111-1111-1111-1111-111111111111"), "Admin", "admin@mail.com", null, null, new DateTime(2026, 1, 25, 14, 16, 3, 579, DateTimeKind.Utc).AddTicks(5170), new Guid("11111111-1111-1111-1111-111111111111"), "A5566B40AED28E094BC69898A81686A7A946BE9B664BAED105CA5CCEF9113CCC-9EB04467721120139D0760ED1A2CDED9", "admin" });
+                columns: new[] { "id", "avatar_img", "country_id", "created_at", "created_by", "display_name", "email", "external_provider", "external_provider_key", "modified_at", "modified_by", "password_hash", "role_id" },
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), null, null, new DateTime(2026, 2, 20, 18, 32, 13, 106, DateTimeKind.Utc).AddTicks(4221), new Guid("11111111-1111-1111-1111-111111111111"), "Admin", "admin@mail.com", null, null, new DateTime(2026, 2, 20, 18, 32, 13, 106, DateTimeKind.Utc).AddTicks(4231), new Guid("11111111-1111-1111-1111-111111111111"), "15E01B6145A9E46373CCA10674CE101CB3F3FAE6D9497ADDF60AF6FD694D59C2-3278A42A79D4753EAEC4EF1047B15DFA", 1 });
 
             migrationBuilder.CreateIndex(
                 name: "ix_bids_freelancer_id",
@@ -936,6 +1285,16 @@ namespace DAL.Migrations
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
+                name: "ix_contract_payments_contract_id",
+                table: "contract_payments",
+                column: "contract_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_contract_payments_milestone_id",
+                table: "contract_payments",
+                column: "milestone_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_contracts_created_by",
                 table: "contracts",
                 column: "created_by");
@@ -956,9 +1315,40 @@ namespace DAL.Migrations
                 column: "project_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_freelancers_country_id",
-                table: "freelancers",
-                column: "country_id");
+                name: "ix_dispute_resolutions_created_by",
+                table: "dispute_resolutions",
+                column: "created_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_dispute_resolutions_dispute_id",
+                table: "dispute_resolutions",
+                column: "dispute_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_dispute_resolutions_modified_by",
+                table: "dispute_resolutions",
+                column: "modified_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_disputes_created_by",
+                table: "disputes",
+                column: "created_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_disputes_modified_by",
+                table: "disputes",
+                column: "modified_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_employers_created_by",
+                table: "employers",
+                column: "created_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_employers_modified_by",
+                table: "employers",
+                column: "modified_by");
 
             migrationBuilder.CreateIndex(
                 name: "ix_freelancers_created_by",
@@ -969,17 +1359,6 @@ namespace DAL.Migrations
                 name: "ix_freelancers_modified_by",
                 table: "freelancers",
                 column: "modified_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_freelancers_user_id",
-                table: "freelancers",
-                column: "user_id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_freelancers_languages_languages_id",
-                table: "freelancers_languages",
-                column: "languages_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_freelancers_skills_skills_id",
@@ -1002,9 +1381,9 @@ namespace DAL.Migrations
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_messages_sender_id",
+                name: "ix_messages_receiver_id",
                 table: "messages",
-                column: "sender_id");
+                column: "receiver_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_payments_contract_id",
@@ -1012,28 +1391,18 @@ namespace DAL.Migrations
                 column: "contract_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payments_created_by",
-                table: "payments",
+                name: "ix_portfolio_created_by",
+                table: "portfolio",
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payments_modified_by",
-                table: "payments",
-                column: "modified_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_portfolio_items_created_by",
-                table: "portfolio_items",
-                column: "created_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_portfolio_items_freelancer_id",
-                table: "portfolio_items",
+                name: "ix_portfolio_freelancer_id",
+                table: "portfolio",
                 column: "freelancer_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_portfolio_items_modified_by",
-                table: "portfolio_items",
+                name: "ix_portfolio_modified_by",
+                table: "portfolio",
                 column: "modified_by");
 
             migrationBuilder.CreateIndex(
@@ -1067,26 +1436,6 @@ namespace DAL.Migrations
                 column: "project_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_proposals_created_by",
-                table: "proposals",
-                column: "created_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_proposals_freelancer_id",
-                table: "proposals",
-                column: "freelancer_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_proposals_modified_by",
-                table: "proposals",
-                column: "modified_by");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_proposals_project_id",
-                table: "proposals",
-                column: "project_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_quotes_freelancer_id",
                 table: "quotes",
                 column: "freelancer_id");
@@ -1102,6 +1451,21 @@ namespace DAL.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_reviews_contract_id",
+                table: "reviews",
+                column: "contract_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reviews_created_by",
+                table: "reviews",
+                column: "created_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reviews_modified_by",
+                table: "reviews",
+                column: "modified_by");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_user_wallets_created_by",
                 table: "user_wallets",
                 column: "created_by");
@@ -1110,6 +1474,11 @@ namespace DAL.Migrations
                 name: "ix_user_wallets_modified_by",
                 table: "user_wallets",
                 column: "modified_by");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_users_country_id",
+                table: "users",
+                column: "country_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_users_created_by",
@@ -1133,6 +1502,11 @@ namespace DAL.Migrations
                 column: "role_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_users_languages_language_id",
+                table: "users_languages",
+                column: "language_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_wallet_transactions_wallet_id",
                 table: "wallet_transactions",
                 column: "wallet_id");
@@ -1145,13 +1519,13 @@ namespace DAL.Migrations
                 name: "bids");
 
             migrationBuilder.DropTable(
-                name: "contract_milestones");
+                name: "contract_payments");
+
+            migrationBuilder.DropTable(
+                name: "dispute_resolutions");
 
             migrationBuilder.DropTable(
                 name: "employers");
-
-            migrationBuilder.DropTable(
-                name: "freelancers_languages");
 
             migrationBuilder.DropTable(
                 name: "freelancers_skills");
@@ -1163,7 +1537,7 @@ namespace DAL.Migrations
                 name: "payments");
 
             migrationBuilder.DropTable(
-                name: "portfolio_items");
+                name: "portfolio");
 
             migrationBuilder.DropTable(
                 name: "project_milestones");
@@ -1172,31 +1546,40 @@ namespace DAL.Migrations
                 name: "projects_categories");
 
             migrationBuilder.DropTable(
-                name: "proposals");
-
-            migrationBuilder.DropTable(
                 name: "quotes");
 
             migrationBuilder.DropTable(
                 name: "refresh_tokens");
 
             migrationBuilder.DropTable(
+                name: "reviews");
+
+            migrationBuilder.DropTable(
+                name: "users_languages");
+
+            migrationBuilder.DropTable(
                 name: "wallet_transactions");
 
             migrationBuilder.DropTable(
-                name: "languages");
+                name: "contract_milestones");
+
+            migrationBuilder.DropTable(
+                name: "disputes");
 
             migrationBuilder.DropTable(
                 name: "skills");
 
             migrationBuilder.DropTable(
-                name: "contracts");
-
-            migrationBuilder.DropTable(
                 name: "categories");
 
             migrationBuilder.DropTable(
+                name: "languages");
+
+            migrationBuilder.DropTable(
                 name: "user_wallets");
+
+            migrationBuilder.DropTable(
+                name: "contracts");
 
             migrationBuilder.DropTable(
                 name: "freelancers");
@@ -1205,10 +1588,10 @@ namespace DAL.Migrations
                 name: "projects");
 
             migrationBuilder.DropTable(
-                name: "countries");
+                name: "users");
 
             migrationBuilder.DropTable(
-                name: "users");
+                name: "countries");
 
             migrationBuilder.DropTable(
                 name: "roles");

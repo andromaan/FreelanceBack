@@ -400,20 +400,25 @@ public class FreelancerPortfolioControllerTests(IntegrationTestWebFactory factor
 
     public async Task InitializeAsync()
     {
+        var freelancerRole = RoleData.CreateRole(name: Settings.Roles.FreelancerRole);
+        var employerRole = RoleData.CreateRole(name: Settings.Roles.EmployerRole);
+        await Context.AddAsync(employerRole);
+        await Context.AddAsync(freelancerRole);
+        
         _freelancerUser = UserData.CreateTestUser(
             id: UserId,
             email: "freelancer@test.com",
-            roleId: Settings.Roles.FreelancerRole
+            roleId: freelancerRole.Id
         );
 
         _otherFreelancerUser = UserData.CreateTestUser(
             email: "otherfreelancer@test.com",
-            roleId: Settings.Roles.FreelancerRole
+            roleId: freelancerRole.Id
         );
 
         _employerUser = UserData.CreateTestUser(
             email: "employer@test.com",
-            roleId: Settings.Roles.EmployerRole
+            roleId: employerRole.Id
         );
 
         _freelancer = FreelancerData.CreateFreelancer(
