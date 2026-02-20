@@ -134,6 +134,7 @@ public class GoogleExternalLoginCommandHandler(
             var userWallet = new UserWallet
             {
                 Id = Guid.NewGuid(),
+                Currency = "UAH",
                 CreatedBy = createdUser.Id,
                 Balance = 0m
             };

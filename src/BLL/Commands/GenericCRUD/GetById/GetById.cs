@@ -4,7 +4,7 @@ using BLL.Services;
 using Domain.Common.Abstractions;
 using MediatR;
 
-namespace BLL.Commands;
+namespace BLL.Commands.GenericCRUD.GetById;
 
 public class GetById
 {

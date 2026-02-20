@@ -1,7 +1,7 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands;
 using BLL.Commands.Contracts;
+using BLL.Commands.GenericCRUD.Update;
 using BLL.ViewModels.Contract;
 using Domain.Models.Contracts;
 using MediatR;

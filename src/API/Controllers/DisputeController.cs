@@ -1,7 +1,11 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands;
 using BLL.Commands.Disputes;
+using BLL.Commands.GenericCRUD.Create;
+using BLL.Commands.GenericCRUD.Delete;
+using BLL.Commands.GenericCRUD.GetAll;
+using BLL.Commands.GenericCRUD.GetById;
+using BLL.Commands.GenericCRUD.Update;
 using BLL.ViewModels.Dispute;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

@@ -259,10 +259,10 @@ public static class ConfigureBusinessLogic
             {
                 ViewModelType = typeof(UserVM),
                 UpdateViewModelType = typeof(UpdateUserByAdminVM)
-            }, specificUpdateVMs: [typeof(UpdateUserLanguagesByAdminVM)]);
+            });
 
         services.AddUpdateByUserCommandHandler<User, Guid, UserVM, UpdateUserVM, IUserQueries>
-            (specificUpdateVMs: [typeof(UpdateUserLanguagesVM)]);
+            ();
 
         // registrations for Disputes
         services.RegisterCrudHandlers(

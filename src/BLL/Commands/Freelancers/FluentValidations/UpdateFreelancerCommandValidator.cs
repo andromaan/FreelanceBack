@@ -1,3 +1,4 @@
+using BLL.Commands.GenericCRUD.Update;
 using BLL.ViewModels.Freelancer;
 using FluentValidation;
 

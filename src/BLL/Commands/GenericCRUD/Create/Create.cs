@@ -5,7 +5,7 @@ using BLL.Services;
 using Domain.Common.Abstractions;
 using MediatR;
 
-namespace BLL.Commands;
+namespace BLL.Commands.GenericCRUD.Create;
 
 public class Create
 {

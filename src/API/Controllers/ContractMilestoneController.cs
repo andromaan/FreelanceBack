@@ -1,7 +1,7 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands;
 using BLL.Commands.ContractMilestones;
+using BLL.Commands.GenericCRUD.Update;
 using BLL.ViewModels;
 using BLL.ViewModels.ContractMilestone;
 using Domain.Models.Contracts;

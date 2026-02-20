@@ -6,7 +6,7 @@ using BLL.Services;
 using Domain.Common.Abstractions;
 using MediatR;
 
-namespace BLL.Commands;
+namespace BLL.Commands.GenericCRUD.Update;
 
 public class UpdateByUser
 {

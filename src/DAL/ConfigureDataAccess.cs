@@ -18,6 +18,7 @@ using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.RefreshTokens;
 using BLL.Common.Interfaces.Repositories.Reviews;
 using BLL.Common.Interfaces.Repositories.Skills;
+using BLL.Common.Interfaces.Repositories.UserLanguages;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserWallets;
 using BLL.Common.Interfaces.Repositories.WalletTransactions;
@@ -82,5 +83,6 @@ public static class ConfigureDataAccess
         services.AddRepository<DisputeRepository, IDisputeRepository, IDisputeQueries>();
         services.AddRepository<DisputeResolutionRepository, IDisputeResolutionRepository, IDisputeResolutionQueries>();
         services.AddRepository<PortfolioRepository, IPortfolioRepository, IPortfolioQueries>();
+        services.AddRepository<UserLanguageRepository, IUserLanguageRepository, IUserLanguageQueries>();
     }
 }

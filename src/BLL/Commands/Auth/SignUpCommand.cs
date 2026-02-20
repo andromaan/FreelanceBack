@@ -82,6 +82,7 @@ public class SignUpCommandHandler(
                 var userWallet = new UserWallet
                 {
                     Id = Guid.NewGuid(),
+                    Currency = "UAH",
                     CreatedBy = user.Id,
                     Balance = 0m
                 };

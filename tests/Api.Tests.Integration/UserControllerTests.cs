@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BLL;
 using BLL.ViewModels.User;
+using BLL.ViewModels.UserLanguage;
 using DAL.Extensions;
 using Domain.Models.Countries;
 using Domain.Models.Languages;
@@ -70,6 +71,46 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
+    [Fact]
+    public async Task ShouldGetMyselfAsUser()
+    {
+        // Arrange
+        SwitchUser(role: Settings.Roles.EmployerRole, userId: _testUser.Id);
+        
+        var userLanguage1 = new UserLanguage
+        {
+            UserId = _testUser.Id,
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+        
+        var userLanguage2 = new UserLanguage
+        {
+            UserId = _testUser.Id,
+            LanguageId = _language2.Id,
+            ProficiencyLevel = ProficiencyLevel.Intermediate
+        };
+        
+        await Context.AddAsync(userLanguage1);
+        await Context.AddAsync(userLanguage2);
+        await SaveChangesAsync();
+
+        // Act
+        var response = await Client.GetAsync("User/get-myself");
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        var userFromResponse = await JsonHelper.GetPayloadAsync<UserVM>(response);
+
+        userFromResponse.Id.Should().Be(_testUser.Id);
+        userFromResponse.Email.Should().Be(_testUser.Email);
+        userFromResponse.RoleId.Should().Be(_testUser.RoleId);
+        userFromResponse.Languages.Should().HaveCount(2);
+        userFromResponse.Languages.Should().Contain(l => l.LanguageId == _language1.Id && l.ProficiencyLevel == nameof(ProficiencyLevel.Advanced));
+        userFromResponse.Languages.Should().Contain(l => l.LanguageId == _language2.Id && l.ProficiencyLevel == nameof(ProficiencyLevel.Intermediate));
+    }
+    
     [Fact]
     public async Task ShouldGetUserById()
     {
@@ -468,18 +509,102 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
     }
 
     [Fact]
-    public async Task ShouldUpdateUserLanguages()
+    public async Task ShouldCreateUserLanguages()
     {
         SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
 
         // Arrange
-        var request = new UpdateUserLanguagesVM
+        var request1 = new CreateUserLanguageVM
         {
-            LanguageIds = new List<int> { _language1.Id, _language2.Id }
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+        
+        var request2 = new CreateUserLanguageVM
+        {
+            LanguageId = _language2.Id,
+            ProficiencyLevel = ProficiencyLevel.Intermediate
         };
 
         // Act
-        var response = await Client.PutAsJsonAsync("User/languages", request);
+        var response1 = await Client.PostAsJsonAsync("User/languages", request1);
+        var response2 = await Client.PostAsJsonAsync("User/languages", request2);
+
+        // Assert
+        response1.IsSuccessStatusCode.Should().BeTrue();
+        response2.IsSuccessStatusCode.Should().BeTrue();
+
+        var userFromDb = await Context.Set<User>()
+            .Include(f => f.Languages)
+            .FirstOrDefaultAsync(x => x.Id == _testUser.Id);
+
+        userFromDb.Should().NotBeNull();
+        userFromDb.Languages.Should().HaveCount(2);
+        userFromDb.Languages.Should().Contain(l => l.LanguageId == request1.LanguageId && l.ProficiencyLevel == request1.ProficiencyLevel);
+        userFromDb.Languages.Should().Contain(l => l.LanguageId == request2.LanguageId && l.ProficiencyLevel == request2.ProficiencyLevel);
+    }
+    
+    [Fact]
+    public async Task ShouldNotCreateUserLanguageWithInvalidProficiencyLevel()
+    {
+        SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
+
+        // Arrange
+        var request = new CreateUserLanguageVM
+        {
+            LanguageId = _language1.Id,
+            ProficiencyLevel = (ProficiencyLevel)int.MaxValue // Invalid proficiency level
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("User/languages", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+    
+    [Fact]
+    public async Task ShouldNotCreateUserLanguageWithInvalidLanguageId()
+    {
+        SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
+
+        // Arrange
+        var request = new CreateUserLanguageVM
+        {
+            LanguageId = int.MaxValue, // Non-existent language ID
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("User/languages", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+    
+    [Fact]
+    public async Task ShouldUpdateUserLanguage()
+    {
+        SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
+
+        // Arrange
+        var userLanguage = new UserLanguage
+        {
+            UserId = _testUser.Id,
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+        await Context.AddAsync(userLanguage);
+        await SaveChangesAsync();
+
+        var updateRequest = new UpdateUserLanguageVM
+        {
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Intermediate
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync("User/languages", updateRequest);
 
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
@@ -489,49 +614,86 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
             .FirstOrDefaultAsync(x => x.Id == _testUser.Id);
 
         userFromDb.Should().NotBeNull();
-        userFromDb.Languages.Should().HaveCount(2);
-        userFromDb.Languages.Should().Contain(l => l.Id == _language1.Id);
-        userFromDb.Languages.Should().Contain(l => l.Id == _language2.Id);
+        userFromDb.Languages.Should().HaveCount(1);
+        userFromDb.Languages.Should().Contain(l => l.LanguageId == updateRequest.LanguageId && l.ProficiencyLevel == updateRequest.ProficiencyLevel);
     }
 
     [Fact]
-    public async Task ShouldUpdateUserLanguagesWithEmptyList()
+    public async Task ShouldNotUpdateUserLanguageWithInvalidProficiencyLevel()
     {
+        SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
+
         // Arrange
-        var request = new UpdateUserLanguagesVM
+        var request = new UpdateUserLanguageVM
         {
-            LanguageIds = new List<int>()
+            LanguageId = _language1.Id,
+            ProficiencyLevel = (ProficiencyLevel)int.MaxValue // Invalid proficiency level
         };
 
         // Act
-        var response = await Client.PutAsJsonAsync("User/languages", request);
+        var response = await Client.PostAsJsonAsync("User/languages", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+    
+    [Fact]
+    public async Task ShouldNotUpdateUserLanguageWithInvalidLanguageId()
+    {
+        SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
+
+        // Arrange
+        var request = new UpdateUserLanguageVM
+        {
+            LanguageId = int.MaxValue, // Non-existent language ID
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("User/languages", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+    
+    [Fact]
+    public async Task ShouldDeleteUserLanguage()
+    {
+        SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
+
+        // Arrange
+        var userLanguage = new UserLanguage
+        {
+            UserId = _testUser.Id,
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+        await Context.AddAsync(userLanguage);
+        await SaveChangesAsync();
+
+        // Act
+        var response = await Client.DeleteAsync($"User/languages/{_language1.Id}");
 
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
 
         var userFromDb = await Context.Set<User>()
             .Include(f => f.Languages)
-            .FirstOrDefaultAsync(x => x.CreatedBy == _testUser.Id);
+            .FirstOrDefaultAsync(x => x.Id == _testUser.Id);
 
         userFromDb.Should().NotBeNull();
-        userFromDb.Languages.Should().BeEmpty();
+        userFromDb.Languages.Should().NotContain(l => l.LanguageId == _language1.Id);
     }
-
-
+    
     [Fact]
-    public async Task ShouldNotUpdateUserLanguagesBecauseLanguageNotFound()
+    public async Task ShouldNotDeleteUserLanguageWithInvalidLanguageId()
     {
-        // Arrange
-        var request = new UpdateUserLanguagesVM
-        {
-            LanguageIds = new List<int> { int.MaxValue }
-        };
+        SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
 
         // Act
-        var response = await Client.PutAsJsonAsync("User/languages", request);
+        var response = await Client.DeleteAsync($"User/languages/{int.MaxValue}"); // Non-existent language ID
 
         // Assert
-        response.IsSuccessStatusCode.Should().BeFalse();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 

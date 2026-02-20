@@ -8,7 +8,7 @@ public class UserProvider(IHttpContextAccessor context, AppDbContext appDbContex
 {
     private readonly IHttpContextAccessor _context = context ?? throw new ArgumentNullException(nameof(context));
 
-    public async Task<Guid> GetUserId()
+    public async Task<Guid> GetUserId(CancellationToken cancellationToken = default)
     {
         var userIdStr = _context.HttpContext!.User.FindFirst("id")?.Value;
 
@@ -20,7 +20,7 @@ public class UserProvider(IHttpContextAccessor context, AppDbContext appDbContex
         var userIdGuid = Guid.Parse(userIdStr);
 
         if (await appDbContext.Users.AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Id == userIdGuid, CancellationToken.None) == null)
+                .FirstOrDefaultAsync(u => u.Id == userIdGuid, cancellationToken) == null)
         {
             throw new InvalidOperationException("User does not exist.");
         }
