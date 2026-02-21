@@ -65,7 +65,7 @@ public class CreateReviewHandler(
             entity.ReviewedUserId = contract.CreatedBy;
         }
 
-        if (await reviewQueries.GetByReviewerAndReviewedUser(reviewerId, entity.ReviewedUserId, cancellationToken) is
+        if (await reviewQueries.GetByReviewerAndReviewedUser(reviewerId, entity.ReviewedUserId, contract.Id, cancellationToken) is
             not null)
         {
             return ServiceResponse.GetResponse(

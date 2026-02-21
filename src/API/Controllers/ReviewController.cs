@@ -23,6 +23,14 @@ public class ReviewController(ISender sender)
         var result = await Sender.Send(query, ct);
         return GetResult(result);
     }
+
+    [HttpGet("average-rating/{reviewedUserEmail}")]
+    public async Task<IActionResult> GetAverageRating(string reviewedUserEmail, CancellationToken ct)
+    {
+        var query = new GetAverageRatingQuery { ReviewedUserEmail = reviewedUserEmail };
+        var result = await Sender.Send(query, ct);
+        return GetResult(result);
+    }
     
     [HttpGet("by-user")]
     public async Task<IActionResult> GetByGetReviewer(CancellationToken ct)
