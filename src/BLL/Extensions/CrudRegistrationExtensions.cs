@@ -1,8 +1,8 @@
-using BLL.Commands.GenericCRUD.Create;
-using BLL.Commands.GenericCRUD.Delete;
-using BLL.Commands.GenericCRUD.GetAll;
-using BLL.Commands.GenericCRUD.GetById;
-using BLL.Commands.GenericCRUD.Update;
+using BLL.CommandsQueries.GenericCRUD.Create;
+using BLL.CommandsQueries.GenericCRUD.Delete;
+using BLL.CommandsQueries.GenericCRUD.GetAll;
+using BLL.CommandsQueries.GenericCRUD.GetById;
+using BLL.CommandsQueries.GenericCRUD.Update;
 using BLL.Common.Interfaces.Repositories;
 using BLL.Services;
 using Domain.Common.Abstractions;

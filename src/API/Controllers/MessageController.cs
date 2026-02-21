@@ -1,6 +1,6 @@
 using API.Controllers.Common;
-using BLL.Commands.GenericCRUD.Create;
-using BLL.Commands.Messages;
+using BLL.CommandsQueries.GenericCRUD.Create;
+using BLL.CommandsQueries.Messages;
 using BLL.ViewModels;
 using BLL.ViewModels.Message;
 using MediatR;

@@ -1,5 +1,5 @@
-using BLL.Commands.GenericCRUD.Create;
-using BLL.Commands.GenericCRUD.Update;
+using BLL.CommandsQueries.GenericCRUD.Create;
+using BLL.CommandsQueries.GenericCRUD.Update;
 using BLL.Common.Interfaces.Repositories;
 using BLL.Services;
 using Domain.Common.Abstractions;

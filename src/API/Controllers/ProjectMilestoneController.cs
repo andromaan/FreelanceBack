@@ -1,6 +1,6 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.ProjectMilestones;
+using BLL.CommandsQueries.ProjectMilestones;
 using BLL.ViewModels;
 using BLL.ViewModels.ProjectMilestone;
 using Domain.Models.Projects;

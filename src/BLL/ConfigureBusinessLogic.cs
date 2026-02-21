@@ -18,6 +18,7 @@ using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Reviews;
+using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Extensions;
@@ -40,8 +41,10 @@ using BLL.ViewModels.Project;
 using BLL.ViewModels.ProjectMilestone;
 using BLL.ViewModels.Quote;
 using BLL.ViewModels.Reviews;
+using BLL.ViewModels.Roles;
 using BLL.ViewModels.Skill;
 using BLL.ViewModels.User;
+using Domain.Models.Auth;
 using Domain.Models.Contracts;
 using Domain.Models.Countries;
 using Domain.Models.Disputes;
@@ -118,6 +121,9 @@ public static class ConfigureBusinessLogic
             .WithScopedLifetime()
         );
 
+        // registrations for Roles
+        services.AddQueriesHandlers<Role, int, RoleVM, IRoleQueries>();
+        
         // registrations for Country
         services.RegisterCrudHandlers(
             new CrudRegistration<Country, int, ICountryQueries>

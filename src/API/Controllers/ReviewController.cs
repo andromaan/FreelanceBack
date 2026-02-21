@@ -1,6 +1,6 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.Reviews;
+using BLL.CommandsQueries.Reviews;
 using BLL.ViewModels.Reviews;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

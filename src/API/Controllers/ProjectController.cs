@@ -1,8 +1,8 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.GenericCRUD.GetAll;
-using BLL.Commands.GenericCRUD.Update;
-using BLL.Commands.Projects;
+using BLL.CommandsQueries.GenericCRUD.GetAll;
+using BLL.CommandsQueries.GenericCRUD.Update;
+using BLL.CommandsQueries.Projects;
 using BLL.ViewModels;
 using BLL.ViewModels.Project;
 using MediatR;

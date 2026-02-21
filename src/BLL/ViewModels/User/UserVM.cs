@@ -1,4 +1,5 @@
 using BLL.ViewModels.Country;
+using BLL.ViewModels.Roles;
 using BLL.ViewModels.UserLanguage;
 
 namespace BLL.ViewModels.User;
@@ -8,6 +9,7 @@ public class UserVM
     public Guid Id { get; set; }
     public string Email { get; set; } = string.Empty;
     public int RoleId { get; set; }
+    public RoleVM? Role { get; set; }
     public string? AvatarImg { get; set; }
     public CountryVM? Country { get; set; }
     public List<UserLanguageVM> Languages { get; set; } = [];

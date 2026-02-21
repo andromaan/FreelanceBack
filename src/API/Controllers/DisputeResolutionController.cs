@@ -1,9 +1,9 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.GenericCRUD.Create;
-using BLL.Commands.GenericCRUD.Delete;
-using BLL.Commands.GenericCRUD.GetAll;
-using BLL.Commands.GenericCRUD.GetById;
+using BLL.CommandsQueries.GenericCRUD.Create;
+using BLL.CommandsQueries.GenericCRUD.Delete;
+using BLL.CommandsQueries.GenericCRUD.GetAll;
+using BLL.CommandsQueries.GenericCRUD.GetById;
 using BLL.ViewModels.DisputeResolution;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

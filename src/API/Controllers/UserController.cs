@@ -1,8 +1,10 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.UserLanguages;
-using BLL.Commands.Users;
+using BLL.CommandsQueries.GenericCRUD.GetAll;
+using BLL.CommandsQueries.UserLanguages;
+using BLL.CommandsQueries.Users;
 using BLL.ViewModels;
+using BLL.ViewModels.Roles;
 using BLL.ViewModels.User;
 using BLL.ViewModels.UserLanguage;
 using Domain.Models.Users;
@@ -19,6 +21,14 @@ namespace API.Controllers;
 public class UserController(ISender sender)
     : GenericCrudController<Guid, UserVM, CreateUserByAdminVM, UpdateUserByAdminVM>(sender)
 {
+    [HttpGet("roles")]
+    public async Task<IActionResult> GetRoles(CancellationToken ct)
+    {
+        var command = new GetAll.Query<RoleVM>();
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+    
     [HttpGet("get-myself")]
     public async Task<IActionResult> GetMyself(CancellationToken ct)
     {
