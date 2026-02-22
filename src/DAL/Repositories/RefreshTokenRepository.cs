@@ -21,8 +21,20 @@ public class RefreshTokenRepository(AppDbContext appDbContext, IUserProvider use
 
     public async Task MakeAllRefreshTokensExpiredForUser(Guid userId, CancellationToken token)
     {
-        await _appDbContext.RefreshTokens.Where(t => t.UserId == userId)
-            .ExecuteUpdateAsync(updates =>
-                updates.SetProperty(t => t.IsUsed, true), token);
+        // ExecuteUpdateAsync не працює з InMemory провайдером
+        // Використовуємо універсальний підхід
+        var tokensToExpire = await _appDbContext.RefreshTokens
+            .Where(t => t.UserId == userId && !t.IsUsed)
+            .ToListAsync(token);
+
+        foreach (var refreshToken in tokensToExpire)
+        {
+            refreshToken.IsUsed = true;
+        }
+
+        if (tokensToExpire.Any())
+        {
+            await _appDbContext.SaveChangesAsync(token);
+        }
     }
 }
