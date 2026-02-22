@@ -51,6 +51,7 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
         CancellationToken cancellationToken)
     {
         var user = await _appDbContext.Users
+            .Include(u => u.Role)
             .FirstOrDefaultAsync(
                 u => u.ExternalProvider == loginProvider &&
                      u.ExternalProviderKey == providerKey,

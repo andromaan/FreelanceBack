@@ -16,10 +16,6 @@ using Domain.Models.Projects;
 
 namespace BLL.CommandsQueries.ContractMilestones.Handlers;
 
-/// <summary>
-/// Unified handler for ContractMilestone status update that combines validation and processing.
-/// Replaces UpdateContractMilestoneStatusValidator.
-/// </summary>
 public class UpdateContractMilestoneStatusEmployerHandler(
     IUserWalletRepository userWalletRepository,
     IWalletTransactionRepository walletTransactionRepository,
@@ -31,143 +27,218 @@ public class UpdateContractMilestoneStatusEmployerHandler(
     IContractPaymentRepository contractPaymentRepository,
     IProjectRepository projectRepository,
     IProjectQueries projectQueries
-)
-    : IUpdateHandler<ContractMilestone, UpdContractMilestoneStatusEmployerVM>
+) : IUpdateHandler<ContractMilestone, UpdContractMilestoneStatusEmployerVM>
 {
     public async Task<ServiceResponse?> HandleAsync(
         ContractMilestone existingEntity,
         UpdContractMilestoneStatusEmployerVM updateModel,
         CancellationToken cancellationToken)
     {
-        // Validation: Check if milestone is already approved
-        if (existingEntity.Status == ContractMilestoneStatus.Approved)
-        {
-            return ServiceResponse.GetResponse(
-                "Cannot change the status of an approved contract milestone.",
-                false, null, HttpStatusCode.BadRequest);
-        }
-
-        // Validation: Milestone can only be set to 'InProgress' if it is currently 'Submitted'
-        if (updateModel.Status == ContractMilestoneEmployerStatus.InProgress &&
-            existingEntity.Status != ContractMilestoneStatus.Submitted)
-        {
-            return ServiceResponse.GetResponse(
-                "Milestone status can only be set to 'InProgress' if it is currently 'Submitted'.",
-                false, null, HttpStatusCode.BadRequest);
-        }
-
-        // Validation: Only milestones with 'Submitted' status can be updated by the employer
-        if (existingEntity.Status != ContractMilestoneStatus.Submitted)
-        {
-            return ServiceResponse.GetResponse(
-                "Only milestones with 'Submitted' status can be updated by the employer.",
-                false, null, HttpStatusCode.BadRequest);
-        }
+        var validationError = ValidateMilestoneStatus(existingEntity);
+        if (validationError is not null)
+            return validationError;
 
         var contract = await contractQueries.GetByIdAsync(existingEntity.ContractId, cancellationToken);
 
-        // Validation: Check wallet balance if approving
+        var otherMilestones = (await contractMilestoneQueries
+                .GetByContractIdAsync(existingEntity.ContractId, cancellationToken))
+            .Where(m => m.Id != existingEntity.Id)
+            .ToList();
+
+        var areAllOtherMilestonesFinished = otherMilestones
+            .All(m => m.Status is ContractMilestoneStatus.Approved or ContractMilestoneStatus.Rejected);
+
         if (updateModel.Status == ContractMilestoneEmployerStatus.Approved)
         {
-            var paymentResult = await ProcessPayment(existingEntity, contract, cancellationToken);
-            if (paymentResult != null)
-                return paymentResult;
+            var paymentError = await ProcessPaymentAsync(
+                existingEntity, contract!, otherMilestones, areAllOtherMilestonesFinished, cancellationToken);
+
+            if (paymentError is not null)
+                return paymentError;
         }
 
-        // Processing: Update contract status if all milestones are approved or rejected
-        var contractStatusChangeResult =
-            await UpdateContractStatusIfNeeded(existingEntity, contract, updateModel, cancellationToken);
-        if (contractStatusChangeResult != null)
-            return contractStatusChangeResult;
-
+        if (areAllOtherMilestonesFinished && updateModel.Status == ContractMilestoneEmployerStatus.Approved)
+        {
+            var completionError = await CompleteContractAndProjectAsync(contract!, cancellationToken);
+            if (completionError is not null)
+                return completionError;
+        }
 
         mapper.Map(updateModel, existingEntity);
-
-        // Processing: No additional processing needed, return mapped entity
+        
         return ServiceResponse.Ok();
     }
 
-    private async Task<ServiceResponse?> UpdateContractStatusIfNeeded(ContractMilestone existingEntity,
-        Contract? contract, UpdContractMilestoneStatusEmployerVM updateModel, CancellationToken cancellationToken)
+    private static ServiceResponse? ValidateMilestoneStatus(
+        ContractMilestone milestone)
     {
-        var contractMilestonesByContract =
-            (await contractMilestoneQueries.GetByContractIdAsync(existingEntity.ContractId, cancellationToken))
-            .ToList();
+        if (milestone.Status == ContractMilestoneStatus.Approved)
+            return BadRequest("Cannot change the status of an approved contract milestone.");
 
-        var isAllMilestonesCompleted = contractMilestonesByContract.Where(m => m.Id != existingEntity.Id)
-            .All(m => m is { Status: ContractMilestoneStatus.Approved or ContractMilestoneStatus.Rejected });
-        var isUpdatedModelCompleted = updateModel is
-            { Status: ContractMilestoneEmployerStatus.Approved };
+        if (milestone.Status != ContractMilestoneStatus.Submitted)
+            return BadRequest("Only milestones with 'Submitted' status can be updated by the employer.");
 
-        if (isAllMilestonesCompleted && isUpdatedModelCompleted)
+        return null;
+    }
+
+    // --- Contract & Project Completion ---
+
+    private async Task<ServiceResponse?> CompleteContractAndProjectAsync(
+        Contract contract,
+        CancellationToken cancellationToken)
+    {
+        contract.Status = ContractStatus.Completed;
+
+        var project = await projectQueries.GetByIdAsync(contract.ProjectId, cancellationToken);
+        project!.Status = ProjectStatus.Completed;
+
+        try
         {
-            contract!.Status = ContractStatus.Completed;
-            
-            var project = await projectQueries.GetByIdAsync(contract.ProjectId, cancellationToken);
-            project!.Status = ProjectStatus.Completed;
-            
-            try
+            await projectRepository.UpdateAsync(project, cancellationToken);
+            await contractRepository.UpdateAsync(contract, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            return ServiceResponse.InternalError(e.Message, e.InnerException);
+        }
+
+        return null;
+    }
+
+    // --- Payment Processing ---
+
+    private async Task<ServiceResponse?> ProcessPaymentAsync(
+        ContractMilestone milestone,
+        Contract contract,
+        List<ContractMilestone> otherMilestones,
+        bool isLastMilestone,
+        CancellationToken cancellationToken)
+    {
+        var freelancer = await freelancerQueries.GetByIdAsync(contract.FreelancerId, cancellationToken);
+        var freelancerUserId = freelancer!.CreatedBy;
+
+        var milestoneError = await ProcessMilestonePaymentAsync(
+            milestone, contract, freelancerUserId, cancellationToken);
+
+        if (milestoneError is not null)
+            return milestoneError;
+
+        if (isLastMilestone)
+        {
+            var remainingAmount = contract.AgreedRate - otherMilestones.Sum(m => m.Amount) - milestone.Amount;
+
+            if (remainingAmount > 0)
             {
-                await projectRepository.UpdateAsync(project, cancellationToken);
-                await contractRepository.UpdateAsync(contract, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                return ServiceResponse.InternalError(e.Message, e.InnerException);
+                var finalError = await ProcessFinalPaymentAsync(
+                    milestone, contract, freelancerUserId, remainingAmount, cancellationToken);
+
+                if (finalError is not null)
+                    return finalError;
             }
         }
 
         return null;
     }
 
-    private async Task<ServiceResponse?> ProcessPayment(ContractMilestone existingEntity,
-        Contract? contract,
+    private async Task<ServiceResponse?> ProcessMilestonePaymentAsync(
+        ContractMilestone milestone,
+        Contract contract,
+        Guid freelancerUserId,
         CancellationToken cancellationToken)
     {
-        var freelancer = await freelancerQueries.GetByIdAsync(contract!.FreelancerId, cancellationToken);
-
-        var employerWallet = await userWalletRepository.WithdrawAsync(existingEntity.CreatedBy,
-            existingEntity.Amount, cancellationToken);
+        var employerWallet = await userWalletRepository.WithdrawAsync(
+            milestone.CreatedBy, milestone.Amount, cancellationToken);
 
         if (employerWallet is null)
-        {
-            return ServiceResponse.GetResponse(
-                "Insufficient funds in the employer's wallet to approve this milestone.",
-                false, null, HttpStatusCode.BadRequest);
-        }
+            return BadRequest("Insufficient funds in the employer's wallet to approve this milestone.");
 
-        var freelancerWallet =
-            await userWalletRepository.DepositAsync(freelancer!.CreatedBy, existingEntity.Amount,
-                cancellationToken);
+        var freelancerWallet = await userWalletRepository.DepositAsync(
+            freelancerUserId, milestone.Amount, cancellationToken);
 
-        await walletTransactionRepository.CreateAsync(new WalletTransaction
-        {
-            Id = Guid.NewGuid(),
-            Amount = -existingEntity.Amount,
-            TransactionDate = DateTime.UtcNow,
-            TransactionType = "Payment for milestone",
-            WalletId = employerWallet.Id,
-        }, cancellationToken);
+        await RecordTransferAsync(
+            employerWallet.Id, freelancerWallet!.Id,
+            milestone.Amount,
+            debitType: "Payment for milestone",
+            creditType: "Received payment for milestone",
+            cancellationToken);
 
-        await walletTransactionRepository.CreateAsync(new WalletTransaction
-        {
-            Id = Guid.NewGuid(),
-            Amount = existingEntity.Amount,
-            TransactionDate = DateTime.UtcNow,
-            TransactionType = "Received payment for milestone",
-            WalletId = freelancerWallet!.Id,
-        }, cancellationToken);
+        await RecordContractPaymentAsync(contract.Id, milestone.Id, milestone.Amount, cancellationToken);
 
+        return null;
+    }
+
+    private async Task<ServiceResponse?> ProcessFinalPaymentAsync(
+        ContractMilestone milestone,
+        Contract contract,
+        Guid freelancerUserId,
+        decimal amount,
+        CancellationToken cancellationToken)
+    {
+        var employerWallet = await userWalletRepository.WithdrawAsync(
+            milestone.CreatedBy, amount, cancellationToken);
+
+        if (employerWallet is null)
+            return BadRequest("Insufficient funds in the employer's wallet to process the final payment for contract completion.");
+
+        var freelancerWallet = await userWalletRepository.DepositAsync(
+            freelancerUserId, amount, cancellationToken);
+
+        await RecordTransferAsync(
+            employerWallet.Id, freelancerWallet!.Id,
+            amount,
+            debitType: "Final payment for contract completion",
+            creditType: "Received final payment for contract completion",
+            cancellationToken);
+
+        await RecordContractPaymentAsync(contract.Id, milestone.Id, amount, cancellationToken);
+
+        return null;
+    }
+
+    // --- Helpers ---
+
+    private async Task RecordTransferAsync(
+        Guid fromWalletId,
+        Guid toWalletId,
+        decimal amount,
+        string debitType,
+        string creditType,
+        CancellationToken cancellationToken)
+    {
+        await walletTransactionRepository.CreateAsync(
+            CreateWalletTransaction(-amount, debitType, fromWalletId), cancellationToken);
+
+        await walletTransactionRepository.CreateAsync(
+            CreateWalletTransaction(amount, creditType, toWalletId), cancellationToken);
+    }
+
+    private async Task RecordContractPaymentAsync(
+        Guid contractId,
+        Guid milestoneId,
+        decimal amount,
+        CancellationToken cancellationToken)
+    {
         await contractPaymentRepository.CreateAsync(new ContractPayment
         {
             Id = Guid.NewGuid(),
-            ContractId = contract.Id,
-            MilestoneId = existingEntity.Id,
-            Amount = existingEntity.Amount,
+            ContractId = contractId,
+            MilestoneId = milestoneId,
+            Amount = amount,
             PaymentDate = DateTime.UtcNow,
             PaymentMethod = "Wallet"
         }, cancellationToken);
-
-        return null;
     }
+
+    private static WalletTransaction CreateWalletTransaction(decimal amount, string type, Guid walletId) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            Amount = amount,
+            TransactionDate = DateTime.UtcNow,
+            TransactionType = type,
+            WalletId = walletId
+        };
+
+    private static ServiceResponse BadRequest(string message) =>
+        ServiceResponse.GetResponse(message, false, null, HttpStatusCode.BadRequest);
 }
