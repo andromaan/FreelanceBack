@@ -1,9 +1,12 @@
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces;
+using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Services;
+using BLL.Services.Notifications;
 using BLL.ViewModels.Bid;
+using Domain.Models.Notifications;
 using Domain.Models.Projects;
 
 namespace BLL.CommandsQueries.Bids;
@@ -15,7 +18,9 @@ namespace BLL.CommandsQueries.Bids;
 public class CreateBidHandler(
     IProjectQueries projectQueries,
     IUserProvider userProvider,
-    IFreelancerQueries freelancerQueries)
+    IFreelancerQueries freelancerQueries,
+    IEmployerQueries employerQueries,
+    INotificationService notificationService)
     : ICreateHandler<Bid, CreateBidVM>
 {
     public async Task<ServiceResponse?> HandleAsync(
@@ -48,7 +53,19 @@ public class CreateBidHandler(
 
         entity.FreelancerId = existingFreelancer.Id;
 
+        // Notify: Find employer (owner of the project) and send notification
+        var employer = await employerQueries.GetByUserId(existingProject.CreatedBy, cancellationToken);
+        if (employer is not null)
+        {
+            await notificationService.SendAsync(
+                message: $"You received a new bid of {createModel.Amount:C} on your project \"{existingProject.Title}\".",
+                type: NotificationType.NewBidReceived,
+                userId: existingProject.CreatedBy,
+                cancellationToken: cancellationToken);
+        }
+
         // Return success with processed entity
         return ServiceResponse.Ok();
     }
 }
+

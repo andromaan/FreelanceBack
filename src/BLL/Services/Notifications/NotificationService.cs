@@ -1,0 +1,44 @@
+using BLL.Common.Interfaces.Repositories.Notifications;
+using BLL.Hubs;
+using Domain.Models.Notifications;
+using Microsoft.AspNetCore.SignalR;
+
+namespace BLL.Services.Notifications;
+
+public class NotificationService(
+    INotificationRepository notificationRepository,
+    IHubContext<NotificationHub> hubContext)
+    : INotificationService
+{
+    public async Task SendAsync(
+        string message,
+        NotificationType type,
+        Guid? userId,
+        CancellationToken cancellationToken = default)
+    {
+        // 1. Зберігаємо в БД
+        var notification = new Notification
+        {
+            Id = Guid.NewGuid(),
+            Message = message,
+            Type = type,
+            IsRead = false,
+            SentAt = DateTime.UtcNow,
+            UserId = userId
+        };
+
+        await notificationRepository.CreateAsync(notification, cancellationToken);
+
+        // 2. Надсилаємо через SignalR
+        if (userId is null)
+        {
+            await hubContext.Clients.All
+                .SendAsync("ReceiveNotification", notification, cancellationToken);
+        }
+        else
+        {
+            await hubContext.Clients.User(userId.ToString()!)
+                .SendAsync("ReceiveNotification", notification, cancellationToken);
+        }
+    }
+}

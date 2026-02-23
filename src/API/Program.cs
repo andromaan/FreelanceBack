@@ -2,6 +2,7 @@ using API.Modules;
 using API.Services.UserProvider;
 using BLL;
 using BLL.Common.Interfaces;
+using BLL.Hubs;
 using BLL.Middlewares;
 using DAL;
 using Microsoft.Extensions.FileProviders;
@@ -22,6 +23,8 @@ builder.Services.AddScoped<IUserProvider, UserProvider>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddSignalR();
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
@@ -34,7 +37,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors(options => options
-    .WithOrigins("http://localhost:3000", "https://localhost:3000")
+    // .WithOrigins("http://localhost:3000", "https://localhost:3000")
+    .SetIsOriginAllowed(_ => true)
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials()
@@ -51,6 +55,8 @@ if (!app.Environment.IsEnvironment("Test"))
 app.MapControllers();
 
 app.UseMiddleware<MiddlewareExceptionsHandling>();
+
+app.MapHub<NotificationHub>("/notifications");
 
 var imagesPath = Path.Combine(builder.Environment.ContentRootPath, Settings.ImagesPathSettings.ImagesPath);
 
@@ -73,7 +79,6 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(imagesPath),
     RequestPath = $"/{Settings.ImagesPathSettings.StaticFileRequestPath}"
 });
-
 
 app.Run();
 

@@ -4,6 +4,7 @@ using Domain.Models.Auth;
 using Domain.Models.Disputes;
 using Domain.Models.Employers;
 using Domain.Models.Freelance;
+using Domain.Models.Notifications;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Dispute> Disputes { get; set; }
     public DbSet<DisputeResolution> DisputeResolutions { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -22,8 +22,10 @@ using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Extensions;
+using BLL.Hubs;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
+using BLL.Services.Notifications;
 using BLL.Services.PasswordHasher;
 using BLL.ViewModels.Bid;
 using BLL.ViewModels.Category;
@@ -59,6 +61,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -92,6 +95,9 @@ public static class ConfigureBusinessLogic
             options.AddPolicy(Settings.Roles.AdminOrFreelancer,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.FreelancerRole));
         });
+
+        // SignalR: використовуємо кастомний провайдер userId (читає claim "id")
+        builder.Services.AddSingleton<IUserIdProvider, NotificationUserIdProvider>();
     }
 
     private static void AddMediatrConfig(this IServiceCollection services)
@@ -123,7 +129,7 @@ public static class ConfigureBusinessLogic
 
         // registrations for Roles
         services.AddQueriesHandlers<Role, int, RoleVM, IRoleQueries>();
-        
+
         // registrations for Country
         services.RegisterCrudHandlers(
             new CrudRegistration<Country, int, ICountryQueries>
@@ -292,6 +298,7 @@ public static class ConfigureBusinessLogic
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IImageService, ImageService>();
+        services.AddScoped<INotificationService, NotificationService>();
     }
 
     private static void AddJwtTokenAuth(this IServiceCollection services, WebApplicationBuilder builder)
@@ -327,6 +334,23 @@ public static class ConfigureBusinessLogic
                         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AuthSettings:key"]!)),
                     ValidIssuer = builder.Configuration["AuthSettings:issuer"],
                     ValidAudience = builder.Configuration["AuthSettings:audience"]
+                };
+
+                // SignalR передає токен через query string (WebSocket не підтримує заголовки)
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/notifications"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
     }
