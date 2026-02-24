@@ -26,7 +26,6 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            // new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new("id", user.Id.ToString()),
             new("email", user.Email),
             new("role", user.Role!.Name)

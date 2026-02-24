@@ -79,7 +79,7 @@ public class Repository<TEntity, TKey>(AppDbContext appDbContext, IUserProvider 
         return await query.FirstOrDefaultAsync(e => e.Id!.Equals(id), token);
     }
 
-    public async Task<(List<TEntity> Entities, int TotalCount)> GetPaginatedAsync(int page, int pageSize,
+    public virtual async Task<(List<TEntity> Entities, int TotalCount)> GetPaginatedAsync(int page, int pageSize,
         CancellationToken token = default)
     {
         var query = appDbContext.Set<TEntity>()

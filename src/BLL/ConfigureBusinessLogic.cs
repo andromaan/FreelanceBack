@@ -13,6 +13,7 @@ using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
+using BLL.Common.Interfaces.Repositories.Notifications;
 using BLL.Common.Interfaces.Repositories.Portfolios;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
@@ -38,6 +39,7 @@ using BLL.ViewModels.Employer;
 using BLL.ViewModels.Freelancer;
 using BLL.ViewModels.Language;
 using BLL.ViewModels.Message;
+using BLL.ViewModels.Notification;
 using BLL.ViewModels.Portfolio;
 using BLL.ViewModels.Project;
 using BLL.ViewModels.ProjectMilestone;
@@ -54,6 +56,7 @@ using Domain.Models.Employers;
 using Domain.Models.Freelance;
 using Domain.Models.Languages;
 using Domain.Models.Messaging;
+using Domain.Models.Notifications;
 using Domain.Models.Projects;
 using Domain.Models.Reviews;
 using Domain.Models.Users;
@@ -291,6 +294,19 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(DisputeResolutionVM),
                 CreateViewModelType = typeof(CreateDisputeResolutionVM)
             });
+
+        // registrations for Notifications
+        services.AddUpdateByUserCommandHandler<
+            Notification,
+            Guid,
+            NotificationVM,
+            UpdateNotificationVM,
+            INotificationQueries>();
+
+        services.AddQueriesHandlers<Notification,
+            Guid,
+            NotificationVM,
+            INotificationQueries>(filterViewModel: typeof(FilterNotificationVM));
     }
 
     private static void AddServices(this IServiceCollection services)
@@ -359,7 +375,7 @@ public static class ConfigureBusinessLogic
     {
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "freelance", Version = "v1" });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "Freelance Marketplace API", Version = "v1" });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
