@@ -18,6 +18,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Tests.Integration", "te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestsData", "tests\TestsData\TestsData.csproj", "{94901309-8E83-4FB9-86FD-B21C2A366C0C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{24462C6D-56FB-4415-BE1A-931669CEC290}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.env.example = .env.example
+		docker-compose.yml = docker-compose.yml
+		Dockerfile = Dockerfile
+		.env = .env
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
