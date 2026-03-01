@@ -9,6 +9,13 @@ public class ServiceResponse
     public object? Data { get; set; }
     public HttpStatusCode StatusCode { get; set; }
 
+    public object ToResponse() => new
+    {
+        Message,
+        Success,
+        Data
+    };
+
     public static ServiceResponse GetResponse(string message, bool success, object? data, HttpStatusCode statusCode)
     {
         return new ServiceResponse
@@ -34,7 +41,7 @@ public class ServiceResponse
     {
         return GetResponse(message, false, data, HttpStatusCode.InternalServerError);
     }
-        
+
     public static ServiceResponse NotFound(string message, object? data = null)
     {
         return GetResponse(message, false, data, HttpStatusCode.NotFound);
@@ -44,7 +51,7 @@ public class ServiceResponse
     {
         return GetResponse(message, false, data, HttpStatusCode.Forbidden);
     }
-    
+
     public static ServiceResponse Unauthorized(string message, object? data = null)
     {
         return GetResponse(message, false, data, HttpStatusCode.Unauthorized);

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BLL;
 using BLL.ViewModels.Dispute;
+using Domain.Models.Auth;
 using Domain.Models.Contracts;
 using Domain.Models.Disputes;
 using Domain.Models.Freelance;
@@ -23,6 +24,7 @@ public class DisputeControllerTests(IntegrationTestWebFactory factory)
     private Freelancer _freelancer = null!;
     private Contract _contract = null!;
     private Dispute _existingDispute = null!;
+    private Role _freelancerRole = null!;
 
     [Fact]
     public async Task ShouldCreateDispute()
@@ -98,7 +100,7 @@ public class DisputeControllerTests(IntegrationTestWebFactory factory)
         // Arrange
         var freelancerUser2 = UserData.CreateTestUser(
             email: "freelancer2@mail.com",
-            roleId: Settings.Roles.FreelancerRole);
+            roleId: _freelancerRole.Id);
         
         var freelancer2 = FreelancerData.CreateFreelancer(userId: freelancerUser2.Id);
         
@@ -263,15 +265,20 @@ public class DisputeControllerTests(IntegrationTestWebFactory factory)
 
     public async Task InitializeAsync()
     {
+        _freelancerRole = RoleData.CreateRole(name: Settings.Roles.FreelancerRole);
+        var employerRole = RoleData.CreateRole(name: Settings.Roles.EmployerRole);
+        await Context.AddAsync(employerRole);
+        await Context.AddAsync(_freelancerRole);
+        
         _employerUser = UserData.CreateTestUser(
             id: UserId,
             email: "employer@test.com",
-            roleId: Settings.Roles.EmployerRole
+            roleId: employerRole.Id
         );
 
         _freelancerUser = UserData.CreateTestUser(
             email: "freelancer@test.com",
-            roleId: Settings.Roles.FreelancerRole
+            roleId: _freelancerRole.Id
         );
 
         _project = ProjectData.CreateProject(userId: _employerUser.Id);

@@ -10,5 +10,5 @@ public class Review : AuditableEntity<Guid>
     public Contract Contract { get; set; } = null!;
     public decimal Rating { get; set; }
     public string ReviewText { get; set; } = string.Empty;
-    public string ReviewerRoleId { get; set; } = null!;
+    public int ReviewerRoleId { get; set; }
 }

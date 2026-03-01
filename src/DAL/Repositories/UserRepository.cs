@@ -13,26 +13,25 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
-    public async Task<User?> GetByEmailAsync(string email, CancellationToken token, bool includes = false)
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken token, bool includes = true)
     {
         return await GetUserAsync(u => u.Email == email, token, includes);
     }
 
     public override async Task<User?> GetByIdAsync(Guid id, CancellationToken token, bool asNoTracking = false)
     {
-        return await base.GetByIdAsync(id, token, asNoTracking,
-            // user => user.Role!,
-            user => user.Languages,
-            user => user.Country!);
+        return await GetUserAsync(u => u.Id == id, token);
     }
 
     private async Task<User?> GetUserAsync(Expression<Func<User, bool>> predicate, CancellationToken token,
-        bool includes = false)
+        bool includes = true)
     {
         if (includes)
         {
             return await _appDbContext.Users
                 .Include(ur => ur.Role)
+                .Include(u => u.Languages)
+                .Include(u => u.Country)
                 .FirstOrDefaultAsync(predicate, token);
         }
 
@@ -52,6 +51,7 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
         CancellationToken cancellationToken)
     {
         var user = await _appDbContext.Users
+            .Include(u => u.Role)
             .FirstOrDefaultAsync(
                 u => u.ExternalProvider == loginProvider &&
                      u.ExternalProviderKey == providerKey,
@@ -84,10 +84,6 @@ public class UserRepository(AppDbContext appDbContext, IUserProvider userProvide
 
     public async Task<User?> GetByUser(Guid userId, CancellationToken cancellationToken)
     {
-        return await _appDbContext.Users
-            // .Include(u => u.Role)
-            .Include(u => u.Languages)
-            .Include(u => u.Country)
-            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+        return await GetUserAsync(u => u.Id == userId, cancellationToken);
     }
 }

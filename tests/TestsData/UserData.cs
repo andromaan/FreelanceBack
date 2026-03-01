@@ -5,7 +5,7 @@ namespace TestsData;
 public class UserData
 {
     public static User CreateTestUser(Guid? id = null, string? email = null, string? displayName = null,
-        string? roleId = null)
+        int roleId = 1)
     {
         var userId = id ?? Guid.NewGuid();
         return new User
@@ -14,8 +14,8 @@ public class UserData
             Email = email ?? $"user_{userId}@test.com",
             DisplayName = displayName ?? $"user_{userId}",
             PasswordHash = string.Empty,
-            RoleId = roleId ?? "test-role",
-            CreatedBy = userId
+            RoleId = roleId,
+            CreatedBy = userId,
         };
     }
 }

@@ -207,7 +207,10 @@ public class ProjectControllerTests(IntegrationTestWebFactory factory)
 
     public async Task InitializeAsync()
     {
-        _employerUser = UserData.CreateTestUser(UserId, roleId: Settings.Roles.EmployerRole);
+        var employerRole = RoleData.CreateRole(name: Settings.Roles.EmployerRole);
+        await Context.AddAsync(employerRole);
+        
+        _employerUser = UserData.CreateTestUser(UserId, roleId: employerRole.Id);
         _project = ProjectData.CreateProject(userId: UserId);
         
         await Context.AddAsync(_employerUser);

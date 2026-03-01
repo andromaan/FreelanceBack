@@ -90,9 +90,12 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Domain.Models.Auth.Role", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -107,22 +110,22 @@ namespace DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "admin",
+                            Id = 1,
                             Name = "admin"
                         },
                         new
                         {
-                            Id = "employer",
+                            Id = 2,
                             Name = "employer"
                         },
                         new
                         {
-                            Id = "freelancer",
+                            Id = 3,
                             Name = "freelancer"
                         },
                         new
                         {
-                            Id = "moderator",
+                            Id = 4,
                             Name = "moderator"
                         });
                 });
@@ -3507,6 +3510,50 @@ namespace DAL.Migrations
                     b.ToTable("messages", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Notifications.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_read");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("message");
+
+                    b.Property<DateTime>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("type");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notifications");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_notifications_user_id");
+
+                    b.ToTable("notifications", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Payments.ContractPayment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4052,10 +4099,9 @@ namespace DAL.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("reviewed_user_id");
 
-                    b.Property<string>("ReviewerRoleId")
-                        .IsRequired()
+                    b.Property<int>("ReviewerRoleId")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("integer")
                         .HasColumnName("reviewer_role_id");
 
                     b.HasKey("Id")
@@ -4133,9 +4179,8 @@ namespace DAL.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password_hash");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer")
                         .HasColumnName("role_id");
 
                     b.HasKey("Id")
@@ -4163,15 +4208,40 @@ namespace DAL.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 2, 15, 19, 6, 37, 741, DateTimeKind.Utc).AddTicks(7553),
+                            CreatedAt = new DateTime(2026, 2, 23, 16, 3, 41, 551, DateTimeKind.Utc).AddTicks(1541),
                             CreatedBy = new Guid("11111111-1111-1111-1111-111111111111"),
                             DisplayName = "Admin",
                             Email = "admin@mail.com",
-                            ModifiedAt = new DateTime(2026, 2, 15, 19, 6, 37, 741, DateTimeKind.Utc).AddTicks(7559),
+                            ModifiedAt = new DateTime(2026, 2, 23, 16, 3, 41, 551, DateTimeKind.Utc).AddTicks(1546),
                             ModifiedBy = new Guid("11111111-1111-1111-1111-111111111111"),
-                            PasswordHash = "11EDDB55A343F1EA1EF2BCCB5BA82F4AB27F55D0C0AF3A562A893B831A1A3669-D332CC5FBB963F6E0A83CCA35158ED3D",
-                            RoleId = "admin"
+                            PasswordHash = "7B0171A7490C1BB725B169EBF09915C3B5F15F80FD97F5E3C1C690ED2057D261-B4662EFE42765101A1A649297F3CD73D",
+                            RoleId = 1
                         });
+                });
+
+            modelBuilder.Entity("Domain.Models.Users.UserLanguage", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("integer")
+                        .HasColumnName("language_id");
+
+                    b.Property<string>("ProficiencyLevel")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("proficiency_level");
+
+                    b.HasKey("UserId", "LanguageId")
+                        .HasName("pk_users_languages");
+
+                    b.HasIndex("LanguageId")
+                        .HasDatabaseName("ix_users_languages_language_id");
+
+                    b.ToTable("users_languages", (string)null);
                 });
 
             modelBuilder.Entity("FreelancerSkill", b =>
@@ -4191,25 +4261,6 @@ namespace DAL.Migrations
                         .HasDatabaseName("ix_freelancers_skills_skills_id");
 
                     b.ToTable("freelancers_skills", (string)null);
-                });
-
-            modelBuilder.Entity("LanguageUser", b =>
-                {
-                    b.Property<int>("LanguagesId")
-                        .HasColumnType("integer")
-                        .HasColumnName("languages_id");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("LanguagesId", "UserId")
-                        .HasName("pk_users_languages");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_users_languages_user_id");
-
-                    b.ToTable("users_languages", (string)null);
                 });
 
             modelBuilder.Entity("CategoryProject", b =>
@@ -4419,6 +4470,15 @@ namespace DAL.Migrations
                     b.Navigation("Receiver");
                 });
 
+            modelBuilder.Entity("Domain.Models.Notifications.Notification", b =>
+                {
+                    b.HasOne("Domain.Models.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_notifications_users_user_id");
+                });
+
             modelBuilder.Entity("Domain.Models.Payments.ContractPayment", b =>
                 {
                     b.HasOne("Domain.Models.Contracts.Contract", "Contract")
@@ -4616,6 +4676,27 @@ namespace DAL.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Domain.Models.Users.UserLanguage", b =>
+                {
+                    b.HasOne("Domain.Models.Languages.Language", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_users_languages_languages_language_id");
+
+                    b.HasOne("Domain.Models.Users.User", "User")
+                        .WithMany("Languages")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_users_languages_users_user_id");
+
+                    b.Navigation("Language");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FreelancerSkill", b =>
                 {
                     b.HasOne("Domain.Models.Freelance.Freelancer", null)
@@ -4633,23 +4714,6 @@ namespace DAL.Migrations
                         .HasConstraintName("fk_freelancers_skills_skill_skills_id");
                 });
 
-            modelBuilder.Entity("LanguageUser", b =>
-                {
-                    b.HasOne("Domain.Models.Languages.Language", null)
-                        .WithMany()
-                        .HasForeignKey("LanguagesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_users_languages_languages_languages_id");
-
-                    b.HasOne("Domain.Models.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_users_languages_users_user_id");
-                });
-
             modelBuilder.Entity("Domain.Models.Freelance.Freelancer", b =>
                 {
                     b.Navigation("Portfolio");
@@ -4660,6 +4724,11 @@ namespace DAL.Migrations
                     b.Navigation("Bids");
 
                     b.Navigation("Quotes");
+                });
+
+            modelBuilder.Entity("Domain.Models.Users.User", b =>
+                {
+                    b.Navigation("Languages");
                 });
 #pragma warning restore 612, 618
         }

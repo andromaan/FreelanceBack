@@ -1,4 +1,8 @@
-using BLL.Commands;
+using BLL.CommandsQueries.GenericCRUD.Create;
+using BLL.CommandsQueries.GenericCRUD.Delete;
+using BLL.CommandsQueries.GenericCRUD.GetAll;
+using BLL.CommandsQueries.GenericCRUD.GetById;
+using BLL.CommandsQueries.GenericCRUD.Update;
 using BLL.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

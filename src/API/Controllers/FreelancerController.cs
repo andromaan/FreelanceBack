@@ -1,7 +1,7 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands;
-using BLL.Commands.Freelancers;
+using BLL.CommandsQueries.Freelancers;
+using BLL.CommandsQueries.GenericCRUD.Update;
 using BLL.ViewModels.Freelancer;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

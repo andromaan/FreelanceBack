@@ -1,6 +1,6 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.Reviews;
+using BLL.CommandsQueries.Reviews;
 using BLL.ViewModels.Reviews;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,6 +20,14 @@ public class ReviewController(ISender sender)
     public async Task<IActionResult> GetByGetReviewedUser(string reviewedUserEmail, CancellationToken ct)
     {
         var query = new GetByReviewedUserQuery { ReviewedUserEmail = reviewedUserEmail };
+        var result = await Sender.Send(query, ct);
+        return GetResult(result);
+    }
+
+    [HttpGet("average-rating/{reviewedUserEmail}")]
+    public async Task<IActionResult> GetAverageRating(string reviewedUserEmail, CancellationToken ct)
+    {
+        var query = new GetAverageRatingQuery { ReviewedUserEmail = reviewedUserEmail };
         var result = await Sender.Send(query, ct);
         return GetResult(result);
     }

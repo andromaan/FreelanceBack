@@ -1,5 +1,5 @@
 using API.Controllers.Common;
-using BLL.Commands.Auth;
+using BLL.CommandsQueries.Auth;
 using BLL.ViewModels.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

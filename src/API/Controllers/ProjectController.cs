@@ -1,7 +1,8 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands;
-using BLL.Commands.Projects;
+using BLL.CommandsQueries.GenericCRUD.GetAll;
+using BLL.CommandsQueries.GenericCRUD.Update;
+using BLL.CommandsQueries.Projects;
 using BLL.ViewModels;
 using BLL.ViewModels.Project;
 using MediatR;
@@ -52,11 +53,11 @@ public class ProjectController(ISender sender)
         => await base.GetAllPaginated(pagedVm, ct);
 
     [AllowAnonymous]
-    [HttpGet("paginated-filtered")]
+    [HttpGet("search")]
     public async Task<IActionResult> GetAllPaginatedFiltered(PagedVM pagedVm, [FromQuery] FilterProjectVM filterProjectVm,
         CancellationToken ct)
     {
-        var query = new GetAllPaginated.QueryFiltered<FilterProjectVM>(pagedVm, filterProjectVm);
+        var query = new GetAllFilteredPaginated.Query<FilterProjectVM>(pagedVm, filterProjectVm);
         var result = await Sender.Send(query, ct);
         return GetResult(result);
     }

@@ -1,6 +1,6 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.Bids;
+using BLL.CommandsQueries.Bids;
 using BLL.ViewModels;
 using BLL.ViewModels.Bid;
 using MediatR;

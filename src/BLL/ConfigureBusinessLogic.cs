@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using BLL.Common.Behaviours;
@@ -13,16 +14,20 @@ using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
+using BLL.Common.Interfaces.Repositories.Notifications;
 using BLL.Common.Interfaces.Repositories.Portfolios;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.Reviews;
+using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Skills;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Extensions;
+using BLL.Hubs;
 using BLL.Services.ImageService;
 using BLL.Services.JwtService;
+using BLL.Services.Notifications;
 using BLL.Services.PasswordHasher;
 using BLL.ViewModels.Bid;
 using BLL.ViewModels.Category;
@@ -35,13 +40,16 @@ using BLL.ViewModels.Employer;
 using BLL.ViewModels.Freelancer;
 using BLL.ViewModels.Language;
 using BLL.ViewModels.Message;
+using BLL.ViewModels.Notification;
 using BLL.ViewModels.Portfolio;
 using BLL.ViewModels.Project;
 using BLL.ViewModels.ProjectMilestone;
 using BLL.ViewModels.Quote;
 using BLL.ViewModels.Reviews;
+using BLL.ViewModels.Roles;
 using BLL.ViewModels.Skill;
 using BLL.ViewModels.User;
+using Domain.Models.Auth;
 using Domain.Models.Contracts;
 using Domain.Models.Countries;
 using Domain.Models.Disputes;
@@ -49,6 +57,7 @@ using Domain.Models.Employers;
 using Domain.Models.Freelance;
 using Domain.Models.Languages;
 using Domain.Models.Messaging;
+using Domain.Models.Notifications;
 using Domain.Models.Projects;
 using Domain.Models.Reviews;
 using Domain.Models.Users;
@@ -56,6 +65,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -73,7 +83,11 @@ public static class ConfigureBusinessLogic
 
         services.AddJwtTokenAuth(builder);
         services.AddSwaggerAuth();
+        
+        // AutoMapper: scans all assemblies for profiles
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+        // Authorization: policy-based with role checks, policies defined in Settings.Roles
         services.AddAuthorization(options =>
         {
             options.AddPolicy(Settings.Roles.AnyAuthenticated,
@@ -89,6 +103,13 @@ public static class ConfigureBusinessLogic
             options.AddPolicy(Settings.Roles.AdminOrFreelancer,
                 policy => policy.RequireRole(Settings.Roles.AdminRole, Settings.Roles.FreelancerRole));
         });
+
+        // SignalR: використовуємо кастомний провайдер userId (читає claim "id")
+        builder.Services.AddSingleton<IUserIdProvider, NotificationUserIdProvider>();
+
+        var culture = new CultureInfo("uk-UA");
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
     }
 
     private static void AddMediatrConfig(this IServiceCollection services)
@@ -117,6 +138,9 @@ public static class ConfigureBusinessLogic
             .AsImplementedInterfaces()
             .WithScopedLifetime()
         );
+
+        // registrations for Roles
+        services.AddQueriesHandlers<Role, int, RoleVM, IRoleQueries>();
 
         // registrations for Country
         services.RegisterCrudHandlers(
@@ -259,10 +283,10 @@ public static class ConfigureBusinessLogic
             {
                 ViewModelType = typeof(UserVM),
                 UpdateViewModelType = typeof(UpdateUserByAdminVM)
-            }, specificUpdateVMs: [typeof(UpdateUserLanguagesByAdminVM)]);
+            });
 
         services.AddUpdateByUserCommandHandler<User, Guid, UserVM, UpdateUserVM, IUserQueries>
-            (specificUpdateVMs: [typeof(UpdateUserLanguagesVM)]);
+            ();
 
         // registrations for Disputes
         services.RegisterCrudHandlers(
@@ -279,6 +303,19 @@ public static class ConfigureBusinessLogic
                 ViewModelType = typeof(DisputeResolutionVM),
                 CreateViewModelType = typeof(CreateDisputeResolutionVM)
             });
+
+        // registrations for Notifications
+        services.AddUpdateByUserCommandHandler<
+            Notification,
+            Guid,
+            NotificationVM,
+            UpdateNotificationVM,
+            INotificationQueries>();
+
+        services.AddQueriesHandlers<Notification,
+            Guid,
+            NotificationVM,
+            INotificationQueries>(filterViewModel: typeof(FilterNotificationVM));
     }
 
     private static void AddServices(this IServiceCollection services)
@@ -286,6 +323,7 @@ public static class ConfigureBusinessLogic
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IImageService, ImageService>();
+        services.AddScoped<INotificationService, NotificationService>();
     }
 
     private static void AddJwtTokenAuth(this IServiceCollection services, WebApplicationBuilder builder)
@@ -322,6 +360,23 @@ public static class ConfigureBusinessLogic
                     ValidIssuer = builder.Configuration["AuthSettings:issuer"],
                     ValidAudience = builder.Configuration["AuthSettings:audience"]
                 };
+
+                // SignalR передає токен через query string (WebSocket не підтримує заголовки)
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/notifications"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
     }
 
@@ -329,7 +384,7 @@ public static class ConfigureBusinessLogic
     {
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "freelance", Version = "v1" });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "Freelance Marketplace API", Version = "v1" });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {

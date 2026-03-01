@@ -10,7 +10,7 @@ public class ReviewData
         Guid? reviewedUserId = null,
         decimal? rating = null,
         string? reviewText = null,
-        string? reviewerRoleId = null,
+        int? reviewerRoleId = null,
         Guid? createdById = null)
     {
         return new Review
@@ -20,7 +20,7 @@ public class ReviewData
             ReviewedUserId = reviewedUserId ?? Guid.NewGuid(),
             Rating = rating ?? 4.5m,
             ReviewText = reviewText ?? "Great work!",
-            ReviewerRoleId = reviewerRoleId ?? "Employer",
+            ReviewerRoleId = reviewerRoleId ?? 0,
             CreatedBy = createdById ?? Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow
         };

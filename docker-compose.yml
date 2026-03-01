@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16
+    container_name: freelance-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: freelance-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ghcr.io/andromaan/freelanceback:latest
+    container_name: freelance-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: "Server=db;Port=5432;Database=freelance-db;User Id=postgres;Password=postgres;"
+      GoogleAuthSettings__ClientId: ${GOOGLE_CLIENT_ID}
+      AuthSettings__key: ${JWT_KEY}
+      AuthSettings__issuer: ${JWT_ISSUER}
+      AuthSettings__audience: ${JWT_AUDIENCE}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - images_data:/app/wwwroot/images
+
+volumes:
+  postgres_data:
+  images_data:
+

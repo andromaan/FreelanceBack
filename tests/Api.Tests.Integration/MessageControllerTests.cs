@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using BLL;
 using BLL.ViewModels.Message;
 using Domain.Models.Contracts;
 using Domain.Models.Freelance;
@@ -291,8 +292,11 @@ public class MessageControllerTests(IntegrationTestWebFactory factory)
 
     public async Task InitializeAsync()
     {
+        var freelancerRole = RoleData.CreateRole(name: Settings.Roles.FreelancerRole);
+        await Context.AddAsync(freelancerRole);
+        
         _user = UserData.CreateTestUser(UserId, "sender@test.com");
-        _receiverUser = UserData.CreateTestUser(email: "receiver@test.com");
+        _receiverUser = UserData.CreateTestUser(email: "receiver@test.com", roleId: freelancerRole.Id);
         _project = ProjectData.CreateProject(userId: _user.Id);
         _freelancer = FreelancerData.CreateFreelancer(userId: _receiverUser.Id);
         _contract = ContractData.CreateContract(

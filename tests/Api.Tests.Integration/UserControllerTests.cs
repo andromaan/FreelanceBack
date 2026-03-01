@@ -2,7 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using BLL;
 using BLL.ViewModels.User;
+using BLL.ViewModels.UserLanguage;
 using DAL.Extensions;
+using Domain.Models.Auth;
 using Domain.Models.Countries;
 using Domain.Models.Languages;
 using Domain.Models.Users;
@@ -21,6 +23,10 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
     private Country _country = null!;
     private Language _language1 = null!;
     private Language _language2 = null!;
+    private Role _freelancerRole = null!;
+    private Role _employerRole = null!;
+    private Role _moderatorRole = null!;
+    private Role _adminRole = null!;
 
     [Fact]
     public async Task ShouldCreateUser()
@@ -30,7 +36,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         {
             Email = "newuser@test.com",
             Password = "Test123!@#",
-            RoleId = Settings.Roles.EmployerRole
+            RoleId = _employerRole.Id
         };
 
         // Act
@@ -60,7 +66,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         {
             Email = "unauthorized@test.com",
             Password = "Test123!@#",
-            RoleId = Settings.Roles.FreelancerRole
+            RoleId = _freelancerRole.Id
         };
 
         // Act
@@ -70,6 +76,46 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
+    [Fact]
+    public async Task ShouldGetMyselfAsUser()
+    {
+        // Arrange
+        SwitchUser(role: Settings.Roles.EmployerRole, userId: _testUser.Id);
+        
+        var userLanguage1 = new UserLanguage
+        {
+            UserId = _testUser.Id,
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+        
+        var userLanguage2 = new UserLanguage
+        {
+            UserId = _testUser.Id,
+            LanguageId = _language2.Id,
+            ProficiencyLevel = ProficiencyLevel.Intermediate
+        };
+        
+        await Context.AddAsync(userLanguage1);
+        await Context.AddAsync(userLanguage2);
+        await SaveChangesAsync();
+
+        // Act
+        var response = await Client.GetAsync("User/get-myself");
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        var userFromResponse = await JsonHelper.GetPayloadAsync<UserVM>(response);
+
+        userFromResponse.Id.Should().Be(_testUser.Id);
+        userFromResponse.Email.Should().Be(_testUser.Email);
+        userFromResponse.RoleId.Should().Be(_testUser.RoleId);
+        userFromResponse.Languages.Should().HaveCount(2);
+        userFromResponse.Languages.Should().Contain(l => l.LanguageId == _language1.Id && l.ProficiencyLevel == nameof(ProficiencyLevel.Advanced));
+        userFromResponse.Languages.Should().Contain(l => l.LanguageId == _language2.Id && l.ProficiencyLevel == nameof(ProficiencyLevel.Intermediate));
+    }
+    
     [Fact]
     public async Task ShouldGetUserById()
     {
@@ -118,7 +164,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
 
         userFromResponse.Id.Should().Be(_testUser.Id);
         userFromResponse.Email.Should().Be(_testUser.Email);
-        userFromResponse.RoleId.Should().Be(_testUser.RoleId);
+        userFromResponse.RoleId.Should().Be(_employerRole.Id);
     }
 
     [Fact]
@@ -177,7 +223,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         // Arrange
         var userToDelete = UserData.CreateTestUser(
             email: "delete@test.com",
-            roleId: Settings.Roles.FreelancerRole
+            roleId: _freelancerRole.Id
         );
         await Context.AddAsync(userToDelete);
         await SaveChangesAsync();
@@ -264,7 +310,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         {
             Email = _testUser.Email, // Existing email
             Password = "Test123!@#",
-            RoleId = Settings.Roles.FreelancerRole
+            RoleId = _freelancerRole.Id
         };
 
         // Act
@@ -351,7 +397,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         // Arrange
         var anotherUser = UserData.CreateTestUser(
             email: "another@test.com",
-            roleId: Settings.Roles.FreelancerRole
+            roleId: _freelancerRole.Id
         );
         await Context.AddAsync(anotherUser);
         await SaveChangesAsync();
@@ -408,7 +454,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         {
             Email = "userwithname@test.com",
             Password = "Test123!@#",
-            RoleId = Settings.Roles.FreelancerRole,
+            RoleId = _freelancerRole.Id,
             DisplayName = "John Doe"
         };
 
@@ -437,7 +483,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         {
             Email = "invalid-email", // Invalid email format
             Password = "Test123!@#",
-            RoleId = Settings.Roles.FreelancerRole
+            RoleId = _freelancerRole.Id
         };
 
         // Act
@@ -457,7 +503,7 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         {
             Email = "validuser@test.com",
             Password = "", // Empty password
-            RoleId = Settings.Roles.FreelancerRole
+            RoleId = _freelancerRole.Id
         };
 
         // Act
@@ -468,18 +514,102 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
     }
 
     [Fact]
-    public async Task ShouldUpdateUserLanguages()
+    public async Task ShouldCreateUserLanguages()
     {
-        SwitchUser(role: _testUser.RoleId, userId: _testUser.Id);
+        SwitchUser(role: _testUser.Role!.Name, userId: _testUser.Id);
 
         // Arrange
-        var request = new UpdateUserLanguagesVM
+        var request1 = new CreateUserLanguageVM
         {
-            LanguageIds = new List<int> { _language1.Id, _language2.Id }
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+        
+        var request2 = new CreateUserLanguageVM
+        {
+            LanguageId = _language2.Id,
+            ProficiencyLevel = ProficiencyLevel.Intermediate
         };
 
         // Act
-        var response = await Client.PutAsJsonAsync("User/languages", request);
+        var response1 = await Client.PostAsJsonAsync("User/languages", request1);
+        var response2 = await Client.PostAsJsonAsync("User/languages", request2);
+
+        // Assert
+        response1.IsSuccessStatusCode.Should().BeTrue();
+        response2.IsSuccessStatusCode.Should().BeTrue();
+
+        var userFromDb = await Context.Set<User>()
+            .Include(f => f.Languages)
+            .FirstOrDefaultAsync(x => x.Id == _testUser.Id);
+
+        userFromDb.Should().NotBeNull();
+        userFromDb.Languages.Should().HaveCount(2);
+        userFromDb.Languages.Should().Contain(l => l.LanguageId == request1.LanguageId && l.ProficiencyLevel == request1.ProficiencyLevel);
+        userFromDb.Languages.Should().Contain(l => l.LanguageId == request2.LanguageId && l.ProficiencyLevel == request2.ProficiencyLevel);
+    }
+    
+    [Fact]
+    public async Task ShouldNotCreateUserLanguageWithInvalidProficiencyLevel()
+    {
+        SwitchUser(role: _testUser.Role!.Name, userId: _testUser.Id);
+
+        // Arrange
+        var request = new CreateUserLanguageVM
+        {
+            LanguageId = _language1.Id,
+            ProficiencyLevel = (ProficiencyLevel)int.MaxValue // Invalid proficiency level
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("User/languages", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+    
+    [Fact]
+    public async Task ShouldNotCreateUserLanguageWithInvalidLanguageId()
+    {
+        SwitchUser(role: _testUser.Role!.Name, userId: _testUser.Id);
+
+        // Arrange
+        var request = new CreateUserLanguageVM
+        {
+            LanguageId = int.MaxValue, // Non-existent language ID
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("User/languages", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+    
+    [Fact]
+    public async Task ShouldUpdateUserLanguage()
+    {
+        SwitchUser(role: _testUser.Role!.Name, userId: _testUser.Id);
+
+        // Arrange
+        var userLanguage = new UserLanguage
+        {
+            UserId = _testUser.Id,
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+        await Context.AddAsync(userLanguage);
+        await SaveChangesAsync();
+
+        var updateRequest = new UpdateUserLanguageVM
+        {
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Intermediate
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync("User/languages", updateRequest);
 
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
@@ -489,49 +619,86 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
             .FirstOrDefaultAsync(x => x.Id == _testUser.Id);
 
         userFromDb.Should().NotBeNull();
-        userFromDb.Languages.Should().HaveCount(2);
-        userFromDb.Languages.Should().Contain(l => l.Id == _language1.Id);
-        userFromDb.Languages.Should().Contain(l => l.Id == _language2.Id);
+        userFromDb.Languages.Should().HaveCount(1);
+        userFromDb.Languages.Should().Contain(l => l.LanguageId == updateRequest.LanguageId && l.ProficiencyLevel == updateRequest.ProficiencyLevel);
     }
 
     [Fact]
-    public async Task ShouldUpdateUserLanguagesWithEmptyList()
+    public async Task ShouldNotUpdateUserLanguageWithInvalidProficiencyLevel()
     {
+        SwitchUser(role: _testUser.Role!.Name, userId: _testUser.Id);
+
         // Arrange
-        var request = new UpdateUserLanguagesVM
+        var request = new UpdateUserLanguageVM
         {
-            LanguageIds = new List<int>()
+            LanguageId = _language1.Id,
+            ProficiencyLevel = (ProficiencyLevel)int.MaxValue // Invalid proficiency level
         };
 
         // Act
-        var response = await Client.PutAsJsonAsync("User/languages", request);
+        var response = await Client.PostAsJsonAsync("User/languages", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+    
+    [Fact]
+    public async Task ShouldNotUpdateUserLanguageWithInvalidLanguageId()
+    {
+        SwitchUser(role: _testUser.Role!.Name, userId: _testUser.Id);
+
+        // Arrange
+        var request = new UpdateUserLanguageVM
+        {
+            LanguageId = int.MaxValue, // Non-existent language ID
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("User/languages", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+    
+    [Fact]
+    public async Task ShouldDeleteUserLanguage()
+    {
+        SwitchUser(role: _testUser.Role!.Name, userId: _testUser.Id);
+
+        // Arrange
+        var userLanguage = new UserLanguage
+        {
+            UserId = _testUser.Id,
+            LanguageId = _language1.Id,
+            ProficiencyLevel = ProficiencyLevel.Advanced
+        };
+        await Context.AddAsync(userLanguage);
+        await SaveChangesAsync();
+
+        // Act
+        var response = await Client.DeleteAsync($"User/languages/{_language1.Id}");
 
         // Assert
         response.IsSuccessStatusCode.Should().BeTrue();
 
         var userFromDb = await Context.Set<User>()
             .Include(f => f.Languages)
-            .FirstOrDefaultAsync(x => x.CreatedBy == _testUser.Id);
+            .FirstOrDefaultAsync(x => x.Id == _testUser.Id);
 
         userFromDb.Should().NotBeNull();
-        userFromDb.Languages.Should().BeEmpty();
+        userFromDb.Languages.Should().NotContain(l => l.LanguageId == _language1.Id);
     }
-
-
+    
     [Fact]
-    public async Task ShouldNotUpdateUserLanguagesBecauseLanguageNotFound()
+    public async Task ShouldNotDeleteUserLanguageWithInvalidLanguageId()
     {
-        // Arrange
-        var request = new UpdateUserLanguagesVM
-        {
-            LanguageIds = new List<int> { int.MaxValue }
-        };
+        SwitchUser(role: _testUser.Role!.Name, userId: _testUser.Id);
 
         // Act
-        var response = await Client.PutAsJsonAsync("User/languages", request);
+        var response = await Client.DeleteAsync($"User/languages/{int.MaxValue}"); // Non-existent language ID
 
         // Assert
-        response.IsSuccessStatusCode.Should().BeFalse();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -545,21 +712,21 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         {
             Email = "employer@test.com",
             Password = "Test123!@#",
-            RoleId = Settings.Roles.EmployerRole
+            RoleId = _employerRole.Id
         };
 
         var freelancerRequest = new CreateUserByAdminVM
         {
             Email = "freelancer@test.com",
             Password = "Test123!@#",
-            RoleId = Settings.Roles.FreelancerRole
+            RoleId = _freelancerRole.Id
         };
 
         var moderatorRequest = new CreateUserByAdminVM
         {
             Email = "moderator@test.com",
             Password = "Test123!@#",
-            RoleId = Settings.Roles.ModeratorRole
+            RoleId = _moderatorRole.Id
         };
 
         // Act
@@ -576,16 +743,22 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         var freelancer = await JsonHelper.GetPayloadAsync<UserVM>(freelancerResponse);
         var moderator = await JsonHelper.GetPayloadAsync<UserVM>(moderatorResponse);
 
-        employer.RoleId.Should().Be(Settings.Roles.EmployerRole);
-        freelancer.RoleId.Should().Be(Settings.Roles.FreelancerRole);
-        moderator.RoleId.Should().Be(Settings.Roles.ModeratorRole);
+        employer.RoleId.Should().Be(_employerRole.Id);
+        freelancer.RoleId.Should().Be(_freelancerRole.Id);
+        moderator.RoleId.Should().Be(_moderatorRole.Id);
     }
     
     public async Task InitializeAsync()
     {
-        // var employerRole = new Role { Id = Settings.Roles.EmployerRole, Name = Settings.Roles.EmployerRole };
-        // var freelancerRole = new Role { Id = Settings.Roles.FreelancerRole, Name = Settings.Roles.FreelancerRole };
-        // var adminRole = new Role { Id = Settings.Roles.AdminRole, Name = Settings.Roles.AdminRole, };
+        _employerRole = RoleData.CreateRole(name: Settings.Roles.EmployerRole);
+        _freelancerRole = RoleData.CreateRole(name: Settings.Roles.FreelancerRole);
+        _moderatorRole = RoleData.CreateRole(name: Settings.Roles.ModeratorRole);
+        _adminRole = RoleData.CreateRole(name: Settings.Roles.AdminRole);
+        
+        await Context.AddAsync(_employerRole);
+        await Context.AddAsync(_freelancerRole);
+        await Context.AddAsync(_adminRole);
+        await Context.AddAsync(_moderatorRole);
         
         _country = CountryData.MainCountry;
         _language1 = new Language { Id = 0, Name = "English", Code = "EN" };
@@ -594,17 +767,15 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
         _adminUser = UserData.CreateTestUser(
             id: UserId,
             email: "admin@test.com",
-            roleId: Settings.Roles.AdminRole
+            roleId: _adminRole.Id
         );
 
         _testUser = UserData.CreateTestUser(
             email: "testuser@test.com",
-            roleId: Settings.Roles.EmployerRole
+            roleId: _employerRole.Id
         );
 
-        // await Context.AddAsync(employerRole);
-        // await Context.AddAsync(freelancerRole);
-        // await Context.AddAsync(adminRole);
+
         await Context.AddAsync(_country);
         await Context.AddAsync(_language1);
         await Context.AddAsync(_language2);
@@ -616,9 +787,9 @@ public class UserControllerTests(IntegrationTestWebFactory factory)
     public async Task DisposeAsync()
     {
         Context.Set<User>().RemoveRange(Context.Set<User>());
-        // Context.Set<Role>().RemoveRange(Context.Set<Role>());
         Context.Set<Country>().RemoveRange(Context.Set<Country>());
         Context.Set<Language>().RemoveRange(Context.Set<Language>());
+        Context.Set<Role>().RemoveRange(Context.Set<Role>());
         await SaveChangesAsync();
     }
 }

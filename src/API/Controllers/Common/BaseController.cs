@@ -7,6 +7,6 @@ public class BaseController : ControllerBase
 {
     protected IActionResult GetResult(ServiceResponse serviceResponse)
     {
-        return StatusCode((int)serviceResponse.StatusCode, serviceResponse);
+        return StatusCode((int)serviceResponse.StatusCode, serviceResponse.ToResponse());
     }
 }

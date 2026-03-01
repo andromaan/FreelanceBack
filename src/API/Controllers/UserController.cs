@@ -1,9 +1,13 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands;
-using BLL.Commands.Users;
+using BLL.CommandsQueries.GenericCRUD.GetAll;
+using BLL.CommandsQueries.UserLanguages;
+using BLL.CommandsQueries.Users;
 using BLL.ViewModels;
+using BLL.ViewModels.Roles;
 using BLL.ViewModels.User;
+using BLL.ViewModels.UserLanguage;
+using Domain.Models.Users;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -17,6 +21,14 @@ namespace API.Controllers;
 public class UserController(ISender sender)
     : GenericCrudController<Guid, UserVM, CreateUserByAdminVM, UpdateUserByAdminVM>(sender)
 {
+    [HttpGet("roles")]
+    public async Task<IActionResult> GetRoles(CancellationToken ct)
+    {
+        var command = new GetAll.Query<RoleVM>();
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+    
     [HttpGet("get-myself")]
     public async Task<IActionResult> GetMyself(CancellationToken ct)
     {
@@ -32,17 +44,40 @@ public class UserController(ISender sender)
         var result = await Sender.Send(command, ct);
         return GetResult(result);
     }
+    
+    [HttpGet("proficiency-levels")]
+    public IActionResult GetProficiencyLevelsAsync()
+    {
+        var platforms = Enum.GetValues<ProficiencyLevel>()
+            .Select(x => new { Name = x.ToString(), Value = (int)x })
+            .ToList();
 
+        return Ok(platforms);
+    }
+
+    [HttpPost("languages")]
+    public async Task<IActionResult> CreateLanguage(CreateUserLanguageVM vm, CancellationToken ct)
+    {
+        var command = new CreateUserLanguageCommand(vm);
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+    
     [HttpPut("languages")]
-    public virtual async Task<IActionResult> UpdateLanguages(UpdateUserLanguagesVM vm, CancellationToken ct)
-        => GetResult(await Sender.Send(new UpdateByUser.Command<UpdateUserLanguagesVM> { Model = vm }, ct));
-
-    [Authorize(Roles = Settings.Roles.AdminRole)]
-    [HttpPut("{userId:guid}/languages")]
-    public virtual async Task<IActionResult> UpdateLanguages(Guid userId, UpdateUserLanguagesByAdminVM vm,
-        CancellationToken ct)
-        => GetResult(await Sender.Send(
-            new Update.Command<UpdateUserLanguagesByAdminVM, Guid> { Id = userId, Model = vm }, ct));
+    public async Task<IActionResult> UpdateLanguage(UpdateUserLanguageVM vm, CancellationToken ct)
+    {
+        var command = new UpdateUserLanguageCommand(vm);
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
+    
+    [HttpDelete("languages/{languageId}")]
+    public async Task<IActionResult> DeleteLanguage(int languageId, CancellationToken ct)
+    {
+        var command = new DeleteUserLanguageCommand(languageId);
+        var result = await Sender.Send(command, ct);
+        return GetResult(result);
+    }
 
     [Authorize(Roles = Settings.Roles.AdminRole)]
     public override async Task<IActionResult> Create(CreateUserByAdminVM byAdminVm, CancellationToken ct)

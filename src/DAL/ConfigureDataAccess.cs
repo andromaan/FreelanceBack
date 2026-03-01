@@ -11,13 +11,16 @@ using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Languages;
 using BLL.Common.Interfaces.Repositories.Messages;
+using BLL.Common.Interfaces.Repositories.Notifications;
 using BLL.Common.Interfaces.Repositories.Portfolios;
 using BLL.Common.Interfaces.Repositories.ProjectMilestones;
 using BLL.Common.Interfaces.Repositories.Projects;
 using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Common.Interfaces.Repositories.RefreshTokens;
 using BLL.Common.Interfaces.Repositories.Reviews;
+using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Skills;
+using BLL.Common.Interfaces.Repositories.UserLanguages;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserWallets;
 using BLL.Common.Interfaces.Repositories.WalletTransactions;
@@ -61,9 +64,10 @@ public static class ConfigureDataAccess
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped(typeof(IQueries<,>), typeof(Repository<,>));
 
+        services.AddRepository<RoleRepository, IRoleRepository, IRoleQueries>();
+        services.AddRepository<UserRepository, IUserRepository, IUserQueries>();
         services.AddRepository<ProjectRepository, IProjectRepository, IProjectQueries>();
         services.AddRepository<CountryRepository, ICountryRepository, ICountryQueries>();
-        services.AddRepository<UserRepository, IUserRepository, IUserQueries>();
         services.AddRepository<FreelancerRepository, IFreelancerRepository, IFreelancerQueries>();
         services.AddRepository<ContractRepository, IContractRepository, IContractQueries>();
         services.AddRepository<SkillRepository, ISkillRepository, ISkillQueries>();
@@ -82,5 +86,7 @@ public static class ConfigureDataAccess
         services.AddRepository<DisputeRepository, IDisputeRepository, IDisputeQueries>();
         services.AddRepository<DisputeResolutionRepository, IDisputeResolutionRepository, IDisputeResolutionQueries>();
         services.AddRepository<PortfolioRepository, IPortfolioRepository, IPortfolioQueries>();
+        services.AddRepository<UserLanguageRepository, IUserLanguageRepository, IUserLanguageQueries>();
+        services.AddRepository<NotificationRepository, INotificationRepository, INotificationQueries>();
     }
 }

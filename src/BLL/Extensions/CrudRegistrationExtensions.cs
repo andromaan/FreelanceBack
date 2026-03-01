@@ -1,4 +1,8 @@
-using BLL.Commands;
+using BLL.CommandsQueries.GenericCRUD.Create;
+using BLL.CommandsQueries.GenericCRUD.Delete;
+using BLL.CommandsQueries.GenericCRUD.GetAll;
+using BLL.CommandsQueries.GenericCRUD.GetById;
+using BLL.CommandsQueries.GenericCRUD.Update;
 using BLL.Common.Interfaces.Repositories;
 using BLL.Services;
 using Domain.Common.Abstractions;
@@ -91,8 +95,8 @@ public static class CrudRegistrationExtensions
         if (reg.FilteringViewModelType != null)
         {
             handlers.Add(new HandlerDescriptor(
-                typeof(GetAllPaginated.QueryFiltered<>),
-                typeof(GetAllPaginated.QueryHandler<,,,,>),
+                typeof(GetAllFilteredPaginated.Query<>),
+                typeof(GetAllFilteredPaginated.QueryHandler<,,,,>),
                 [reg.FilteringViewModelType],
                 [
                     reg.EntityType,

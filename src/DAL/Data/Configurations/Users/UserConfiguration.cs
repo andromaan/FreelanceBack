@@ -30,9 +30,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(p => p.CountryId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasMany(p => p.Languages)
-            .WithMany()
-            .UsingEntity(join => join.ToTable("users_languages"));
+        // builder.HasMany(p => p.Languages)
+        //     .WithMany()
+        //     .UsingEntity(join => join.ToTable("users_languages"));
         
         builder.Property(x => x.AvatarImg).HasMaxLength(256);
         

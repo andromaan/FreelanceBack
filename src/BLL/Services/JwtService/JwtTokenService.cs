@@ -28,7 +28,7 @@ public class JwtTokenService(IConfiguration configuration, IRefreshTokenReposito
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new("id", user.Id.ToString()),
             new("email", user.Email),
-            new("role", user.RoleId)
+            new("role", user.Role!.Name)
         };
 
         var token = new JwtSecurityToken(

@@ -1,6 +1,6 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.Portfolios;
+using BLL.CommandsQueries.Portfolios;
 using BLL.ViewModels;
 using BLL.ViewModels.Portfolio;
 using MediatR;

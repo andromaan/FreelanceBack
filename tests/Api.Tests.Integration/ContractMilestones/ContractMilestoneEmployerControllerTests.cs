@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BLL;
 using BLL.ViewModels.ContractMilestone;
+using DAL.Extensions;
 using Domain.Models.Contracts;
 using Domain.Models.Freelance;
 using Domain.Models.Payments;
@@ -118,6 +119,107 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
     }
 
     [Fact]
+    public async Task ShouldApproveMilestone_AndCreateTransactions_WithBiggerContractAmountThanMilestoneSum()
+    {
+        // Arrange
+        var userEmployerWalletAmountBefore = 10000m;
+        var employerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = userEmployerWalletAmountBefore,
+            Currency = "USD",
+            CreatedBy = _employerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _employerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+        var freelancerWallet = new UserWallet
+        {
+            Id = Guid.NewGuid(),
+            Balance = 0m,
+            Currency = "USD",
+            CreatedBy = _freelancerUser.Id,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedBy = _freelancerUser.Id,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        var milestone1 = ContractMilestoneData.MainContractMilestone(contractId: _contract.Id,
+            description: "Milestone 1 for approval", amount: 500m, dueDate: DateTime.UtcNow.AddDays(10),
+            status: ContractMilestoneStatus.Submitted, createdBy: _employerUser.Id);
+        
+        var milestone2 = ContractMilestoneData.MainContractMilestone(contractId: _contract.Id,
+            description: "Milestone 2 for approval", amount: 300m, dueDate: DateTime.UtcNow.AddDays(15),
+            status: ContractMilestoneStatus.Submitted, createdBy: _employerUser.Id);
+        
+        var milestone3 = ContractMilestoneData.MainContractMilestone(contractId: _contract.Id,
+            description: "Milestone 3 for approval", amount: 100m, dueDate: DateTime.UtcNow.AddDays(20),
+            status: ContractMilestoneStatus.Submitted, createdBy: _employerUser.Id);
+
+        await Context.AddAsync(employerWallet);
+        await Context.AddAsync(freelancerWallet);
+        await Context.AddAuditableAsync(milestone1);
+        await Context.AddAuditableAsync(milestone2);
+        await Context.AddAuditableAsync(milestone3);
+        Context.Remove(_contractMilestone);
+        await SaveChangesAsync();
+
+        var request = new UpdContractMilestoneStatusEmployerVM
+        {
+            Status = ContractMilestoneEmployerStatus.Approved
+        };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone1.Id}/employer", request);
+        var response2 = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone2.Id}/employer", request);
+        var response3 = await Client.PutAsJsonAsync($"ContractMilestone/status/{milestone3.Id}/employer", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeTrue();
+        response2.IsSuccessStatusCode.Should().BeTrue();
+        response3.IsSuccessStatusCode.Should().BeTrue();
+
+        var milestonesSum = milestone1.Amount + milestone2.Amount + milestone3.Amount; // 500 + 300 + 100 = 900
+        var secondMilestoneAmount = _contract.AgreedRate - milestonesSum;
+
+        // Verify milestone status changed
+        var updatedMilestone = await Context.Set<ContractMilestone>()
+            .FirstOrDefaultAsync(x => x.Id == milestone1.Id);
+        updatedMilestone.Should().NotBeNull();
+        updatedMilestone.Status.Should().Be(ContractMilestoneStatus.Approved);
+
+        // Verify employer wallet was debited
+        var updatedEmployerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _employerUser.Id);
+        updatedEmployerWallet.Should().NotBeNull();
+        updatedEmployerWallet.Balance.Should().Be(userEmployerWalletAmountBefore - _contract.AgreedRate);
+
+        // Verify freelancer wallet was credited
+        var updatedFreelancerWallet = await Context.Set<UserWallet>()
+            .FirstOrDefaultAsync(w => w.CreatedBy == _freelancerUser.Id);
+        updatedFreelancerWallet.Should().NotBeNull();
+        updatedFreelancerWallet.Balance.Should().Be(_contract.AgreedRate); // 0 + 500
+
+        // Verify wallet transactions were created
+        var employerTransaction = await Context.Set<WalletTransaction>()
+            .FirstOrDefaultAsync(t => t.WalletId == updatedEmployerWallet.Id && t.Amount == -secondMilestoneAmount);
+        employerTransaction.Should().NotBeNull();
+        employerTransaction.Amount.Should().Be(-secondMilestoneAmount);
+
+        var freelancerTransaction = await Context.Set<WalletTransaction>()
+            .FirstOrDefaultAsync(t => t.WalletId == updatedFreelancerWallet.Id && t.Amount == secondMilestoneAmount);
+        freelancerTransaction.Should().NotBeNull();
+        freelancerTransaction.Amount.Should().Be(secondMilestoneAmount);
+
+        // Verify contract payment was created
+        var contractPayment = await Context.Set<ContractPayment>()
+            .FirstOrDefaultAsync(p => p.ContractId == _contract.Id && p.Amount == secondMilestoneAmount);
+        contractPayment.Should().NotBeNull();
+        contractPayment.Amount.Should().Be(secondMilestoneAmount);
+        contractPayment.MilestoneId.Should().Be(milestone3.Id);
+    }
+
+    [Fact]
     public async Task ShouldUpdateContractStatusToCompleted_WhenAllMilestonesApprovedOrRejected()
     {
         // Arrange
@@ -171,7 +273,7 @@ public class ContractMilestoneEmployerControllerTests(IntegrationTestWebFactory 
         var contractFromDb = await Context.Set<Contract>().FirstOrDefaultAsync(x => x.Id == contract.Id);
         contractFromDb.Should().NotBeNull();
         contractFromDb.Status.Should().Be(ContractStatus.Completed);
-        
+
         var projectFromDb = await Context.Set<Project>().FirstOrDefaultAsync(x => x.Id == _project.Id);
         projectFromDb.Should().NotBeNull();
         projectFromDb.Status.Should().Be(ProjectStatus.Completed);

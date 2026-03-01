@@ -1,6 +1,6 @@
 using API.Controllers.Common;
 using BLL;
-using BLL.Commands.Quotes;
+using BLL.CommandsQueries.Quotes;
 using BLL.ViewModels;
 using BLL.ViewModels.Quote;
 using MediatR;
