@@ -22,5 +22,7 @@ public enum NotificationType
     DisputeOpened,          // Відкрито спір (для обох сторін)
     ReviewLeft,             // Залишено відгук (для фрілансера/роботодавця)
     SystemAnnouncement,     // Глобальна розсилка (наприклад, "Оновлення платформи")
-    ProjectDeadlineReminder // Нагадування про дедлайн проекту
+    ProjectDeadlineReminder, // Нагадування про дедлайн проекту
+    ProposalAccepted,         // Пропозиція прийнята (для фрілансера)
+    ProposalRejected,         // Пропозиція відхилена (для фрілансера)
 }

@@ -1,5 +1,6 @@
 using BLL.Common.Handlers;
 using BLL.Common.Interfaces;
+using BLL.Common.Interfaces.Repositories.Bids;
 using BLL.Common.Interfaces.Repositories.Employers;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Projects;
@@ -20,7 +21,8 @@ public class CreateBidHandler(
     IUserProvider userProvider,
     IFreelancerQueries freelancerQueries,
     IEmployerQueries employerQueries,
-    INotificationService notificationService)
+    INotificationService notificationService,
+    IBidQueries bidQueries)
     : ICreateHandler<Bid, CreateBidVM>
 {
     public async Task<ServiceResponse?> HandleAsync(
@@ -37,7 +39,7 @@ public class CreateBidHandler(
         }
 
         // Processing: Set FreelancerId from current user
-        var userId = await userProvider.GetUserId();
+        var userId = await userProvider.GetUserId(cancellationToken);
         var existingFreelancer = await freelancerQueries.GetByUserIdAsync(userId, cancellationToken);
 
         if (existingFreelancer is null)
@@ -52,6 +54,12 @@ public class CreateBidHandler(
         }
 
         entity.FreelancerId = existingFreelancer.Id;
+        
+        var bidsByProject = await bidQueries.GetByProjectIdAsync(createModel.ProjectId, cancellationToken);
+        if (bidsByProject.Any(b => b.FreelancerId == entity.FreelancerId))
+        {
+            return ServiceResponse.BadRequest("You have already placed a bid on this project");
+        }
 
         // Notify: Find employer (owner of the project) and send notification
         var employer = await employerQueries.GetByUserId(existingProject.CreatedBy, cancellationToken);

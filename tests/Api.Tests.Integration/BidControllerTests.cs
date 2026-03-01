@@ -30,6 +30,9 @@ public class BidControllerTests(IntegrationTestWebFactory factory)
             Message = "I can do this project"
         };
 
+        Context.Remove(_bid);
+        await SaveChangesAsync();
+        
         // Act
         var response = await Client.PostAsJsonAsync("Bid", request);
 
@@ -45,6 +48,25 @@ public class BidControllerTests(IntegrationTestWebFactory factory)
         bidFromDb.ProjectId.Should().Be(_project.Id);
         bidFromDb.Amount.Should().Be(1500m);
         bidFromDb.Message.Should().Be("I can do this project");
+    }
+    
+    [Fact]
+    public async Task ShouldNotCreateMoreThanOneBidPerFreelancerPerProject()
+    {
+        // Arrange
+        var request = new CreateBidVM
+        {
+            ProjectId = _project.Id,
+            Amount = 1500m,
+            Message = "I can do this project"
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("Bid", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

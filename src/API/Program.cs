@@ -21,8 +21,6 @@ builder.Services.AddBusinessLogic(builder);
 
 builder.Services.AddScoped<IUserProvider, UserProvider>();
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
 builder.Services.AddSignalR();
 
 Log.Logger = new LoggerConfiguration()

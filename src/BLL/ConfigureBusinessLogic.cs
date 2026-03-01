@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using BLL.Common.Behaviours;
@@ -82,7 +83,11 @@ public static class ConfigureBusinessLogic
 
         services.AddJwtTokenAuth(builder);
         services.AddSwaggerAuth();
+        
+        // AutoMapper: scans all assemblies for profiles
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+        // Authorization: policy-based with role checks, policies defined in Settings.Roles
         services.AddAuthorization(options =>
         {
             options.AddPolicy(Settings.Roles.AnyAuthenticated,
@@ -101,6 +106,10 @@ public static class ConfigureBusinessLogic
 
         // SignalR: використовуємо кастомний провайдер userId (читає claim "id")
         builder.Services.AddSingleton<IUserIdProvider, NotificationUserIdProvider>();
+
+        var culture = new CultureInfo("uk-UA");
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
     }
 
     private static void AddMediatrConfig(this IServiceCollection services)

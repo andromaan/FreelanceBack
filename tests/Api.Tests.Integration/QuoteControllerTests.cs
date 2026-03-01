@@ -29,6 +29,9 @@ public class QuoteControllerTests(IntegrationTestWebFactory factory)
             Amount = 2000m,
             Message = "My quote for this project"
         };
+        
+        Context.Remove(_quote);
+        await SaveChangesAsync();
 
         // Act
         var response = await Client.PostAsJsonAsync("Quote", request);
@@ -45,6 +48,25 @@ public class QuoteControllerTests(IntegrationTestWebFactory factory)
         quoteFromDb.ProjectId.Should().Be(_project.Id);
         quoteFromDb.Amount.Should().Be(2000m);
         quoteFromDb.Message.Should().Be("My quote for this project");
+    }
+    
+    [Fact]
+    public async Task ShouldNotCreateMoreThanOneQuotePerFreelancerPerProject()
+    {
+        // Arrange
+        var request = new CreateQuoteVM
+        {
+            ProjectId = _project.Id,
+            Amount = 1500m,
+            Message = "I can do this project"
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("Quote", request);
+
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

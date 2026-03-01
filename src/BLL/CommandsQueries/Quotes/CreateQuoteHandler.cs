@@ -2,6 +2,7 @@ using BLL.Common.Handlers;
 using BLL.Common.Interfaces;
 using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Projects;
+using BLL.Common.Interfaces.Repositories.Quotes;
 using BLL.Services;
 using BLL.ViewModels.Quote;
 using Domain.Models.Projects;
@@ -15,7 +16,8 @@ namespace BLL.CommandsQueries.Quotes;
 public class CreateQuoteHandler(
     IProjectQueries projectQueries,
     IUserProvider userProvider,
-    IFreelancerQueries freelancerQueries)
+    IFreelancerQueries freelancerQueries,
+    IQuoteQueries quoteQueries)
     : ICreateHandler<Quote, CreateQuoteVM>
 {
     public async Task<ServiceResponse?> HandleAsync(
@@ -32,12 +34,20 @@ public class CreateQuoteHandler(
         }
 
         // Processing: Set FreelancerId from current user
-        var userId = await userProvider.GetUserId();
+        var userId = await userProvider.GetUserId(cancellationToken);
         var existingFreelancer = await freelancerQueries.GetByUserIdAsync(userId, cancellationToken);
 
         if (existingFreelancer is null)
         {
             return ServiceResponse.NotFound("Freelancer not found for current user");
+        }
+        
+        entity.FreelancerId = existingFreelancer.Id;
+        
+        var quotesByProject = await quoteQueries.GetByProjectIdAsync(createModel.ProjectId, cancellationToken);
+        if (quotesByProject.Any(b => b.FreelancerId == entity.FreelancerId))
+        {
+            return ServiceResponse.BadRequest("You have already placed a quote on this project");
         }
 
         if (existingProject.Budget < createModel.Amount)
@@ -45,8 +55,6 @@ public class CreateQuoteHandler(
             return ServiceResponse.BadRequest(
                 $"Quote amount {createModel.Amount} exceeds project budget {existingProject.Budget}");
         }
-
-        entity.FreelancerId = existingFreelancer.Id;
 
         // Return success with processed entity
         return ServiceResponse.Ok();
