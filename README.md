@@ -1,312 +1,455 @@
-# Freelance Marketplace Platform API
+# Freelance Marketplace Platform — Backend API
 
-ASP.NET Core Web API для платформи фріланс-маркетплейсу. Проект реалізує повний функціонал для роботи з проектами, контрактами, заявками, повідомленнями та системою вирішення спорів.
+ASP.NET Core Web API для платформи фріланс-маркетплейсу. Реалізує повний цикл: реєстрація та автентифікація, управління проектами, заявками, котируваннями, контрактами (з майлстоунами), обмін повідомленнями, відгуки, спори, сповіщення в реальному часі та адміністративна панель.
 
-## 🚀 Технології
+---
 
-- **ASP.NET Core** - Web API framework
-- **C# 14** - основна мова програмування
-- **Entity Framework Core** - ORM для роботи з базою даних
-- **MediatR** - CQRS pattern та mediation
-- **FluentValidation** - валідація моделей
-- **AutoMapper** - маппінг об'єктів
-- **JWT Authentication** - автентифікація та авторизація
-- **Swagger/OpenAPI** - документація API
-- **Serilog** - логування
-- **xUnit** - тестування
+## 🚀 Стек технологій
+
+| Категорія | Технологія |
+|---|---|
+| Framework | ASP.NET Core 8 (.NET 8) |
+| Мова | C# |
+| ORM | Entity Framework Core 8 + Npgsql |
+| База даних | PostgreSQL 16 |
+| CQRS / Mediator | MediatR 13 |
+| Валідація | FluentValidation 12 |
+| Маппінг | AutoMapper 14 |
+| Автентифікація | JWT Bearer + Google OAuth 2.0 |
+| Real-time | SignalR (`NotificationHub`) |
+| Документація | Swagger / OpenAPI (Swashbuckle) |
+| Логування | Serilog (Console sink) |
+| DI / scan | Scrutor |
+| Контейнеризація | Docker + Docker Compose |
+| CI/CD | GitHub Actions → GHCR |
+| Тестування | xUnit (Integration Tests) |
+
+---
 
 ## 📁 Структура проекту
 
 ```
 FreelanceBack/
 ├── src/
-│   ├── API/              # Presentation layer (Controllers, Middleware)
-│   ├── BLL/              # Business Logic Layer (Commands, Queries, Services)
-│   ├── DAL/              # Data Access Layer (DbContext, Repositories)
-│   └── Domain/           # Domain models and ViewModels
-└── tests/
-    ├── Api.Tests.Integration/    # Integration tests
-    ├── Tests.Common/             # Common test utilities
-    └── TestsData/                # Test data and fixtures
+│   ├── API/        # Presentation layer — Controllers, Program.cs, Middleware
+│   ├── BLL/        # Business Logic — Commands/Queries (CQRS), Services, Hubs, ViewModels
+│   ├── DAL/        # Data Access — AppDbContext, Repositories, Migrations
+│   └── Domain/     # Domain models, enums, base abstractions
+├── tests/
+│   ├── Api.Tests.Integration/   # Integration tests (xUnit + WebApplicationFactory)
+│   ├── Tests.Common/            # BaseIntegrationTest, TestFactory, helpers
+│   └── TestsData/               # Фікстури та тестові дані
+├── .github/workflows/ci-cd.yml  # CI/CD pipeline (Build → Test → Docker Push)
+├── Dockerfile
+├── docker-compose.yml
+└── .env.example
 ```
 
-## 🎯 Основні функції
+---
 
-### Автентифікація та авторизація
-- Реєстрація користувачів (Sign-up)
-- Вхід у систему (Sign-in)
-- Google OAuth2 зовнішній вхід
-- JWT токени для автентифікації
-- Рольова авторизація (Admin, Freelancer, Employer)
+## 🔐 Автентифікація та ролі
 
-### Управління проектами
-- CRUD операції для проектів
-- Фільтрація та пагінація проектів
-- Управління категоріями проектів
-- Віхи проекту (Project Milestones)
-- Отримання проектів по роботодавцю
+### Ролі
+| Роль | Опис |
+|---|---|
+| `admin` | Повний доступ до системи |
+| `employer` | Управління проектами, контрактами, прийняття квот |
+| `freelancer` | Подача заявок, виконання контрактів, портфоліо |
+| `moderator` | Розгляд та вирішення спорів |
 
-### Система заявок (Bids)
-- Створення заявок фрілансерами
-- Перегляд заявок за проектом
-- CRUD операції для заявок
-- Контроль доступу на основі ролей
+### Авторизаційні політики
+| Політика | Ролі |
+|---|---|
+| `AdminOrEmployer` | admin, employer |
+| `AdminOrFreelancer` | admin, freelancer |
+| `AdminOrModerator` | admin, moderator |
+| `AnyAuthenticated` | будь-яка авторизована роль |
 
-### Контракти
-- Створення контракту з заявки
-- Оновлення статусу контракту
-- Отримання контрактів користувача
-- Завершені контракти фрілансера
-- Управління статусами контрактів
+### Підтримувані методи входу
+- **JWT** — стандартний sign-up / sign-in
+- **Google OAuth 2.0** — зовнішній вхід через Google
 
-### Система повідомлень
-- Повідомлення в рамках контракту
-- Повідомлення без контракту
-- Отримання повідомлень користувача
-- Отримання повідомлень за контрактом
-
-### Вирішення спорів
-- Створення та управління спорами
-- Рішення по спорах (Dispute Resolutions)
-- Адміністративна панель для модерації
-
-### Довідкові дані
-- Країни (Country) - з кодами Alpha2 та Alpha3
-- Мови (Language)
-- Навички (Skills)
-- CRUD операції з валідацією
+---
 
 ## 🔌 API Контролери
 
-### **AccountController** (`/api/Account`)
-Автентифікація та управління акаунтами.
+### **AccountController** `/account`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| POST | `/sign-up` | Публічний |
+| POST | `/sign-in` | Публічний |
+| POST | `/external-login` | Публічний (Google OAuth) |
 
-**Endpoints:**
-- `POST /sign-up` - Реєстрація нового користувача
-- `POST /sign-in` - Вхід у систему
-- `POST /external-login` - Google OAuth вхід
+---
 
-### **ProjectController** (`/Project`)
-Управління проектами (тільки для роботодавців та адмінів).
+### **UserController** `/user`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/get-myself` | Авторизований |
+| PATCH | `/update-avatar` | Авторизований |
+| GET | `/roles` | Авторизований |
+| GET | `/proficiency-levels` | Авторизований |
+| POST | `/languages` | Авторизований |
+| PUT | `/languages` | Авторизований |
+| DELETE | `/languages/{languageId}` | Авторизований |
+| GET | `/` | Admin only |
+| GET | `/{id}` | Admin only |
+| GET | `/paginated` | Admin only |
+| POST | `/` | Admin only |
+| PUT | `/{id}` | Admin only |
+| DELETE | `/{id}` | Admin only |
 
-**Endpoints:**
-- `GET /` - Отримати всі проекти (доступно всім)
-- `GET /{id}` - Отримати проект за ID (доступно всім)
-- `POST /` - Створити новий проект
-- `PUT /{id}` - Оновити проект
-- `DELETE /{id}` - Видалити проект
-- `PATCH /categories/{projectId}` - Оновити категорії проекту
-- `GET /by-employer` - Отримати проекти роботодавця
-- `GET /paginated-filtered` - Фільтрація з пагінацією (доступно всім)
+---
 
-### **BidController** (`/Bid`)
-Управління заявками фрілансерів.
+### **FreelancerController** `/freelancer`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Admin / Freelancer |
+| GET | `/{id}` | Admin / Freelancer |
+| GET | `/{email}` | Admin / Freelancer |
+| PUT | `/` | Admin / Freelancer |
+| PUT | `/skills` | Admin / Freelancer |
 
-**Endpoints:**
-- `GET /{id}` - Отримати заявку за ID (доступно всім)
-- `POST /` - Створити заявку (тільки фрілансери)
-- `PUT /{id}` - Оновити заявку (тільки фрілансери)
-- `DELETE /{id}` - Видалити заявку (тільки фрілансери)
-- `GET /by-project/{projectId}` - Заявки за проектом (доступно всім)
+---
 
-### **ContractController** (`/Contract`)
-Управління контрактами.
+### **EmployerController** `/employer`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Admin / Employer |
+| PUT | `/` | Admin / Employer |
 
-**Endpoints:**
-- `POST /{quoteId}` - Створити контракт з заявки (тільки роботодавці)
-- `PUT /{contractId}` - Оновити контракт (тільки роботодавці)
-- `PUT /update-status/{contractId}` - Оновити статус контракту (тільки роботодавці)
-- `GET /status-enums` - Отримати доступні статуси контракту
-- `GET /by-user` - Контракти поточного користувача
-- `GET /completed-by-freelancer-id/{freelancerId}` - Завершені контракти фрілансера
+---
 
-### **MessageController** (`/Message`)
-Система обміну повідомленнями.
+### **ProjectController** `/project`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Публічний |
+| GET | `/{id}` | Публічний |
+| GET | `/search` | Публічний (фільтрація + пагінація) |
+| POST | `/` | Admin / Employer |
+| PUT | `/{id}` | Admin / Employer |
+| DELETE | `/{id}` | Admin / Employer |
+| PATCH | `/categories/{projectId}` | Admin / Employer |
+| GET | `/by-employer` | Admin / Employer |
 
-**Endpoints:**
-- `GET /{id}` - Отримати повідомлення за ID
-- `POST /` - Створити повідомлення
-- `PUT /{id}` - Оновити повідомлення
-- `DELETE /{id}` - Видалити повідомлення
-- `POST /without-contract` - Створити повідомлення без контракту
-- `GET /by-user` - Повідомлення користувача
-- `GET /by-contract/{contractId}` - Повідомлення за контрактом
+---
 
-### **DisputeController** (`/Dispute`)
-Управління спорами.
+### **ProjectMilestoneController** `/projectmilestone`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/{id}` | Admin / Employer |
+| POST | `/` | Admin / Employer |
+| PUT | `/{id}` | Admin / Employer |
+| DELETE | `/{id}` | Admin / Employer |
+| GET | `/by-project/{projectId}` | Публічний |
+| GET | `/milestone-status-enums` | Admin / Employer |
 
-**Endpoints:**
-- Стандартні CRUD операції
-- Створення та розгляд спорів
-- Адміністративні функції
+---
 
-### **DisputeResolutionController** (`/DisputeResolution`)
-Рішення по спорах.
+### **BidController** `/bid`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/{id}` | Публічний |
+| POST | `/` | Admin / Freelancer |
+| PUT | `/{id}` | Admin / Freelancer |
+| DELETE | `/{id}` | Admin / Freelancer |
+| GET | `/by-project/{projectId}` | Публічний |
 
-**Endpoints:**
-- Створення рішень по спорах
-- Перегляд історії рішень
+---
 
-### **ProjectMilestoneController** (`/ProjectMilestone`)
-Управління віхами проекту (тільки для роботодавців).
+### **QuoteController** `/quote`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/{id}` | Публічний |
+| POST | `/` | Admin / Freelancer |
+| PUT | `/{id}` | Admin / Freelancer |
+| DELETE | `/{id}` | Admin / Freelancer |
+| GET | `/by-project/{projectId}` | Публічний |
 
-**Endpoints:**
-- `GET /` - Всі віхи
-- `GET /{id}` - Віха за ID
-- `POST /` - Створити віху
-- `PUT /{id}` - Оновити віху
-- `DELETE /{id}` - Видалити віху
-- `GET /by-project/{projectId}` - Віхи конкретного проекту
-- Пагінація та фільтрація
+---
 
-### **FreelancerController** (`/Freelancer`)
-Профілі фрілансерів.
+### **ContractController** `/contract`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| POST | `/{quoteId}` | Employer only |
+| PUT | `/` | Employer only |
+| PUT | `/update-status/{contractId}` | Employer only |
+| GET | `/status-enums` | Авторизований |
+| GET | `/by-user` | Авторизований |
+| GET | `/completed-by-freelancer-id/{freelancerId}` | Авторизований |
 
-**Endpoints:**
-- Управління профілем фрілансера
-- Портфоліо та навички
+---
 
-### **SkillController** (`/Skill`)
-Управління навичками (адмін-панель, читання доступне всім).
+### **ContractMilestoneController** `/contractmilestone`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/{id}` | Авторизований |
+| POST | `/` | Авторизований |
+| PUT | `/{id}` | Авторизований |
+| DELETE | `/{id}` | Авторизований |
+| GET | `/by-contract/{contractId}` | Публічний |
+| GET | `/milestone-status-enums` | Авторизований |
+| GET | `/status-freelancer-enums` | Авторизований |
+| GET | `/status-employer-enums` | Авторизований |
+| PUT | `/status/{id}/freelancer` | Freelancer only |
+| PUT | `/status/{id}/employer` | Employer only |
 
-**Endpoints:**
-- `GET /` - Всі навички (доступно всім)
-- `GET /{id}` - Навичка за ID (доступно всім)
-- `GET /paginated` - З пагінацією (доступно всім)
-- `POST /` - Створити навичку (тільки адміни)
-- `PUT /{id}` - Оновити навичку (тільки адміни)
-- `DELETE /{id}` - Видалити навичку (тільки адміни)
+---
 
-### **CountryController** (`/Country`)
-Довідник країн.
+### **MessageController** `/message`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/{id}` | Авторизований |
+| POST | `/` | Авторизований |
+| PUT | `/{id}` | Авторизований |
+| DELETE | `/{id}` | Авторизований |
+| POST | `/without-contract` | Авторизований |
+| GET | `/by-user` | Авторизований |
+| GET | `/by-contract/{contractId}` | Авторизований |
 
-**Endpoints:**
-- `GET /` - Всі країни
-- `GET /{id}` - Країна за ID
-- `POST /` - Створити країну
-- `PUT /{id}` - Оновити країну
-- `DELETE /{id}` - Видалити країну
+---
 
-### **LanguageController** (`/Language`)
-Довідник мов.
+### **ReviewController** `/review`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/{id}` | Авторизований |
+| POST | `/` | AnyAuthenticated |
+| PUT | `/{id}` | AnyAuthenticated |
+| DELETE | `/{id}` | AnyAuthenticated |
+| GET | `/by-reviewed-user/{email}` | AnyAuthenticated |
+| GET | `/average-rating/{email}` | AnyAuthenticated |
+| GET | `/by-user` | AnyAuthenticated |
 
-**Endpoints:**
-- `GET /` - Всі мови
-- `GET /{id}` - Мова за ID
-- `POST /` - Створити мову
-- `PUT /{id}` - Оновити мову
-- `DELETE /{id}` - Видалити мову
+---
 
-### **UserProfileController** (`/api/UserProfile`)
-Профілі користувачів (тільки для фрілансерів та адмінів).
+### **NotificationController** `/notification`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/is-not-read` | Авторизований |
+| GET | `/paginated` | Авторизований |
+| GET | `/filtered` | Авторизований |
+| GET | `/type-employer-enums` | Авторизований |
+| GET | `/type-freelancer-enums` | Авторизований |
+| PATCH | `/{id}/toggle-read` | Авторизований |
+| PATCH | `/read-all` | Авторизований |
 
-## ✅ Валідація
+---
 
-Проект використовує **FluentValidation** для валідації вхідних даних:
+### **DisputeController** `/dispute`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Admin / Moderator |
+| GET | `/{id}` | Admin / Moderator |
+| GET | `/by-user` | Авторизований |
+| POST | `/` | Авторизований |
+| DELETE | `/{id}` | Admin / Moderator |
+| GET | `/status-moderator-enums` | Admin / Moderator |
+| PUT | `/{id}/status` | Admin / Moderator |
 
-### Приклади валідаторів:
-- `CreateCountryCommandValidator` - валідація створення країни
-  - Name: обов'язкове, макс. 100 символів
-  - Alpha2Code: обов'язкове, рівно 2 символи
-  - Alpha3Code: обов'язкове, рівно 3 символи
-  
-- `CreateLanguageCommandValidator` - валідація створення мови
-  - Name: обов'язкове
-  - Code: обов'язковий
+---
 
-### ValidationBehaviour
-Глобальний pipeline behavior для автоматичної валідації всіх команд через MediatR.
+### **DisputeResolutionController** `/disputeresolution`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Admin / Moderator |
+| GET | `/{id}` | Admin / Moderator |
+| POST | `/` | Admin / Moderator |
+| DELETE | `/{id}` | Admin / Moderator |
 
-## 🔐 Авторизація та ролі
+---
 
-Система підтримує наступні ролі:
-- **Admin** - повний доступ до системи
-- **Freelancer** - доступ до заявок, контрактів, повідомлень
-- **Employer** - доступ до проектів, контрактів, прийняття заявок
+### **FreelancerPortfolioController** `/freelancerportfolio`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/{id}` | Freelancer only |
+| POST | `/` | Freelancer only |
+| PUT | `/{id}` | Freelancer only |
+| DELETE | `/{id}` | Freelancer only |
+| GET | `/get-by-freelancer/{freelancerId}` | Публічний |
 
-### Політики доступу:
-- `AdminOrFreelancer` - для фрілансерів та адмінів
-- `AdminOrEmployer` - для роботодавців та адмінів
-- `AnyAuthenticated` - для будь-якого авторизованого користувача
+---
 
-## 🧪 Тестування
+### **CategoryController** `/category`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Публічний |
+| GET | `/{id}` | Публічний |
+| GET | `/paginated` | Публічний |
+| POST | `/` | Admin only |
+| PUT | `/{id}` | Admin only |
+| DELETE | `/{id}` | Admin only |
 
-Проект містить:
-- **Integration Tests** - інтеграційні тести API
-- **Tests.Common** - спільні утиліти для тестів
-- **TestsData** - фікстури та тестові дані
+---
 
-## 🏗️ Архітектурні патерни
+### **SkillController** `/skill`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Публічний |
+| GET | `/{id}` | Публічний |
+| GET | `/paginated` | Публічний |
+| POST | `/` | Admin only |
+| PUT | `/{id}` | Admin only |
+| DELETE | `/{id}` | Admin only |
 
-### CQRS (Command Query Responsibility Segregation)
-Використання MediatR для розділення команд та запитів:
-- **Commands** - операції зміни стану (Create, Update, Delete)
-- **Queries** - операції читання (GetAll, GetById, GetByFilter)
+---
 
-### Generic CRUD Controllers
-Базові контролери для типових CRUD операцій:
-- `CrudControllerBase` - базовий CRUD контролер
-- `GenericCrudController` - розширений CRUD з пагінацією
+### **CountryController** `/country`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Публічний |
+| GET | `/{id}` | Публічний |
+| GET | `/paginated` | Публічний |
+| POST | `/` | Admin only |
+| PUT | `/{id}` | Admin only |
+| DELETE | `/{id}` | Admin only |
+
+---
+
+### **LanguageController** `/language`
+| Метод | Endpoint | Доступ |
+|---|---|---|
+| GET | `/` | Публічний |
+| GET | `/{id}` | Публічний |
+| GET | `/paginated` | Публічний |
+| POST | `/` | Admin only |
+| PUT | `/{id}` | Admin only |
+| DELETE | `/{id}` | Admin only |
+
+---
+
+## 📡 SignalR Hub
+
+### `NotificationHub` — `/notifications`
+Push-only хаб для сповіщень у реальному часі. Сервер надсилає подію `ReceiveNotification` клієнту через `IHubContext<NotificationHub>`.
+
+Ідентифікація користувача — через JWT claim `id` (User Guid), що реалізовано в `NotificationUserIdProvider`.
+
+**Типи сповіщень для роботодавця:** `NewBidReceived`, `NewMessage`, `DisputeOpened`, `ReviewLeft`, `SystemAnnouncement`, `ProjectDeadlineReminder`
+
+**Типи сповіщень для фрілансера:** `NewMessage`, `MilestoneApproved`, `MilestoneRejected`, `ContractCreated`, `PaymentReceived`, `DisputeOpened`, `ReviewLeft`, `SystemAnnouncement`, `ProjectDeadlineReminder`
+
+---
+
+## 🏗️ Архітектура
+
+### Clean Architecture (4 шари)
+- **Domain** — чисті моделі та enums, без залежностей
+- **DAL** — EF Core DbContext, міграції, репозиторії
+- **BLL** — CQRS, сервіси, маппінг, валідація, хаби
+- **API** — контролери, middleware, конфігурація
+
+### CQRS з MediatR
+- **Commands** — зміна стану (Create, Update, Delete)
+- **Queries** — читання даних (GetAll, GetById, GetFiltered, GetPaginated)
+- **Generic CRUD** — базові handlers для типових операцій
+- **ValidationBehaviour** — pipeline behavior для автоматичної валідації FluentValidation перед кожним запитом
 
 ### Repository Pattern
-DAL layer використовує паттерн Repository для абстракції доступу до даних.
+Кожна сутність має власний інтерфейс репозиторію в BLL, реалізований у DAL.
 
-### Pipeline Behaviors
-- `ValidationBehaviour` - автоматична валідація запитів
+---
 
 ## 🛡️ Middleware
 
-### MiddlewareExceptionsHandling
+### `MiddlewareExceptionsHandling`
 Глобальна обробка винятків:
-- `SecurityTokenException` - 426 Upgrade Required
-- `ValidationException` - 400 Bad Request
-- `Exception` - 500 Internal Server Error
+| Виняток | HTTP статус |
+|---|---|
+| `SecurityTokenException` | `426 Upgrade Required` |
+| `ValidationException` | `400 Bad Request` |
+| Інші `Exception` | `500 Internal Server Error` |
 
-## 🔧 Налаштування
+---
 
-### Конфігурація JWT
-Налаштування автентифікації через JWT токени з підтримкою:
-- Bearer схеми
-- Валідації issuer та audience
-- Підпису токенів
+## 🧪 Тестування
 
-### Swagger/OpenAPI
-Автоматична документація API з підтримкою авторизації через JWT.
+Покриття через **Integration Tests** із `WebApplicationFactory`:
 
-### CORS
-Налаштовано для роботи з фронтенд додатком:
-- Дозволені origins: `http://localhost:3000`, `https://localhost:3000`
-- Дозволені методи: всі
-- Підтримка credentials
+| Файл тестів | Що тестує |
+|---|---|
+| `AccountControllerTests` | Sign-up, Sign-in |
+| `ProjectControllerTests` | CRUD, фільтрація |
+| `BidControllerTests` | Заявки фрілансерів |
+| `ContractControllerTests` | Контракти |
+| `ContractMilestones/` | Майлстоуни контрактів |
+| `DisputeControllerTests` | Спори |
+| `ReviewControllerTests` | Відгуки |
+| `MessageControllerTests` | Повідомлення |
+| ...та інші | Повне API-покриття |
 
-## 📦 Запуск проекту
+---
+
+## 🐳 Docker
+
+### Запуск через Docker Compose (рекомендовано)
+
+**1. Скопіюйте файл зі змінними оточення:**
+```bash
+cp .env.example .env
+```
+
+**2. Запустіть сервіси:**
+```bash
+docker compose up -d
+```
+
+Запустяться два контейнери:
+- `freelance-db` — PostgreSQL 16 (порт `5432`)
+- `freelance-api` — API сервер (порт `8080`)
+
+API буде доступне за адресою: **http://localhost:8080/swagger**
+
+### Змінні оточення (`.env`)
+| Змінна | Опис |
+|---|---|
+| `GOOGLE_CLIENT_ID` | Client ID Google OAuth 2.0 |
+| `JWT_KEY` | Секретний ключ для підпису JWT |
+| `JWT_ISSUER` | Видавець токена |
+| `JWT_AUDIENCE` | Аудиторія токена |
+
+### Docker Image
+Образ автоматично публікується до **GitHub Container Registry**:
+```
+ghcr.io/andromaan/freelanceback:latest
+```
+
+---
+
+## ⚙️ Локальний запуск (без Docker)
+
+**Вимоги:** .NET 8 SDK, PostgreSQL 16
 
 ```bash
 # Клонування репозиторію
 git clone https://github.com/andromaan/FreelanceBack.git
-
-# Перехід у папку проекту
 cd FreelanceBack
 
 # Відновлення залежностей
 dotnet restore
 
+# Налаштування рядка підключення в src/API/appsettings.Development.json
+# "Default": "Server=localhost;Port=5432;Database=freelance-db;User Id=postgres;Password=postgres;"
+
 # Запуск проекту
 dotnet run --project src/API
 
-# Відкрити Swagger документацію
-# https://localhost:{port}/swagger/index.html
+# Swagger UI
+# http://localhost:{port}/swagger
 ```
-
-## 📝 Ліцензія
-
-Цей проект є приватним і належить @andromaan.
-
-## 👤 Автор
-
-**andromaan**
-- GitHub: [@andromaan](https://github.com/andromaan)
 
 ---
 
-> **Примітка:** Документація згенерована автоматично на основі аналізу коду репозиторію. Для отримання повної інформації про endpoints відвідайте `/swagger` після запуску проекту.
+## 🔄 CI/CD
+
+GitHub Actions пайплайн (`.github/workflows/ci-cd.yml`):
+
+| Job | Тригер | Дії |
+|---|---|---|
+| `Build & Test` | push / PR → `main` | `dotnet restore` → `build` → `dotnet test` → публікація TRX звіту |
+| `Build & Push Docker Image` | push → `main` | Логін до GHCR → build image → push `latest` + `sha-*` тег |
+
+---
+
+## 📝 Ліцензія
+
+Цей проект є приватним і належить [@andromaan](https://github.com/andromaan).
