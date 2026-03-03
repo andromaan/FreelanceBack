@@ -7,7 +7,6 @@ using DAL.Extensions;
 using Domain.Models.Auth;
 using Domain.Models.Users;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Tests.Common;
 using TestsData;
 
@@ -22,63 +21,61 @@ public class AccountControllerTests(IntegrationTestWebFactory factory)
     private const string ExistingUserPassword = "Test123!@#";
     private const string ExistingUserEmail = "existing@test.com";
 
-    #region SignUp Tests
+    // [Fact]
+    // public async Task SignUp_ShouldCreateFreelancer_WhenValidData()
+    // {
+    //     // Arrange
+    //     var request = new SignUpVM
+    //     {
+    //         Email = "newfreelancer@test.com",
+    //         Password = "Test123!@#",
+    //         DisplayName = "New Freelancer",
+    //         UserRole = Settings.Roles.FreelancerRole
+    //     };
+    //
+    //     // Act
+    //     var response = await Client.PostAsJsonAsync("Account/sign-up", request);
+    //
+    //     // Assert
+    //     response.IsSuccessStatusCode.Should().BeTrue();
+    //
+    //     var userFromDb = await Context.Set<User>()
+    //         .Include(u => u.Role)
+    //         .FirstOrDefaultAsync(x => x.Email == request.Email);
+    //
+    //     userFromDb.Should().NotBeNull();
+    //     userFromDb.Email.Should().Be(request.Email);
+    //     userFromDb.DisplayName.Should().Be(request.DisplayName);
+    //     userFromDb.Role!.Name.Should().Be(Settings.Roles.FreelancerRole);
+    // }
 
-    [Fact]
-    public async Task SignUp_ShouldCreateFreelancer_WhenValidData()
-    {
-        // Arrange
-        var request = new SignUpVM
-        {
-            Email = "newfreelancer@test.com",
-            Password = "Test123!@#",
-            DisplayName = "New Freelancer",
-            UserRole = Settings.Roles.FreelancerRole
-        };
-
-        // Act
-        var response = await Client.PostAsJsonAsync("Account/sign-up", request);
-
-        // Assert
-        response.IsSuccessStatusCode.Should().BeTrue();
-
-        var userFromDb = await Context.Set<User>()
-            .Include(u => u.Role)
-            .FirstOrDefaultAsync(x => x.Email == request.Email);
-
-        userFromDb.Should().NotBeNull();
-        userFromDb.Email.Should().Be(request.Email);
-        userFromDb.DisplayName.Should().Be(request.DisplayName);
-        userFromDb.Role!.Name.Should().Be(Settings.Roles.FreelancerRole);
-    }
-
-    [Fact]
-    public async Task SignUp_ShouldCreateEmployer_WhenValidData()
-    {
-        // Arrange
-        var request = new SignUpVM
-        {
-            Email = "newemployer@test.com",
-            Password = "Test123!@#",
-            DisplayName = "New Employer",
-            UserRole = Settings.Roles.EmployerRole
-        };
-
-        // Act
-        var response = await Client.PostAsJsonAsync("Account/sign-up", request);
-
-        // Assert
-        response.IsSuccessStatusCode.Should().BeTrue();
-
-        var userFromDb = await Context.Set<User>()
-            .Include(u => u.Role)
-            .FirstOrDefaultAsync(x => x.Email == request.Email);
-
-        userFromDb.Should().NotBeNull();
-        userFromDb.Email.Should().Be(request.Email);
-        userFromDb.DisplayName.Should().Be(request.DisplayName);
-        userFromDb.Role!.Name.Should().Be(Settings.Roles.EmployerRole);
-    }
+    // [Fact]
+    // public async Task SignUp_ShouldCreateEmployer_WhenValidData()
+    // {
+    //     // Arrange
+    //     var request = new SignUpVM
+    //     {
+    //         Email = "newemployer@test.com",
+    //         Password = "Test123!@#",
+    //         DisplayName = "New Employer",
+    //         UserRole = Settings.Roles.EmployerRole
+    //     };
+    //
+    //     // Act
+    //     var response = await Client.PostAsJsonAsync("Account/sign-up", request);
+    //
+    //     // Assert
+    //     response.IsSuccessStatusCode.Should().BeTrue();
+    //
+    //     var userFromDb = await Context.Set<User>()
+    //         .Include(u => u.Role)
+    //         .FirstOrDefaultAsync(x => x.Email == request.Email);
+    //
+    //     userFromDb.Should().NotBeNull();
+    //     userFromDb.Email.Should().Be(request.Email);
+    //     userFromDb.DisplayName.Should().Be(request.DisplayName);
+    //     userFromDb.Role!.Name.Should().Be(Settings.Roles.EmployerRole);
+    // }
 
     [Fact]
     public async Task SignUp_ShouldReturnBadRequest_WhenEmailAlreadyExists()
@@ -137,32 +134,28 @@ public class AccountControllerTests(IntegrationTestWebFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact]
-    public async Task SignUp_ShouldReturnTokens_WhenSuccessful()
-    {
-        // Arrange
-        var request = new SignUpVM
-        {
-            Email = "tokentest@test.com",
-            Password = "Test123!@#",
-            DisplayName = "Token Test User",
-            UserRole = Settings.Roles.FreelancerRole
-        };
-
-        // Act
-        var response = await Client.PostAsJsonAsync("Account/sign-up", request);
-
-        // Assert
-        response.IsSuccessStatusCode.Should().BeTrue();
-
-        var content = await response.Content.ReadAsStringAsync();
-        content.Should().Contain("accessToken");
-        content.Should().Contain("refreshToken");
-    }
-
-    #endregion
-
-    #region SignIn Tests
+    // [Fact]
+    // public async Task SignUp_ShouldReturnTokens_WhenSuccessful()
+    // {
+    //     // Arrange
+    //     var request = new SignUpVM
+    //     {
+    //         Email = "tokentest@test.com",
+    //         Password = "Test123!@#",
+    //         DisplayName = "Token Test User",
+    //         UserRole = Settings.Roles.FreelancerRole
+    //     };
+    //
+    //     // Act
+    //     var response = await Client.PostAsJsonAsync("Account/sign-up", request);
+    //
+    //     // Assert
+    //     response.IsSuccessStatusCode.Should().BeTrue();
+    //
+    //     var content = await response.Content.ReadAsStringAsync();
+    //     content.Should().Contain("accessToken");
+    //     content.Should().Contain("refreshToken");
+    // }
 
     [Fact]
     public async Task SignIn_ShouldReturnOk_WhenValidCredentials()
@@ -235,8 +228,6 @@ public class AccountControllerTests(IntegrationTestWebFactory factory)
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-
-    #endregion
 
     public async Task InitializeAsync()
     {

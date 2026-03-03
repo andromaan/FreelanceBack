@@ -3,6 +3,7 @@ using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserWallets;
+using BLL.Models;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
@@ -13,6 +14,8 @@ using Domain.Models.Payments;
 using Domain.Models.Users;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using Stripe;
 
 namespace BLL.CommandsQueries.Auth;
 
@@ -29,9 +32,13 @@ public class GoogleExternalLoginCommandHandler(
     IFreelancerRepository freelancerRepository,
     IEmployerRepository employerRepository,
     IUserWalletRepository userWalletRepository,
-    IRoleQueries roleQueries)
+    IRoleQueries roleQueries,
+    IOptions<StripeModel> stripeModel,
+    CustomerService customerService)
     : IRequestHandler<GoogleExternalLoginCommand, ServiceResponse>
 {
+    private readonly StripeModel _stripeModel = stripeModel.Value;
+
     public async Task<ServiceResponse> Handle(GoogleExternalLoginCommand request, CancellationToken cancellationToken)
     {
         try
@@ -75,6 +82,8 @@ public class GoogleExternalLoginCommandHandler(
                         return ServiceResponse.InternalError("User role not found in database");
                     }
 
+                    var customer = await CreateStripeCustomerAsync(payload.Email, fullName.name ?? payload.Name, cancellationToken);
+
                     var userModel = new User
                     {
                         Id = userId,
@@ -83,8 +92,10 @@ public class GoogleExternalLoginCommandHandler(
                         RoleId = roleEntity.Id,
                         Role = roleEntity,
                         PasswordHash = hashPasswordService.HashPassword(randomPassword),
+                        StripeCustomerId = customer.Id,
                         CreatedBy = userId
                     };
+
 
                     var createdUser = await userRepository.CreateAsync(userModel, cancellationToken);
 
@@ -170,5 +181,20 @@ public class GoogleExternalLoginCommandHandler(
         var random = new Random();
         return new string(Enumerable.Repeat(chars, 6)
             .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    private async Task<Customer> CreateStripeCustomerAsync(string email, string? displayName, CancellationToken cancellationToken)
+    {
+        StripeConfiguration.ApiKey = _stripeModel.SecretKey;
+
+        var customerOptions = new CustomerCreateOptions
+        {
+            Email = email,
+            Name = displayName
+        };
+
+        var customer = await customerService.CreateAsync(customerOptions, cancellationToken: cancellationToken);
+        
+        return customer;
     }
 }

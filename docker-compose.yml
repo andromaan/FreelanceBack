@@ -11,14 +11,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   api:
-    image: ghcr.io/andromaan/freelanceback:latest
+    # image: ghcr.io/andromaan/freelance-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: freelance-api
     restart: unless-stopped
     ports:
@@ -31,9 +29,10 @@ services:
       AuthSettings__key: ${JWT_KEY}
       AuthSettings__issuer: ${JWT_ISSUER}
       AuthSettings__audience: ${JWT_AUDIENCE}
+      Stripe__SecretKey: ${STRIPE_SECRET_KEY}
+      Stripe__PublishableKey: ${STRIPE_PUBLISHABLE_KEY}
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     volumes:
       - images_data:/app/wwwroot/images
 

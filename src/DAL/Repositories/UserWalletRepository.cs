@@ -58,6 +58,12 @@ public class UserWalletRepository(AppDbContext appDbContext)
         return balance;
     }
 
+    public async Task<UserWallet?> GetByUserIdAsync(Guid userId, CancellationToken token)
+    {
+        return await appDbContext.Set<UserWallet>()
+            .FirstOrDefaultAsync(b => b.CreatedBy == userId, token);
+    }
+
     public async Task<decimal?> GetAmountByUserAsync(Guid userId, CancellationToken token)
     {
         return (await appDbContext.Set<UserWallet>()

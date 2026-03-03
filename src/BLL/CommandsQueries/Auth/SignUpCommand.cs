@@ -4,6 +4,7 @@ using BLL.Common.Interfaces.Repositories.Freelancers;
 using BLL.Common.Interfaces.Repositories.Roles;
 using BLL.Common.Interfaces.Repositories.Users;
 using BLL.Common.Interfaces.Repositories.UserWallets;
+using BLL.Models;
 using BLL.Services;
 using BLL.Services.JwtService;
 using BLL.Services.PasswordHasher;
@@ -13,6 +14,8 @@ using Domain.Models.Freelance;
 using Domain.Models.Payments;
 using Domain.Models.Users;
 using MediatR;
+using Microsoft.Extensions.Options;
+using Stripe;
 
 namespace BLL.CommandsQueries.Auth;
 
@@ -27,8 +30,12 @@ public class SignUpCommandHandler(
     IFreelancerRepository freelancerRepository,
     IEmployerRepository employerRepository,
     IUserWalletRepository userWalletRepository,
-    IRoleQueries roleQueries) : IRequestHandler<SignUpCommand, ServiceResponse>
+    IRoleQueries roleQueries,
+    IOptions<StripeModel> stripeModel,
+    CustomerService customerService) : IRequestHandler<SignUpCommand, ServiceResponse>
 {
+    private readonly StripeModel _stripeModel = stripeModel.Value;
+
     public async Task<ServiceResponse> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
         var vm = request.Vm;
@@ -36,8 +43,8 @@ public class SignUpCommandHandler(
         {
             return ServiceResponse.BadRequest($"{vm.Email} already exists");
         }
-        
-        if (vm is not {UserRole: Settings.Roles.EmployerRole or Settings.Roles.FreelancerRole})
+
+        if (vm is not { UserRole: Settings.Roles.EmployerRole or Settings.Roles.FreelancerRole })
         {
             return ServiceResponse.BadRequest(
                 $"Invalid user role, must be '{Settings.Roles.EmployerRole}' or '{Settings.Roles.FreelancerRole}'");
@@ -52,12 +59,15 @@ public class SignUpCommandHandler(
             return ServiceResponse.InternalError("User role not found in database");
         }
 
+        var customer = await CreateStripeCustomerAsync(vm.Email, vm.DisplayName, cancellationToken);
+
         var user = mapper.Map<User>(vm);
         user.Id = Guid.NewGuid();
         user.PasswordHash = passwordHasher.HashPassword(vm.Password);
         user.CreatedBy = user.Id;
         user.RoleId = roleEntity.Id;
         user.Role = roleEntity;
+        user.StripeCustomerId = customer.Id;
 
         try
         {
@@ -106,5 +116,21 @@ public class SignUpCommandHandler(
         var tokens = await jwtTokenService.GenerateTokensAsync(user, cancellationToken);
 
         return ServiceResponse.Ok($"User {vm.Email} successfully created", tokens);
+    }
+
+    private async Task<Customer> CreateStripeCustomerAsync(string email, string? displayName,
+        CancellationToken cancellationToken)
+    {
+        StripeConfiguration.ApiKey = _stripeModel.SecretKey;
+
+        var customerOptions = new CustomerCreateOptions
+        {
+            Email = email,
+            Name = displayName
+        };
+
+        var customer = await customerService.CreateAsync(customerOptions, cancellationToken: cancellationToken);
+
+        return customer;
     }
 }
