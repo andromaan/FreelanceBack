@@ -28,10 +28,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
 
         Client = factory.WithWebHostBuilder(builder =>
             {
-                builder.ConfigureTestServices(services =>
-                {
-                    services.AddAuthentication();
-                });
+                builder.ConfigureTestServices(services => { services.AddAuthentication(); });
             })
             .CreateClient(new WebApplicationFactoryClientOptions
             {
@@ -41,7 +38,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
         if (useJwtToken)
             SetAuthorizationHeader(customRole);
     }
-    
+
     // Новий метод для зміни ролі та userId
     protected void SwitchUser(string role, Guid? userId = null)
     {
@@ -49,7 +46,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
         {
             UserId = userId.Value;
         }
-        
+
         SetAuthorizationHeader(role);
     }
 
