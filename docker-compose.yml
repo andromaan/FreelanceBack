@@ -29,6 +29,8 @@ services:
       AuthSettings__key: ${JWT_KEY}
       AuthSettings__issuer: ${JWT_ISSUER}
       AuthSettings__audience: ${JWT_AUDIENCE}
+      Stripe__SecretKey: ${STRIPE_SECRET_KEY}
+      Stripe__PublishableKey: ${STRIPE_PUBLISHABLE_KEY}
     depends_on:
       - db
     volumes:

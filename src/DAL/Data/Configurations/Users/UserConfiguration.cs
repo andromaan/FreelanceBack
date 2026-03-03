@@ -19,6 +19,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.Property(x => x.RoleId).IsRequired();
 
+        builder.Property(u => u.StripeCustomerId).IsRequired(false);
+
         builder.HasOne(x => x.Role)
             .WithMany()
             .HasForeignKey(x => x.RoleId)
@@ -29,10 +31,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithMany()
             .HasForeignKey(p => p.CountryId)
             .OnDelete(DeleteBehavior.SetNull);
-
-        // builder.HasMany(p => p.Languages)
-        //     .WithMany()
-        //     .UsingEntity(join => join.ToTable("users_languages"));
         
         builder.Property(x => x.AvatarImg).HasMaxLength(256);
         
